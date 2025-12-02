@@ -341,7 +341,7 @@ export function TestList() {
     } else if (action === 'view' && assignment.submission) {
       navigate(`/student/results/${assignment.submission.id}`);
     } else if (action === 'preview') {
-      navigate(`/student/tests/${assignment.test.id}`);
+      navigate(`/student/tests/${assignmentId}/preview`);
     }
   };
 

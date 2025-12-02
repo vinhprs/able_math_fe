@@ -27,7 +27,9 @@ import { StudentDashboard } from "@/pages/student/Dashboard";
 import { StudentProfile } from "@/pages/student/Profile";
 import { TestList as StudentTestList } from "@/pages/student/tests/TestList";
 import { TakeTest } from "@/pages/student/tests/TakeTest";
+import { TestPreview } from "@/pages/student/tests/TestPreview";
 import { ReviewTest } from "@/pages/student/tests/ReviewTest";
+import { ResultsList } from "@/pages/student/results/ResultsList";
 import { ResultDetail } from "@/pages/student/results/ResultDetail";
 
 // Teacher Pages - Results
@@ -172,8 +174,20 @@ export default function createRoutes() {
                   element: <TakeTest />,
                 },
                 {
+                  path: "student/tests/:assignmentId/preview",
+                  element: <TestPreview />,
+                },
+                {
+                  path: "student/tests/:assignmentId",
+                  element: <TestPreview />,
+                },
+                {
                   path: "student/tests/:testId/review",
                   element: <ReviewTest />,
+                },
+                {
+                  path: "student/results",
+                  element: <ResultsList />,
                 },
                 {
                   path: "student/results/:submissionId",

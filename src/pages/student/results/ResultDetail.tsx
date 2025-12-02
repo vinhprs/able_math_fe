@@ -1,146 +1,159 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAchievementReport, useAdtmReport, useGeneratePdf, downloadPdf } from '@/hooks/useReports';
-import { AchievementReport, AdtmReport } from '@/components/reports';
+import {
+  ArrowLeft,
+  Download,
+  Printer,
+  CheckCircle,
+  XCircle,
+} from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Card, CardContent } from '@/components/ui/Card';
-import { Printer, Download, ArrowLeft, Loader2 } from 'lucide-react';
-import { MainLayout } from '@/components/layout/MainLayout';
+import { Card } from '@/components/ui/Card';
+import { Alert } from '@/components/ui/Alert';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs';
+import { useResultDetail } from '@/hooks/useResults';
+import { formatDateTime } from '@/lib/utils';
+import { ScoreSummary } from './components/ScoreSummary';
+import { QuestionBreakdown } from './components/QuestionBreakdown';
+import { UnitScoreChart } from './components/UnitScoreChart';
+import { StatisticsView } from './components/StatisticsView';
+
+function LoadingSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="h-8 bg-secondary-200 rounded w-1/3 animate-pulse"></div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[1, 2, 3, 4].map((i) => (
+          <Card key={i} className="p-6">
+            <div className="h-20 bg-secondary-200 rounded animate-pulse"></div>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function ResultDetail() {
   const { submissionId } = useParams<{ submissionId: string }>();
   const navigate = useNavigate();
 
-  // Determine test type from submission (you might need to fetch this first)
-  // For now, we'll try both and see which one works
-  const achievementQuery = useAchievementReport(submissionId || '');
-  const adtmQuery = useAdtmReport(submissionId || '');
-  const generatePdfMutation = useGeneratePdf();
-
-  const isLoading = achievementQuery.isLoading || adtmQuery.isLoading;
-  const isError = achievementQuery.isError && adtmQuery.isError;
-  const reportData = achievementQuery.data || adtmQuery.data;
-  const testType = achievementQuery.data ? 'ACHIEVEMENT' : 'ADTM';
+  // Fetch result detail
+  const { data: result, isLoading } = useResultDetail(submissionId || '');
 
   const handlePrint = () => {
     window.print();
   };
 
-  const handleDownloadPdf = async () => {
-    if (!submissionId) return;
-
-    try {
-      // First generate the PDF
-      await generatePdfMutation.mutateAsync(submissionId);
-      // Then download it
-      downloadPdf(submissionId);
-    } catch (error) {
-      console.error('Failed to generate PDF:', error);
-    }
+  const handleDownload = () => {
+    // TODO: Implement PDF download
+    alert('PDF download will be implemented in Phase 4');
   };
 
-  if (isLoading) {
-    return (
-      <MainLayout>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
-        </div>
-      </MainLayout>
-    );
-  }
+  if (isLoading) return <LoadingSkeleton />;
+  if (!result) return null;
 
-  if (isError || !reportData) {
-    return (
-      <MainLayout>
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-center">
-              <h2 className="text-xl font-semibold text-secondary-900 mb-2">Report Not Found</h2>
-              <p className="text-secondary-600 mb-4">
-                The report you're looking for doesn't exist or couldn't be loaded.
-              </p>
-              <Button onClick={() => navigate('/student/dashboard')}>Back to Dashboard</Button>
-            </div>
-          </CardContent>
-        </Card>
-      </MainLayout>
-    );
-  }
+  const { test, scores, questions, unitScores, submission } = result;
 
   return (
-    <MainLayout>
-      <div className="space-y-6 print:space-y-0">
-        {/* Action Buttons - Hidden in print */}
+    <div className="space-y-6 print:space-y-4">
+        {/* Header */}
         <div className="flex items-center justify-between print:hidden">
-          <Button variant="outline" onClick={() => navigate(-1)}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
-          </Button>
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={handlePrint}
-              className="print:hidden"
-            >
-              <Printer className="mr-2 h-4 w-4" />
+          <div className="flex items-center gap-4">
+            <Button variant="outline" onClick={() => navigate('/student/results')}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold text-secondary-900">{test.title}</h1>
+              <p className="text-secondary-500">{test.testCode}</p>
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handlePrint}>
+              <Printer className="w-4 h-4 mr-2" />
               Print
             </Button>
-            <Button
-              onClick={handleDownloadPdf}
-              disabled={generatePdfMutation.isPending}
-              className="print:hidden"
-            >
-              {generatePdfMutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Download className="mr-2 h-4 w-4" />
-                  Download PDF
-                </>
-              )}
+            <Button variant="outline" onClick={handleDownload}>
+              <Download className="w-4 h-4 mr-2" />
+              Download PDF
             </Button>
           </div>
         </div>
 
-        {/* Report Content */}
-        <div className="report-container">
-          {testType === 'ACHIEVEMENT' ? (
-            <AchievementReport reportData={reportData as any} />
+        {/* Print Header */}
+        <div className="hidden print:block border-b border-secondary-200 pb-4 mb-4">
+          <h1 className="text-2xl font-bold">{test.title}</h1>
+          <p className="text-secondary-600">{test.testCode}</p>
+          <p className="text-sm text-secondary-500 mt-2">
+            Graded: {formatDateTime(submission.gradedAt)}
+          </p>
+        </div>
+
+        {/* Success Alert */}
+        <Alert variant={scores.standardScore >= 70 ? 'success' : 'warning'}>
+          {scores.standardScore >= 70 ? (
+            <>
+              <CheckCircle className="w-5 h-5" />
+              <div className="ml-3">
+                <h3 className="font-bold">Great job! You passed this test.</h3>
+                <p className="text-sm mt-1">
+                  Your score of {Math.round(scores.standardScore)}% exceeds the passing
+                  threshold.
+                </p>
+              </div>
+            </>
           ) : (
-            <AdtmReport reportData={reportData as any} />
+            <>
+              <XCircle className="w-5 h-5" />
+              <div className="ml-3">
+                <h3 className="font-bold">Keep practicing!</h3>
+                <p className="text-sm mt-1">
+                  Your score of {Math.round(scores.standardScore)}% is below the passing
+                  threshold. Review the questions below to improve.
+                </p>
+              </div>
+            </>
           )}
+        </Alert>
+
+        {/* Score Summary */}
+        <ScoreSummary
+          totalScore={scores.totalRawScore}
+          maxScore={scores.maxScore}
+          standardScore={scores.standardScore}
+          questions={questions}
+          submittedAt={submission.submittedAt}
+          gradedAt={submission.gradedAt}
+        />
+
+        {/* Unit Scores Chart */}
+        {unitScores && unitScores.length > 0 && (
+          <Card className="p-6">
+            <h2 className="text-xl font-bold mb-4">Performance by Unit</h2>
+            <UnitScoreChart unitScores={unitScores} />
+          </Card>
+        )}
+
+        {/* Tabs: Question Breakdown / Statistics */}
+        <Tabs defaultValue="questions" className="print:hidden">
+          <TabsList>
+            <TabsTrigger value="questions">Question Breakdown</TabsTrigger>
+            <TabsTrigger value="statistics">Statistics</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="questions">
+            <QuestionBreakdown questions={questions} />
+          </TabsContent>
+
+          <TabsContent value="statistics">
+            <StatisticsView questions={questions} unitScores={unitScores} />
+          </TabsContent>
+        </Tabs>
+
+        {/* Print Version: All content */}
+        <div className="hidden print:block space-y-6">
+          <QuestionBreakdown questions={questions} />
         </div>
       </div>
-
-      {/* Print Styles */}
-      <style>{`
-        @media print {
-          .print\\:hidden {
-            display: none !important;
-          }
-          .print\\:break-inside-avoid {
-            break-inside: avoid;
-          }
-          .print\\:mb-4 {
-            margin-bottom: 1rem;
-          }
-          .print\\:space-y-0 {
-            space-y: 0;
-          }
-          .print\\:space-y-4 {
-            space-y: 1rem;
-          }
-          .report-container {
-            padding: 0;
-          }
-          body {
-            background: white;
-          }
-        }
-      `}</style>
-    </MainLayout>
   );
 }
-
