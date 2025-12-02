@@ -1,8 +1,24 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { Login } from "@/pages/auth/Login";
 import { ProtectedRoute } from "./ProtectedRoute";
+import { RoleRoute } from "./RoleRoute";
+import { LayoutRoute } from "./LayoutRoute";
 import { UserRole } from "@shared/types/enum";
 import { useAuthStore } from "@/store/authStore";
+import { NotFound } from "@/pages/NotFound";
+
+// Admin Pages
+import { AdminDashboard } from "@/pages/admin/Dashboard";
+import { TestList } from "@/pages/admin/tests/TestList";
+import { TestCreate } from "@/pages/admin/tests/TestCreate";
+import { TestEdit } from "@/pages/admin/tests/TestEdit";
+import { TestDetail } from "@/pages/admin/tests/TestDetail";
+
+// Teacher Pages
+import { TeacherDashboard } from "@/pages/teacher/Dashboard";
+
+// Student Pages
+import { StudentDashboard } from "@/pages/student/Dashboard";
 
 /**
  * Get dashboard route based on user role
@@ -30,107 +46,7 @@ export function RootRedirect() {
 }
 
 /**
- * Placeholder components for different role dashboards
- * These will be implemented later
- */
-export function AdminDashboard() {
-  const { user, logout } = useAuthStore();
-
-  return (
-    <div className="min-h-screen bg-secondary-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-3xl font-bold text-secondary-900">
-                Admin Dashboard
-              </h1>
-              <p className="mt-2 text-secondary-600">
-                Welcome back, {user?.fullName || user?.username}
-              </p>
-            </div>
-            <button
-              onClick={logout}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              Logout
-            </button>
-          </div>
-          <p className="text-secondary-500">
-            Admin dashboard content will be implemented here.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function TeacherDashboard() {
-  const { user, logout } = useAuthStore();
-
-  return (
-    <div className="min-h-screen bg-secondary-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-3xl font-bold text-secondary-900">
-                Teacher Dashboard
-              </h1>
-              <p className="mt-2 text-secondary-600">
-                Welcome back, {user?.fullName || user?.username}
-              </p>
-            </div>
-            <button
-              onClick={logout}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              Logout
-            </button>
-          </div>
-          <p className="text-secondary-500">
-            Teacher dashboard content will be implemented here.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function StudentDashboard() {
-  const { user, logout } = useAuthStore();
-
-  return (
-    <div className="min-h-screen bg-secondary-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-3xl font-bold text-secondary-900">
-                Student Dashboard
-              </h1>
-              <p className="mt-2 text-secondary-600">
-                Welcome back, {user?.fullName || user?.username}
-              </p>
-            </div>
-            <button
-              onClick={logout}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              Logout
-            </button>
-          </div>
-          <p className="text-secondary-500">
-            Student dashboard content will be implemented here.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/**
- * Application routes
+ * Application routes using React Router v6 nested routes
  */
 export default function createRoutes() {
   return createBrowserRouter([
@@ -139,60 +55,102 @@ export default function createRoutes() {
       element: <Login />,
     },
     {
-      path: "/admin/dashboard",
-      element: (
-        <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
-          <AdminDashboard />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "/admin",
-      element: (
-        <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
-          <Navigate to="/admin/dashboard" replace />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "/teacher/dashboard",
-      element: (
-        <ProtectedRoute allowedRoles={[UserRole.TEACHER]}>
-          <TeacherDashboard />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "/teacher",
-      element: (
-        <ProtectedRoute allowedRoles={[UserRole.TEACHER]}>
-          <Navigate to="/teacher/dashboard" replace />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "/student/dashboard",
-      element: (
-        <ProtectedRoute allowedRoles={[UserRole.STUDENT]}>
-          <StudentDashboard />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "/student",
-      element: (
-        <ProtectedRoute allowedRoles={[UserRole.STUDENT]}>
-          <Navigate to="/student/dashboard" replace />
-        </ProtectedRoute>
-      ),
-    },
-    {
       path: "/",
-      element: <RootRedirect />,
+      element: <ProtectedRoute />,
+      children: [
+        {
+          index: true,
+          element: <RootRedirect />,
+        },
+        {
+          element: <LayoutRoute />,
+          children: [
+            // Admin Routes
+            {
+              element: <RoleRoute allowedRoles={[UserRole.ADMIN]} />,
+              children: [
+                {
+                  path: "admin/dashboard",
+                  element: <AdminDashboard />,
+                },
+                {
+                  path: "admin/tests/achievement",
+                  element: <TestList />,
+                },
+                {
+                  path: "admin/tests/achievement/create",
+                  element: <TestCreate />,
+                },
+                {
+                  path: "admin/tests/achievement/:id/edit",
+                  element: <TestEdit />,
+                },
+                {
+                  path: "admin/tests/adtm",
+                  element: (
+                    <div className="max-w-7xl mx-auto">
+                      <h1 className="text-3xl font-bold text-secondary-900">
+                        A-DTM Tests
+                      </h1>
+                      <p className="mt-2 text-secondary-600">
+                        A-DTM test management will be implemented here.
+                      </p>
+                    </div>
+                  ),
+                },
+                {
+                  path: "admin",
+                  element: <Navigate to="/admin/dashboard" replace />,
+                },
+              ],
+            },
+            // Teacher Routes
+            {
+              element: <RoleRoute allowedRoles={[UserRole.TEACHER]} />,
+              children: [
+                {
+                  path: "teacher/dashboard",
+                  element: <TeacherDashboard />,
+                },
+                {
+                  path: "teacher",
+                  element: <Navigate to="/teacher/dashboard" replace />,
+                },
+              ],
+            },
+            // Student Routes
+            {
+              element: <RoleRoute allowedRoles={[UserRole.STUDENT]} />,
+              children: [
+                {
+                  path: "student/dashboard",
+                  element: <StudentDashboard />,
+                },
+                {
+                  path: "student",
+                  element: <Navigate to="/student/dashboard" replace />,
+                },
+              ],
+            },
+            // Shared routes (accessible by multiple roles)
+            {
+              element: (
+                <RoleRoute allowedRoles={[UserRole.ADMIN, UserRole.TEACHER]} />
+              ),
+              children: [
+                {
+                  path: "admin/tests/achievement/:id",
+                  element: <TestDetail />,
+                },
+              ],
+            },
+          ],
+        },
+      ],
     },
     {
       path: "*",
-      element: <Navigate to="/login" replace />,
+      element: <NotFound />,
     },
   ]);
 }
