@@ -17,9 +17,14 @@ import { TestDetail } from "@/pages/admin/tests/TestDetail";
 // Teacher Pages
 import { TeacherDashboard } from "@/pages/teacher/Dashboard";
 import { AdtmGrading } from "@/pages/teacher/adtm/AdtmGrading";
+import { TeacherTestBrowse } from "@/pages/teacher/tests/TestBrowse";
+import { AssignmentList } from "@/pages/teacher/assignments/AssignmentList";
+import { AssignTest } from "@/pages/teacher/assignments/AssignTest";
+import { AssignmentDetail } from "@/pages/teacher/assignments/AssignmentDetail";
 
 // Student Pages
 import { StudentDashboard } from "@/pages/student/Dashboard";
+import { StudentProfile } from "@/pages/student/Profile";
 import { TestList as StudentTestList } from "@/pages/student/tests/TestList";
 import { TakeTest } from "@/pages/student/tests/TakeTest";
 import { ReviewTest } from "@/pages/student/tests/ReviewTest";
@@ -129,6 +134,22 @@ export default function createRoutes() {
                   element: <ResultReview />,
                 },
                 {
+                  path: "teacher/tests/browse",
+                  element: <TeacherTestBrowse />,
+                },
+                {
+                  path: "teacher/assignments",
+                  element: <AssignmentList />,
+                },
+                {
+                  path: "teacher/assignments/assign",
+                  element: <AssignTest />,
+                },
+                {
+                  path: "teacher/assignments/:id",
+                  element: <AssignmentDetail />,
+                },
+                {
                   path: "teacher",
                   element: <Navigate to="/teacher/dashboard" replace />,
                 },
@@ -147,7 +168,7 @@ export default function createRoutes() {
                   element: <StudentTestList />,
                 },
                 {
-                  path: "student/tests/:testId/take",
+                  path: "student/tests/:assignmentId/take",
                   element: <TakeTest />,
                 },
                 {
@@ -157,6 +178,10 @@ export default function createRoutes() {
                 {
                   path: "student/results/:submissionId",
                   element: <ResultDetail />,
+                },
+                {
+                  path: "student/profile",
+                  element: <StudentProfile />,
                 },
                 {
                   path: "student",

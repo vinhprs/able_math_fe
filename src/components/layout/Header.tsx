@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
-import { cn } from "@/lib/cn";
 import { LogOut, User, Settings, Bell } from "lucide-react";
 
 export function Header() {
@@ -84,10 +83,17 @@ export function Header() {
                 <p className="text-xs text-secondary-500">{user?.email}</p>
               </div>
               <button
-                onClick={() => {
-                  navigate("/profile");
-                  setIsDropdownOpen(false);
-                }}
+                onClick={
+                  user?.role === "STUDENT"
+                    ? () => {
+                        navigate("/student/profile");
+                        setIsDropdownOpen(false);
+                      }
+                    : () => {
+                        navigate("/profile");
+                        setIsDropdownOpen(false);
+                      }
+                }
                 className="w-full flex items-center gap-3 px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-50 transition-colors"
               >
                 <User className="w-4 h-4" />
@@ -118,4 +124,3 @@ export function Header() {
     </header>
   );
 }
-

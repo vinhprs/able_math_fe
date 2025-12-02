@@ -33,4 +33,3 @@ export function RoleRoute({ allowedRoles }: RoleRouteProps) {
 
   return <Outlet />;
 }
-

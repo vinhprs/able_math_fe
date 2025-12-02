@@ -6,6 +6,7 @@ import {
   ClipboardCheck,
   FileCheck,
   BarChart3,
+  Search,
 } from "lucide-react";
 
 interface MenuItem {
@@ -24,6 +25,11 @@ const menuItems: MenuItem[] = [
     label: "My Classes",
     icon: Users,
     path: "/teacher/classes",
+  },
+  {
+    label: "Browse Tests",
+    icon: Search,
+    path: "/teacher/tests/browse",
   },
   {
     label: "Assignments",
@@ -82,4 +88,3 @@ export function TeacherSidebar() {
     </aside>
   );
 }
-

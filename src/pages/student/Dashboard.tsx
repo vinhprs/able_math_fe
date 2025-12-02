@@ -7,7 +7,14 @@ import {
   FileText,
   BarChart3,
 } from "lucide-react";
-import { DashboardCard, Button, Card, CardContent, CardHeader, CardTitle } from "@/components/ui";
+import {
+  DashboardCard,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui";
 import { StudentTestsList, LineChart } from "@/components/dashboard";
 import { useStudentStats, useMyTests } from "@/hooks/useDashboard";
 import { Loader2 } from "lucide-react";
@@ -90,7 +97,7 @@ export function StudentDashboard() {
           <CardTitle>My Tests</CardTitle>
         </CardHeader>
         <CardContent>
-          <StudentTestsList tests={tests || []} />
+          <StudentTestsList tests={tests || ([] as any[])} />
         </CardContent>
       </Card>
 
@@ -106,4 +113,3 @@ export function StudentDashboard() {
     </div>
   );
 }
-

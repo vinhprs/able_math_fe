@@ -1,354 +1,153 @@
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
-import { Card, CardContent } from "@/components/ui/Card";
-import { Textarea } from "@/components/ui/Textarea";
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  useSaveAnswer,
-  useStartTest,
-  useSubmission,
-  useSubmitTest,
-  useTestForTaking,
-} from "@/hooks/useTestSubmissions";
-import { useTestStore } from "@/store/testStore";
-import { formatDistanceToNow } from "date-fns";
-import {
+  ArrowLeft,
+  ArrowRight,
+  Save,
+  Send,
+  Clock,
   AlertTriangle,
   CheckCircle,
-  ChevronLeft,
-  ChevronRight,
-  Clock,
+  List,
   Loader2,
-  Save,
-  X,
-} from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+} from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import { Card, CardContent } from '@/components/ui/Card';
+import { Modal } from '@/components/ui/Modal';
+import { Alert } from '@/components/ui/Alert';
+import { toastSuccess, toastError } from '@/lib/toast';
+import api from '@/lib/api';
+import { QuestionNavigator } from './components/QuestionNavigator';
+import { QuestionCard } from './components/QuestionCard';
+import { ProgressBar } from './components/ProgressBar';
+import { SubmitModal } from './components/SubmitModal';
+import { useAutoSave } from './hooks/useAutoSave';
+import { useTestTimer } from './hooks/useTestTimer';
+
+function LoadingScreen() {
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="text-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary-600 mx-auto mb-4" />
+        <p className="text-gray-600">Loading test...</p>
+      </div>
+    </div>
+  );
+}
 
 export function TakeTest() {
-  const params = useParams<{ testId: string }>();
-  const [searchParams] = useSearchParams();
+  const { assignmentId } = useParams<{ assignmentId: string }>();
   const navigate = useNavigate();
-  const assignmentId = searchParams.get("assignmentId");
-  const submissionIdParam = searchParams.get("submissionId");
+  const queryClient = useQueryClient();
 
-  const {
-    test,
-    questions,
-    submissionId,
-    answers,
-    currentQuestionIndex,
-    isSubmitting,
-    isSaving,
-    lastSaved,
-    setTest,
-    setSubmission,
-    setAnswer,
-    setCurrentQuestion,
-    setSubmitting,
-    setSaving,
-    setLastSaved,
-    getAnsweredCount,
-    reset,
-  } = useTestStore();
+  const [submissionId, setSubmissionId] = useState<string | null>(null);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [showNavigator, setShowNavigator] = useState(false);
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  const [deadline, setDeadline] = useState<Date | null>(null);
-  const [timeRemaining, setTimeRemaining] = useState<string>("");
-  const [showWarning, setShowWarning] = useState(false);
-  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const answerInputRef = useRef<HTMLTextAreaElement>(null);
+  // Start test or get existing submission
+  const startMutation = useMutation({
+    mutationFn: () =>
+      api.post('/student/submissions/start', { assignmentId }),
+    onSuccess: (response) => {
+      // Handle both wrapped and unwrapped responses
+      const data = response.data.data || response.data;
+      const submissionId = data.submissionId;
+      if (submissionId) {
+        setSubmissionId(submissionId);
+      }
+    },
+    onError: (error: any) => {
+      toastError(
+        error.response?.data?.message || error.message || 'Failed to start test'
+      );
+      navigate('/student/tests');
+    },
+  });
 
-  const { data: testData, isLoading: testLoading } = useTestForTaking(
-    params.testId || null
-  );
-  const { data: submissionData, isLoading: submissionLoading } = useSubmission(
-    submissionIdParam || submissionId || null
-  );
-  const startTestMutation = useStartTest();
-  const saveAnswerMutation = useSaveAnswer();
-  const submitTestMutation = useSubmitTest();
-
-  // Initialize test data
-  useEffect(() => {
-    if (testData && testData.questions) {
-      setTest(testData, testData.questions);
-    }
-  }, [testData, setTest]);
-
-  // Initialize submission
-  useEffect(() => {
-    if (submissionData) {
-      setSubmission(submissionData.id, submissionData.assignmentId);
-      // Load existing answers
-      if (submissionData.answers) {
-        submissionData.answers.forEach((answer) => {
-          if (answer.studentAnswer) {
-            setAnswer(answer.questionId, answer.studentAnswer);
+  // Fetch submission with questions
+  const { data: testData, isLoading } = useQuery({
+    queryKey: ['test-submission', submissionId],
+    queryFn: async () => {
+      const response = await api.get(`/student/submissions/${submissionId}/take`);
+      // Handle both wrapped and unwrapped responses
+      return response.data.data || response.data;
+    },
+    enabled: !!submissionId,
+    onSuccess: (data) => {
+      // Initialize answers from existing data
+      const existingAnswers: Record<string, string> = {};
+      if (data.questions) {
+        data.questions.forEach((q: any) => {
+          if (q.studentAnswer) {
+            existingAnswers[q.id] = q.studentAnswer;
           }
         });
       }
-    } else if (assignmentId && params.testId && !submissionIdParam) {
-      // Start new test
-      startTestMutation.mutate(
-        { testId: params.testId, assignmentId },
-        {
-          onSuccess: (data) => {
-            setSubmission(data.id, data.assignmentId);
-          },
-        }
+      setAnswers(existingAnswers);
+    },
+  });
+
+  // Submit test mutation
+  const submitMutation = useMutation({
+    mutationFn: () => api.post(`/student/submissions/${submissionId}/submit`),
+    onSuccess: () => {
+      toastSuccess('Test submitted successfully!');
+      queryClient.invalidateQueries({ queryKey: ['student-assignments'] });
+      navigate('/student/tests');
+    },
+    onError: (error: any) => {
+      toastError(
+        error.response?.data?.message || error.message || 'Failed to submit test'
       );
-    }
-  }, [
-    submissionData,
-    assignmentId,
-    params.testId,
-    submissionIdParam,
-    setSubmission,
-    setAnswer,
-    startTestMutation,
-  ]);
-
-  // Set deadline from assignment
-  useEffect(() => {
-    if (submissionData?.test) {
-      // You would get deadline from assignment API
-      // For now, we'll calculate from test duration if available
-    }
-  }, [submissionData]);
-
-  // Timer effect
-  useEffect(() => {
-    if (!deadline) return;
-
-    const updateTimer = () => {
-      const now = new Date();
-      const diff = deadline.getTime() - now.getTime();
-
-      if (diff <= 0) {
-        setTimeRemaining("Time expired");
-        setShowWarning(true);
-        // Auto-submit when time expires
-        if (submissionId && !isSubmitting) {
-          handleSubmit();
-        }
-        return;
-      }
-
-      const minutes = Math.floor(diff / 60000);
-      const seconds = Math.floor((diff % 60000) / 1000);
-      setTimeRemaining(`${minutes}:${seconds.toString().padStart(2, "0")}`);
-
-      // Show warning at 5 minutes
-      if (diff <= 5 * 60 * 1000 && !showWarning) {
-        setShowWarning(true);
-      }
-    };
-
-    updateTimer();
-    const interval = setInterval(updateTimer, 1000);
-
-    return () => clearInterval(interval);
-  }, [deadline, submissionId, isSubmitting]);
-
-  // Auto-save effect
-  const saveAnswer = useCallback(
-    async (questionId: string, answer: string, immediate = false) => {
-      if (!submissionId) return;
-
-      // Clear existing timeout
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-
-      const performSave = async () => {
-        setSaving(true);
-        try {
-          await saveAnswerMutation.mutateAsync({
-            submissionId,
-            questionId,
-            answer,
-          });
-          setLastSaved(new Date());
-        } catch (error) {
-          console.error("Failed to save answer:", error);
-        } finally {
-          setSaving(false);
-        }
-      };
-
-      if (immediate) {
-        await performSave();
-      } else {
-        saveTimeoutRef.current = setTimeout(performSave, 30000); // 30 seconds
-      }
     },
-    [submissionId, saveAnswerMutation, setSaving, setLastSaved]
+  });
+
+  // Auto-save hook
+  const { saveStatus, saveAnswer } = useAutoSave(submissionId);
+
+  // Timer hook (if deadline exists)
+  const { timeRemaining, isOvertime } = useTestTimer(
+    testData?.assignment?.deadline
   );
 
-  // Save on answer change
+  // Start test on mount
   useEffect(() => {
-    const currentQuestion = questions[currentQuestionIndex];
-    if (currentQuestion && submissionId) {
-      const answer = answers[currentQuestion.id] || "";
-      saveAnswer(currentQuestion.id, answer);
+    if (assignmentId && !submissionId && !startMutation.isPending) {
+      startMutation.mutate();
     }
-  }, [answers, currentQuestionIndex, questions, submissionId, saveAnswer]);
+  }, [assignmentId]);
 
-  // Save on navigation
-  const handleNavigation = useCallback(
-    (direction: "prev" | "next") => {
-      const currentQuestion = questions[currentQuestionIndex];
-      if (currentQuestion && submissionId) {
-        const answer = answers[currentQuestion.id] || "";
-        saveAnswer(currentQuestion.id, answer, true);
-      }
-
-      if (direction === "prev" && currentQuestionIndex > 0) {
-        setCurrentQuestion(currentQuestionIndex - 1);
-      } else if (
-        direction === "next" &&
-        currentQuestionIndex < questions.length - 1
-      ) {
-        setCurrentQuestion(currentQuestionIndex + 1);
-      }
-    },
-    [
-      currentQuestionIndex,
-      questions,
-      answers,
-      submissionId,
-      saveAnswer,
-      setCurrentQuestion,
-    ]
-  );
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLTextAreaElement) {
-        // Don't interfere with text input
-        if (e.key === "Enter" && e.ctrlKey) {
-          e.preventDefault();
-          handleNavigation("next");
-        } else if (e.key === "Escape" && e.shiftKey && e.ctrlKey) {
-          e.preventDefault();
-          handleNavigation("prev");
-        } else if (e.key === "s" && e.ctrlKey) {
-          e.preventDefault();
-          const currentQuestion = questions[currentQuestionIndex];
-          if (currentQuestion && submissionId) {
-            saveAnswer(
-              currentQuestion.id,
-              answers[currentQuestion.id] || "",
-              true
-            );
-          }
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [
-    currentQuestionIndex,
-    questions,
-    answers,
-    submissionId,
-    saveAnswer,
-    handleNavigation,
-  ]);
-
-  // Prevent accidental refresh
+  // Warn before leaving page
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      // Save current answer before leaving
-      const currentQuestion = questions[currentQuestionIndex];
-      if (currentQuestion && submissionId) {
-        const answer = answers[currentQuestion.id] || "";
-        saveAnswer(currentQuestion.id, answer, true);
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
       }
-
-      e.preventDefault();
-      e.returnValue = "";
     };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [currentQuestionIndex, questions, answers, submissionId, saveAnswer]);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
-  // Focus input on question change
-  useEffect(() => {
-    if (answerInputRef.current) {
-      answerInputRef.current.focus();
-    }
-  }, [currentQuestionIndex]);
-
-  const handleAnswerChange = (value: string) => {
-    const currentQuestion = questions[currentQuestionIndex];
-    if (currentQuestion) {
-      setAnswer(currentQuestion.id, value);
-    }
-  };
-
-  const handleSubmit = async () => {
-    if (!submissionId || isSubmitting) return;
-
-    // Save all answers first
-    for (const question of questions) {
-      const answer = answers[question.id] || "";
-      if (answer.trim()) {
-        await saveAnswer(question.id, answer, true);
-      }
-    }
-
-    setSubmitting(true);
-    try {
-      await submitTestMutation.mutateAsync(submissionId);
-      navigate(
-        `/student/tests/${params.testId}/review?submissionId=${submissionId}`
-      );
-    } catch (error) {
-      console.error("Failed to submit test:", error);
-      alert("Failed to submit test. Please try again.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleSaveAndExit = async () => {
-    if (!submissionId) return;
-
-    // Save current answer
-    const currentQuestion = questions[currentQuestionIndex];
-    if (currentQuestion) {
-      await saveAnswer(
-        currentQuestion.id,
-        answers[currentQuestion.id] || "",
-        true
-      );
-    }
-
-    navigate("/student/tests");
-  };
-
-  const handleQuestionClick = (index: number) => {
-    handleNavigation("next"); // Save current first
-    setCurrentQuestion(index);
-  };
-
-  if (testLoading || submissionLoading || startTestMutation.isPending) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
-      </div>
-    );
+  if (isLoading || startMutation.isPending || !testData) {
+    return <LoadingScreen />;
   }
 
-  if (!test || questions.length === 0) {
+  const questions = testData.questions || [];
+  const currentQuestion = questions[currentQuestionIndex];
+  const progress = testData.progress || { answered: 0, total: questions.length };
+
+  if (!currentQuestion) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <p className="text-secondary-600">Test not found</p>
-          <Button onClick={() => navigate("/student/tests")} className="mt-4">
+          <p className="text-gray-600 mb-4">No questions found</p>
+          <Button onClick={() => navigate('/student/tests')}>
             Back to Tests
           </Button>
         </div>
@@ -356,208 +155,276 @@ export function TakeTest() {
     );
   }
 
-  const currentQuestion = questions[currentQuestionIndex];
-  const currentAnswer = answers[currentQuestion.id] || "";
+  const handleAnswerChange = async (questionId: string, answer: string) => {
+    setAnswers((prev) => ({ ...prev, [questionId]: answer }));
+    setHasUnsavedChanges(true);
+
+    // Auto-save
+    await saveAnswer(questionId, answer);
+    setHasUnsavedChanges(false);
+  };
+
+  const handleNext = () => {
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex((prev) => prev + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex((prev) => prev - 1);
+    }
+  };
+
+  const handleJumpToQuestion = (index: number) => {
+    setCurrentQuestionIndex(index);
+    setShowNavigator(false);
+  };
+
+  const handleSubmit = () => {
+    // Check unanswered questions
+    const unanswered = questions.filter(
+      (q) => !answers[q.id] || answers[q.id].trim() === ''
+    );
+
+    if (unanswered.length > 0) {
+      setShowSubmitModal(true);
+    } else {
+      submitMutation.mutate();
+    }
+  };
+
+  const confirmSubmit = () => {
+    setShowSubmitModal(false);
+    submitMutation.mutate();
+  };
 
   return (
-    <div className="min-h-screen bg-secondary-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-secondary-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div className="bg-white border-b sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <h1 className="text-xl font-bold text-secondary-900">
-                {test.title}
-              </h1>
-              <p className="text-sm text-secondary-600 font-mono">
-                {test.testCode}
-              </p>
-            </div>
+            {/* Left: Test Info */}
             <div className="flex items-center gap-4">
-              {deadline && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      'Are you sure you want to leave? Your progress is saved.'
+                    )
+                  ) {
+                    navigate('/student/tests');
+                  }
+                }}
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Exit
+              </Button>
+              <div>
+                <h1 className="font-bold text-lg">
+                  {testData.test?.title || 'Test'}
+                </h1>
+                <p className="text-sm text-gray-500">
+                  {testData.test?.testCode || ''}
+                </p>
+              </div>
+            </div>
+
+            {/* Center: Progress */}
+            <div className="flex-1 max-w-md mx-8">
+              <ProgressBar
+                answered={Object.keys(answers).filter(
+                  (id) => answers[id] && answers[id].trim() !== ''
+                ).length}
+                total={questions.length}
+              />
+            </div>
+
+            {/* Right: Timer & Navigator */}
+            <div className="flex items-center gap-3">
+              {/* Timer */}
+              {testData.assignment?.deadline && (
                 <div
-                  className={`flex items-center gap-2 ${
-                    showWarning ? "text-red-600" : "text-secondary-700"
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
+                    isOvertime
+                      ? 'bg-red-100 text-red-700'
+                      : timeRemaining && timeRemaining.hours < 1
+                      ? 'bg-yellow-100 text-yellow-700'
+                      : 'bg-blue-100 text-blue-700'
                   }`}
                 >
-                  <Clock className="w-5 h-5" />
-                  <span className="font-mono text-lg">{timeRemaining}</span>
+                  <Clock className="w-4 h-4" />
+                  <span className="font-mono font-bold">
+                    {timeRemaining
+                      ? `${timeRemaining.hours}:${timeRemaining.minutes
+                          .toString()
+                          .padStart(2, '0')}:${timeRemaining.seconds
+                          .toString()
+                          .padStart(2, '0')}`
+                      : 'Overtime'}
+                  </span>
                 </div>
               )}
-              <div className="text-sm text-secondary-600">
-                Question {currentQuestionIndex + 1} of {questions.length}
-              </div>
-              {isSaving ? (
-                <Badge variant="info">Saving...</Badge>
-              ) : lastSaved ? (
-                <Badge variant="success" className="flex items-center gap-1">
-                  <CheckCircle className="w-3 h-3" />
-                  Saved {formatDistanceToNow(lastSaved, { addSuffix: true })}
-                </Badge>
-              ) : null}
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Warning Banner */}
-      {showWarning && deadline && (
-        <div className="bg-yellow-50 border-b border-yellow-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-yellow-800">
-                <AlertTriangle className="w-5 h-5" />
-                <span>Time is running out! Please submit your test soon.</span>
+              {/* Save Status */}
+              <div className="flex items-center gap-2 text-sm">
+                {saveStatus === 'saving' && (
+                  <>
+                    <Save className="w-4 h-4 text-blue-600 animate-pulse" />
+                    <span className="text-blue-600">Saving...</span>
+                  </>
+                )}
+                {saveStatus === 'saved' && (
+                  <>
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    <span className="text-green-600">Saved</span>
+                  </>
+                )}
+                {saveStatus === 'error' && (
+                  <>
+                    <AlertTriangle className="w-4 h-4 text-red-600" />
+                    <span className="text-red-600">Error</span>
+                  </>
+                )}
               </div>
+
+              {/* Question Navigator Toggle */}
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setShowWarning(false)}
+                onClick={() => setShowNavigator(!showNavigator)}
               >
-                <X className="w-4 h-4" />
+                <List className="w-4 h-4 mr-2" />
+                Questions
               </Button>
             </div>
           </div>
         </div>
-      )}
+      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-3">
+          {/* Question Navigator Sidebar (Desktop) */}
+          <div className="hidden lg:block">
+            <div className="sticky top-24">
+              <QuestionNavigator
+                questions={questions}
+                currentIndex={currentQuestionIndex}
+                answers={answers}
+                onJumpTo={handleJumpToQuestion}
+              />
+            </div>
+          </div>
+
+          {/* Question Content */}
+          <div className="lg:col-span-3 space-y-4">
+            {/* Question Card */}
+            <QuestionCard
+              question={currentQuestion}
+              questionNumber={currentQuestionIndex + 1}
+              totalQuestions={questions.length}
+              answer={answers[currentQuestion.id] || ''}
+              onAnswerChange={(answer) =>
+                handleAnswerChange(currentQuestion.id, answer)
+              }
+            />
+
+            {/* Navigation Buttons */}
             <Card>
-              <CardContent className="p-6">
-                {/* Question Header */}
-                <div className="flex items-center justify-between mb-6 pb-4 border-b border-secondary-200">
-                  <div>
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="text-2xl font-bold text-primary-600">
-                        Question {currentQuestion.questionNumber}
-                      </span>
-                      {currentQuestion.unitName && (
-                        <Badge variant="info">{currentQuestion.unitName}</Badge>
-                      )}
-                      <Badge variant="default">
-                        {currentQuestion.score} points
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Question Text */}
-                <div className="mb-6">
-                  <p className="text-lg text-secondary-900 whitespace-pre-wrap">
-                    {currentQuestion.questionText}
-                  </p>
-                  {currentQuestion.questionImage && (
-                    <img
-                      src={currentQuestion.questionImage}
-                      alt="Question"
-                      className="mt-4 max-w-full rounded-lg"
-                    />
-                  )}
-                </div>
-
-                {/* Answer Input */}
-                <div>
-                  <Textarea
-                    ref={answerInputRef}
-                    label="Your Answer"
-                    value={currentAnswer}
-                    onChange={(e) => handleAnswerChange(e.target.value)}
-                    placeholder="Enter your answer here..."
-                    className="min-h-[200px] text-lg"
-                  />
-                </div>
-
-                {/* Navigation */}
-                <div className="flex items-center justify-between mt-6 pt-6 border-t border-secondary-200">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
                   <Button
                     variant="outline"
-                    onClick={() => handleNavigation("prev")}
+                    onClick={handlePrevious}
                     disabled={currentQuestionIndex === 0}
                   >
-                    <ChevronLeft className="w-4 h-4 mr-2" />
+                    <ArrowLeft className="w-4 h-4 mr-2" />
                     Previous
                   </Button>
-                  <div className="flex items-center gap-2">
-                    <Button variant="secondary" onClick={handleSaveAndExit}>
-                      <Save className="w-4 h-4 mr-2" />
-                      Save & Exit
+
+                  <span className="text-sm text-gray-500">
+                    Question {currentQuestionIndex + 1} of {questions.length}
+                  </span>
+
+                  {currentQuestionIndex === questions.length - 1 ? (
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={submitMutation.isPending}
+                      isLoading={submitMutation.isPending}
+                    >
+                      <Send className="w-4 h-4 mr-2" />
+                      Submit Test
                     </Button>
-                    {currentQuestionIndex === questions.length - 1 ? (
-                      <Button
-                        variant="primary"
-                        onClick={handleSubmit}
-                        isLoading={isSubmitting}
-                      >
-                        Submit Test
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="primary"
-                        onClick={() => handleNavigation("next")}
-                      >
-                        Next
-                        <ChevronRight className="w-4 h-4 ml-2" />
-                      </Button>
-                    )}
-                  </div>
+                  ) : (
+                    <Button onClick={handleNext}>
+                      Next
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
-          </div>
 
-          {/* Question Palette Sidebar */}
-          <div className="lg:col-span-1">
-            <Card>
-              <CardContent className="p-4">
-                <h3 className="font-semibold text-secondary-900 mb-4">
-                  Questions ({getAnsweredCount()}/{questions.length})
-                </h3>
-                <div className="grid grid-cols-5 lg:grid-cols-3 gap-2">
-                  {questions.map((q, index) => {
-                    const isAnswered =
-                      answers[q.id] && answers[q.id].trim() !== "";
-                    const isCurrent = index === currentQuestionIndex;
-                    return (
-                      <button
-                        key={q.id}
-                        onClick={() => handleQuestionClick(index)}
-                        className={`
-                          w-10 h-10 rounded-lg font-medium text-sm transition-colors
-                          ${
-                            isCurrent
-                              ? "bg-primary-600 text-white ring-2 ring-primary-300"
-                              : isAnswered
-                              ? "bg-green-100 text-green-800 hover:bg-green-200"
-                              : "bg-secondary-100 text-secondary-700 hover:bg-secondary-200"
-                          }
-                        `}
-                      >
-                        {q.questionNumber}
-                      </button>
-                    );
-                  })}
+            {/* Submit Button (Always Visible) */}
+            <Card className="p-4 bg-blue-50 border-blue-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-blue-900">
+                    {Object.keys(answers).filter(
+                      (id) => answers[id] && answers[id].trim() !== ''
+                    ).length}{' '}
+                    of {questions.length} questions answered
+                  </p>
+                  <p className="text-sm text-blue-700">
+                    You can submit when you're ready
+                  </p>
                 </div>
-                <div className="mt-4 pt-4 border-t border-secondary-200">
-                  <Button
-                    variant="primary"
-                    className="w-full"
-                    onClick={() =>
-                      navigate(
-                        `/student/tests/${params.testId}/review?submissionId=${submissionId}`
-                      )
-                    }
-                  >
-                    Review All
-                  </Button>
-                </div>
-              </CardContent>
+                <Button
+                  onClick={handleSubmit}
+                  disabled={submitMutation.isPending}
+                  isLoading={submitMutation.isPending}
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  Submit Test
+                </Button>
+              </div>
             </Card>
           </div>
         </div>
       </div>
+
+      {/* Mobile Question Navigator Modal */}
+      {showNavigator && (
+        <Modal
+          isOpen
+          onClose={() => setShowNavigator(false)}
+          size="lg"
+          title="Questions"
+        >
+          <QuestionNavigator
+            questions={questions}
+            currentIndex={currentQuestionIndex}
+            answers={answers}
+            onJumpTo={handleJumpToQuestion}
+          />
+        </Modal>
+      )}
+
+      {/* Submit Confirmation Modal */}
+      {showSubmitModal && (
+        <SubmitModal
+          isOpen
+          onClose={() => setShowSubmitModal(false)}
+          onConfirm={confirmSubmit}
+          questions={questions}
+          answers={answers}
+          isSubmitting={submitMutation.isPending}
+        />
+      )}
     </div>
   );
 }
