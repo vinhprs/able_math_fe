@@ -16,9 +16,17 @@ import { TestDetail } from "@/pages/admin/tests/TestDetail";
 
 // Teacher Pages
 import { TeacherDashboard } from "@/pages/teacher/Dashboard";
+import { AdtmGrading } from "@/pages/teacher/adtm/AdtmGrading";
 
 // Student Pages
 import { StudentDashboard } from "@/pages/student/Dashboard";
+import { TestList as StudentTestList } from "@/pages/student/tests/TestList";
+import { TakeTest } from "@/pages/student/tests/TakeTest";
+import { ReviewTest } from "@/pages/student/tests/ReviewTest";
+import { ResultDetail } from "@/pages/student/results/ResultDetail";
+
+// Teacher Pages - Results
+import { ResultReview } from "@/pages/teacher/results/ResultReview";
 
 /**
  * Get dashboard route based on user role
@@ -113,6 +121,14 @@ export default function createRoutes() {
                   element: <TeacherDashboard />,
                 },
                 {
+                  path: "teacher/adtm/:submissionId/grade",
+                  element: <AdtmGrading />,
+                },
+                {
+                  path: "teacher/results/:submissionId",
+                  element: <ResultReview />,
+                },
+                {
                   path: "teacher",
                   element: <Navigate to="/teacher/dashboard" replace />,
                 },
@@ -125,6 +141,22 @@ export default function createRoutes() {
                 {
                   path: "student/dashboard",
                   element: <StudentDashboard />,
+                },
+                {
+                  path: "student/tests",
+                  element: <StudentTestList />,
+                },
+                {
+                  path: "student/tests/:testId/take",
+                  element: <TakeTest />,
+                },
+                {
+                  path: "student/tests/:testId/review",
+                  element: <ReviewTest />,
+                },
+                {
+                  path: "student/results/:submissionId",
+                  element: <ResultDetail />,
                 },
                 {
                   path: "student",

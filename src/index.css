@@ -39,3 +39,51 @@
     font-family: var(--font-family-sans);
   }
 }
+
+/* Print Styles */
+@media print {
+  @page {
+    margin: 1cm;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .print\:hidden {
+    display: none !important;
+  }
+
+  .print\:break-inside-avoid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .report-card {
+    page-break-inside: avoid;
+  }
+
+  /* Ensure charts don't break across pages */
+  .recharts-wrapper {
+    page-break-inside: avoid;
+  }
+
+  /* Optimize table printing */
+  table {
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+}

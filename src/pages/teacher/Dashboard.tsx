@@ -8,7 +8,14 @@ import {
   ClipboardCheck,
   FileText,
 } from "lucide-react";
-import { DashboardCard, Button, Card, CardContent, CardHeader, CardTitle } from "@/components/ui";
+import {
+  DashboardCard,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui";
 import { ClassesList, UpcomingDeadlinesList } from "@/components/dashboard";
 import { useTeacherStats, useMyClasses } from "@/hooks/useDashboard";
 import { Loader2 } from "lucide-react";
@@ -30,8 +37,12 @@ export function TeacherDashboard() {
     <div className="space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-bold text-secondary-900">Teacher Dashboard</h1>
-        <p className="text-secondary-500 mt-1">Manage your classes and assignments</p>
+        <h1 className="text-3xl font-bold text-secondary-900">
+          Teacher Dashboard
+        </h1>
+        <p className="text-secondary-500 mt-1">
+          Manage your classes and assignments
+        </p>
       </div>
 
       {/* Statistics */}
@@ -111,4 +122,3 @@ export function TeacherDashboard() {
     </div>
   );
 }
-

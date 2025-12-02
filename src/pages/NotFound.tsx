@@ -1,5 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import { Button, Card, CardContent, CardHeader, CardTitle } from "@/components/ui";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui";
 import { Home, ArrowLeft } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { UserRole } from "@shared/types/enum";
@@ -54,4 +60,3 @@ export function NotFound() {
     </div>
   );
 }
-

@@ -31,3 +31,14 @@ export interface PaginatedResponse<T> {
   totalPages: number;
 }
 
+// Export report types
+export type {
+  ChartData,
+  QuestionResult,
+  UnitScore,
+  DifficultyScore,
+  AchievementReportData,
+  AdtmSectionData,
+  AdtmReportData,
+} from './reports.types';
+
