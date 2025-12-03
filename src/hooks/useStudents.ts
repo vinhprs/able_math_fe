@@ -12,13 +12,13 @@ export interface Student {
 /**
  * Fetch students for teacher selection
  */
-export function useStudents(search?: string) {
+export function useStudents(search?: string, limit: number = 100) {
   return useQuery({
-    queryKey: ["students", search],
+    queryKey: ["students", search, limit],
     queryFn: async () => {
       const params = new URLSearchParams();
       params.append("role", "STUDENT");
-      params.append("limit", "10");
+      params.append("limit", limit.toString());
       if (search) params.append("search", search);
 
       const response = await api.get<{

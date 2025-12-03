@@ -42,3 +42,14 @@ export type {
   AdtmReportData,
 } from './reports.types';
 
+// Export class types
+export type {
+  IClass,
+  IStudent,
+  ICreateClassDto,
+  IUpdateClassDto,
+  IClassQueryParams,
+  IPaginatedClassResponse,
+  IClassStatistics,
+} from './class';
+

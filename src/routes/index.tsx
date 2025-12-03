@@ -21,6 +21,9 @@ import { TeacherTestBrowse } from "@/pages/teacher/tests/TestBrowse";
 import { AssignmentList } from "@/pages/teacher/assignments/AssignmentList";
 import { AssignTest } from "@/pages/teacher/assignments/AssignTest";
 import { AssignmentDetail } from "@/pages/teacher/assignments/AssignmentDetail";
+import ClassList from "@/pages/teacher/classes/ClassList";
+import ClassForm from "@/pages/teacher/classes/ClassForm";
+import ClassDetails from "@/pages/teacher/classes/ClassDetails";
 
 // Student Pages
 import { StudentDashboard } from "@/pages/student/Dashboard";
@@ -150,6 +153,22 @@ export default function createRoutes() {
                 {
                   path: "teacher/assignments/:id",
                   element: <AssignmentDetail />,
+                },
+                {
+                  path: "teacher/classes",
+                  element: <ClassList />,
+                },
+                {
+                  path: "teacher/classes/new",
+                  element: <ClassForm />,
+                },
+                {
+                  path: "teacher/classes/:id/edit",
+                  element: <ClassForm />,
+                },
+                {
+                  path: "teacher/classes/:id",
+                  element: <ClassDetails />,
                 },
                 {
                   path: "teacher",

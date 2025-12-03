@@ -1,6 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '@/lib/api';
-import { toastSuccess, toastError } from '@/lib/toast';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import api from "@/lib/api";
+import { toastSuccess, toastError } from "@/lib/toast";
 
 export interface AssignmentFilters {
   status?: string;
@@ -23,7 +23,7 @@ export interface Assignment {
     fullName: string;
     grade?: string;
   };
-  status: 'PENDING' | 'IN_PROGRESS' | 'SUBMITTED' | 'GRADED';
+  status: "PENDING" | "IN_PROGRESS" | "SUBMITTED" | "GRADED";
   deadline: string | null;
   createdAt: string;
 }
@@ -36,10 +36,10 @@ export interface PaginatedAssignments {
 }
 
 export interface AssignmentDetail extends Assignment {
-  test: Assignment['test'] & {
+  test: Assignment["test"] & {
     questionCount: number;
   };
-  student: Assignment['student'] & {
+  student: Assignment["student"] & {
     email: string;
   };
   assignedBy: {
@@ -56,7 +56,8 @@ export interface CreateAssignmentDto {
 
 export interface BulkAssignDto {
   testId: string;
-  studentIds: string[];
+  classId?: string;
+  studentIds?: string[];
   deadline?: string;
 }
 
@@ -65,14 +66,14 @@ export interface BulkAssignDto {
  */
 export function useAssignments(filters?: AssignmentFilters) {
   return useQuery({
-    queryKey: ['teacher-assignments', filters],
+    queryKey: ["teacher-assignments", filters],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (filters?.status) params.append('status', filters.status);
-      if (filters?.testId) params.append('testId', filters.testId);
-      if (filters?.studentId) params.append('studentId', filters.studentId);
-      if (filters?.page) params.append('page', filters.page.toString());
-      if (filters?.limit) params.append('limit', filters.limit.toString());
+      if (filters?.status) params.append("status", filters.status);
+      if (filters?.testId) params.append("testId", filters.testId);
+      if (filters?.studentId) params.append("studentId", filters.studentId);
+      if (filters?.page) params.append("page", filters.page.toString());
+      if (filters?.limit) params.append("limit", filters.limit.toString());
 
       const response = await api.get<{
         success: boolean;
@@ -89,7 +90,7 @@ export function useAssignments(filters?: AssignmentFilters) {
  */
 export function useAssignment(assignmentId: string | null) {
   return useQuery({
-    queryKey: ['assignment', assignmentId],
+    queryKey: ["assignment", assignmentId],
     queryFn: async () => {
       const response = await api.get<{
         success: boolean;
@@ -107,7 +108,7 @@ export function useAssignment(assignmentId: string | null) {
  */
 export function useAssignedStudents(testId: string | null) {
   return useQuery({
-    queryKey: ['assigned-students', testId],
+    queryKey: ["assigned-students", testId],
     queryFn: async () => {
       const response = await api.get<{
         success: boolean;
@@ -142,15 +143,17 @@ export function useCreateAssignment() {
         success: boolean;
         data: Assignment;
         timestamp: string;
-      }>('/assignments', data);
+      }>("/assignments", data);
       return response.data.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['teacher-assignments'] });
-      toastSuccess('Assignment created successfully');
+      queryClient.invalidateQueries({ queryKey: ["teacher-assignments"] });
+      toastSuccess("Assignment created successfully");
     },
     onError: (error: any) => {
-      toastError(error.response?.data?.message || 'Failed to create assignment');
+      toastError(
+        error.response?.data?.message || "Failed to create assignment"
+      );
     },
   });
 }
@@ -174,18 +177,18 @@ export function useBulkAssign() {
           }>;
         };
         timestamp: string;
-      }>('/assignments/bulk', data);
+      }>("/assignments/bulk", data);
       return response.data.data;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['teacher-assignments'] });
+      queryClient.invalidateQueries({ queryKey: ["teacher-assignments"] });
       toastSuccess(`Successfully assigned to ${data.assigned} students`);
       if (data.skipped > 0) {
         toastError(`${data.skipped} students were already assigned this test`);
       }
     },
     onError: (error: any) => {
-      toastError(error.response?.data?.message || 'Failed to assign test');
+      toastError(error.response?.data?.message || "Failed to assign test");
     },
   });
 }
@@ -206,11 +209,13 @@ export function useDeleteAssignment() {
       return response.data.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['teacher-assignments'] });
-      toastSuccess('Assignment deleted successfully');
+      queryClient.invalidateQueries({ queryKey: ["teacher-assignments"] });
+      toastSuccess("Assignment deleted successfully");
     },
     onError: (error: any) => {
-      toastError(error.response?.data?.message || 'Failed to delete assignment');
+      toastError(
+        error.response?.data?.message || "Failed to delete assignment"
+      );
     },
   });
 }
@@ -222,7 +227,13 @@ export function useExtendDeadline() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, newDeadline }: { id: string; newDeadline: Date }) => {
+    mutationFn: async ({
+      id,
+      newDeadline,
+    }: {
+      id: string;
+      newDeadline: Date;
+    }) => {
       const response = await api.post<{
         success: boolean;
         data: { message: string; newDeadline: string };
@@ -233,12 +244,12 @@ export function useExtendDeadline() {
       return response.data.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['teacher-assignments'] });
-      queryClient.invalidateQueries({ queryKey: ['assignment'] });
-      toastSuccess('Deadline extended successfully');
+      queryClient.invalidateQueries({ queryKey: ["teacher-assignments"] });
+      queryClient.invalidateQueries({ queryKey: ["assignment"] });
+      toastSuccess("Deadline extended successfully");
     },
     onError: (error: any) => {
-      toastError(error.response?.data?.message || 'Failed to extend deadline');
+      toastError(error.response?.data?.message || "Failed to extend deadline");
     },
   });
 }
