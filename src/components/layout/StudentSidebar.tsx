@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/cn";
-import { Home, FileText, BarChart3, User } from "lucide-react";
+import { Home, FileText, BarChart3, BookOpen, User } from "lucide-react";
 
 interface MenuItem {
   label: string;
@@ -23,6 +23,11 @@ const menuItems: MenuItem[] = [
     label: "My Results",
     icon: BarChart3,
     path: "/student/results",
+  },
+  {
+    label: "My Reports",
+    icon: BookOpen,
+    path: "/student/reports",
   },
   {
     label: "My Profile",

@@ -35,9 +35,12 @@ import { TestPreview } from "@/pages/student/tests/TestPreview";
 import { ReviewTest } from "@/pages/student/tests/ReviewTest";
 import { ResultsList } from "@/pages/student/results/ResultsList";
 import { ResultDetail } from "@/pages/student/results/ResultDetail";
+import MyReports from "@/pages/student/MyReports";
+import StudentReportDetail from "@/pages/student/StudentReportDetail";
 
 // Teacher Pages - Results
 import { ResultReview } from "@/pages/teacher/results/ResultReview";
+import PendingReports from "@/pages/teacher/PendingReports";
 
 /**
  * Get dashboard route based on user role
@@ -140,6 +143,18 @@ export default function createRoutes() {
                   element: <ResultReview />,
                 },
                 {
+                  path: "teacher/reports/pending",
+                  element: <PendingReports />,
+                },
+                {
+                  path: "teacher/reports/:reportId/review",
+                  element: <ResultReview />,
+                },
+                {
+                  path: "teacher/reports",
+                  element: <Navigate to="/teacher/reports/pending" replace />,
+                },
+                {
                   path: "teacher/tests/browse",
                   element: <TeacherTestBrowse />,
                 },
@@ -216,6 +231,14 @@ export default function createRoutes() {
                 {
                   path: "student/results/:submissionId",
                   element: <ResultDetail />,
+                },
+                {
+                  path: "student/reports",
+                  element: <MyReports />,
+                },
+                {
+                  path: "student/reports/:reportId",
+                  element: <StudentReportDetail />,
                 },
                 {
                   path: "student/profile",

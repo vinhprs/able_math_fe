@@ -12,6 +12,15 @@ interface AchievementReportProps {
 }
 
 export function AchievementReport({ reportData }: AchievementReportProps) {
+  // Guard against undefined/missing data
+  if (!reportData || !reportData.student || !reportData.test || !reportData.scores) {
+    return (
+      <div className="p-6 text-center text-gray-500">
+        <p>Report data is not available. Please try again later.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="report-card space-y-6 print:space-y-4">
       {/* Header */}

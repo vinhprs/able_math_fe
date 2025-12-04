@@ -42,6 +42,16 @@ export type {
   AdtmReportData,
 } from './reports.types';
 
+// Export report workflow types
+export type {
+  PendingReport,
+  ReportCard,
+  ApproveReportDto,
+  RejectReportDto,
+} from './report';
+
+export { ReportStatus } from './report';
+
 // Export class types
 export type {
   IClass,
