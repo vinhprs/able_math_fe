@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -47,6 +47,7 @@ export function TakeTest() {
   const [showNavigator, setShowNavigator] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const hasStartedRef = useRef(false);
 
   // Start test or get existing submission
   const startMutation = useMutation({
@@ -54,13 +55,20 @@ export function TakeTest() {
       api.post('/student/submissions/start', { assignmentId }),
     onSuccess: (response) => {
       // Handle both wrapped and unwrapped responses
-      const data = response.data.data || response.data;
-      const submissionId = data.submissionId;
+      const data = response.data?.data || response.data;
+      const submissionId = data?.submissionId;
       if (submissionId) {
         setSubmissionId(submissionId);
+      } else {
+        console.error('No submissionId in response:', response.data);
+        toastError('Failed to get submission ID from server');
+        hasStartedRef.current = false;
       }
     },
     onError: (error: any) => {
+      // Reset ref on error so user can retry
+      hasStartedRef.current = false;
+      console.error('Failed to start test:', error);
       toastError(
         error.response?.data?.message || error.message || 'Failed to start test'
       );
@@ -69,18 +77,35 @@ export function TakeTest() {
   });
 
   // Fetch submission with questions
-  const { data: testData, isLoading } = useQuery({
+  const {
+    data: testData,
+    isLoading,
+    isError,
+    error: queryError,
+  } = useQuery({
     queryKey: ['test-submission', submissionId],
     queryFn: async () => {
-      const response = await api.get(`/student/submissions/${submissionId}/take`);
-      // Handle both wrapped and unwrapped responses
-      return response.data.data || response.data;
+      if (!submissionId) {
+        throw new Error('Submission ID is required');
+      }
+      try {
+        const response = await api.get(`/student/submissions/${submissionId}/take`);
+        // Handle both wrapped and unwrapped responses
+        const data = response.data?.data || response.data;
+        console.log('Test data loaded:', { hasQuestions: !!data?.questions, questionCount: data?.questions?.length });
+        return data;
+      } catch (error: any) {
+        console.error('Error fetching test data:', error);
+        throw error;
+      }
     },
     enabled: !!submissionId,
+    retry: 1,
     onSuccess: (data) => {
+      console.log('Test data success:', { hasData: !!data, hasQuestions: !!data?.questions });
       // Initialize answers from existing data
       const existingAnswers: Record<string, string> = {};
-      if (data.questions) {
+      if (data?.questions && Array.isArray(data.questions)) {
         data.questions.forEach((q: any) => {
           if (q.studentAnswer) {
             existingAnswers[q.id] = q.studentAnswer;
@@ -88,6 +113,12 @@ export function TakeTest() {
         });
       }
       setAnswers(existingAnswers);
+    },
+    onError: (error: any) => {
+      console.error('Failed to load test data:', error);
+      toastError(
+        error.response?.data?.message || error.message || 'Failed to load test'
+      );
     },
   });
 
@@ -114,12 +145,18 @@ export function TakeTest() {
     testData?.assignment?.deadline
   );
 
-  // Start test on mount
+  // Start test on mount (only once)
   useEffect(() => {
-    if (assignmentId && !submissionId && !startMutation.isPending) {
+    if (
+      assignmentId &&
+      !submissionId &&
+      !startMutation.isPending &&
+      !hasStartedRef.current
+    ) {
+      hasStartedRef.current = true;
       startMutation.mutate();
     }
-  }, [assignmentId]);
+  }, [assignmentId, submissionId, startMutation]);
 
   // Warn before leaving page
   useEffect(() => {
@@ -134,7 +171,51 @@ export function TakeTest() {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [hasUnsavedChanges]);
 
-  if (isLoading || startMutation.isPending || !testData) {
+  // Show error state if query failed
+  if (isError && queryError) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <AlertTriangle className="w-12 h-12 text-red-600 mx-auto mb-4" />
+          <p className="text-gray-600 mb-4">
+            {queryError instanceof Error
+              ? queryError.message
+              : 'Failed to load test'}
+          </p>
+          <Button onClick={() => navigate('/student/tests')}>
+            Back to Tests
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading only if we're waiting for submissionId or testData
+  if (
+    (startMutation.isPending && !submissionId) ||
+    (submissionId && isLoading) ||
+    (submissionId && !testData && !isError)
+  ) {
+    return <LoadingScreen />;
+  }
+
+  // If we have submissionId but no testData after loading, show error
+  if (submissionId && !testData && !isLoading && !isError) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <AlertTriangle className="w-12 h-12 text-red-600 mx-auto mb-4" />
+          <p className="text-gray-600 mb-4">No test data available</p>
+          <Button onClick={() => navigate('/student/tests')}>
+            Back to Tests
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Safety check: ensure testData exists before accessing properties
+  if (!testData) {
     return <LoadingScreen />;
   }
 

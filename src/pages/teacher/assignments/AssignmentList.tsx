@@ -3,12 +3,12 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Modal } from "@/components/ui/Modal";
 import { Select } from "@/components/ui/Select";
-import {
-  useAssignments,
-  useDeleteAssignment,
-  type AssignmentFilters,
-} from "@/hooks/useAssignments";
+import { assignmentService } from "@/services/assignmentService";
+import { classService } from "@/services/classService";
+import { toastSuccess, toastError } from "@/lib/toast";
 import { formatDate, formatDateTime } from "@/lib/utils";
+import type { IAssignment, AssignmentStatus, IAssignmentQueryParams } from "@/types/assignment";
+import type { IClass } from "@/types/class";
 import {
   CheckCircle,
   Clock,
@@ -17,8 +17,10 @@ import {
   Plus,
   Trash2,
   User,
+  Users,
+  Loader2,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface PaginationProps {
@@ -151,20 +153,64 @@ const STATUS_OPTIONS = [
 
 export function AssignmentList() {
   const navigate = useNavigate();
-  const [filters, setFilters] = useState<AssignmentFilters>({
-    page: 1,
-    limit: 10,
-  });
+  const [assignments, setAssignments] = useState<IAssignment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [selectedAssignment, setSelectedAssignment] = useState<string | null>(
-    null
-  );
+  const [selectedAssignment, setSelectedAssignment] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
-  const { data: assignmentsData, isLoading } = useAssignments(filters);
-  const deleteMutation = useDeleteAssignment();
+  // Filters
+  const [statusFilter, setStatusFilter] = useState<AssignmentStatus | ''>('');
+  const [classFilter, setClassFilter] = useState<string>('');
+  const [classes, setClasses] = useState<IClass[]>([]);
 
-  const handleFilterChange = (key: keyof AssignmentFilters, value: any) => {
-    setFilters((prev) => ({ ...prev, [key]: value, page: 1 }));
+  // Load classes for filter
+  useEffect(() => {
+    const loadClasses = async () => {
+      try {
+        const response = await classService.getAll({ limit: 100, isActive: true });
+        setClasses(response.data);
+      } catch (error) {
+        console.error('Failed to load classes:', error);
+      }
+    };
+    loadClasses();
+  }, []);
+
+  // Load assignments
+  useEffect(() => {
+    loadAssignments();
+  }, [currentPage, statusFilter, classFilter]);
+
+  const loadAssignments = async () => {
+    try {
+      setLoading(true);
+      const params: IAssignmentQueryParams = {
+        page: currentPage,
+        limit: 20,
+        status: statusFilter || undefined,
+        classId: classFilter || undefined,
+      };
+      const response = await assignmentService.getTeacherAssignments(params);
+      setAssignments(response.data);
+      setTotalPages(response.totalPages);
+    } catch (error) {
+      console.error('Failed to load assignments:', error);
+      toastError('Failed to load assignments');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFilterChange = (key: 'status' | 'class', value: string) => {
+    if (key === 'status') {
+      setStatusFilter(value as AssignmentStatus | '');
+    } else if (key === 'class') {
+      setClassFilter(value);
+    }
+    setCurrentPage(1);
   };
 
   const handleDelete = (id: string) => {
@@ -172,14 +218,21 @@ export function AssignmentList() {
     setDeleteModalOpen(true);
   };
 
-  const confirmDelete = () => {
-    if (selectedAssignment) {
-      deleteMutation.mutate(selectedAssignment, {
-        onSuccess: () => {
-          setDeleteModalOpen(false);
-          setSelectedAssignment(null);
-        },
-      });
+  const confirmDelete = async () => {
+    if (!selectedAssignment) return;
+
+    try {
+      setDeleting(true);
+      await assignmentService.delete(selectedAssignment);
+      toastSuccess('Assignment deleted successfully');
+      setDeleteModalOpen(false);
+      setSelectedAssignment(null);
+      loadAssignments();
+    } catch (error: any) {
+      console.error('Failed to delete:', error);
+      toastError(error?.response?.data?.message || 'Failed to delete assignment');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -219,7 +272,7 @@ export function AssignmentList() {
             Manage test assignments to students
           </p>
         </div>
-        <Button onClick={() => navigate("/teacher/assignments/assign")}>
+        <Button onClick={() => navigate("/teacher/assign-test")}>
           <Plus className="w-4 h-4 mr-2" />
           Assign New Test
         </Button>
@@ -232,19 +285,37 @@ export function AssignmentList() {
           <div className="flex-1">
             <label className="block text-sm font-medium mb-2">Status</label>
             <Select
-              value={filters.status || ""}
-              onChange={(e) =>
-                handleFilterChange("status", e.target.value || undefined)
-              }
+              value={statusFilter}
+              onChange={(e) => handleFilterChange("status", e.target.value)}
               options={STATUS_OPTIONS}
+            />
+          </div>
+
+          {/* Class Filter */}
+          <div className="flex-1">
+            <label className="block text-sm font-medium mb-2">Class</label>
+            <Select
+              value={classFilter}
+              onChange={(e) => handleFilterChange("class", e.target.value)}
+              options={[
+                { value: "", label: "All Classes" },
+                ...classes.map((c) => ({
+                  value: c.id,
+                  label: c.name,
+                })),
+              ]}
             />
           </div>
 
           {/* Clear Filters */}
           <Button
             variant="outline"
-            onClick={() => setFilters({ page: 1, limit: 10 })}
-            disabled={!filters.status}
+            onClick={() => {
+              setStatusFilter("");
+              setClassFilter("");
+              setCurrentPage(1);
+            }}
+            disabled={!statusFilter && !classFilter}
           >
             Clear
           </Button>
@@ -252,9 +323,9 @@ export function AssignmentList() {
       </Card>
 
       {/* Assignments Table */}
-      {isLoading ? (
+      {loading ? (
         <TableSkeleton />
-      ) : assignmentsData && assignmentsData.data.length > 0 ? (
+      ) : assignments.length > 0 ? (
         <>
           <Card>
             <div className="overflow-x-auto">
@@ -262,10 +333,13 @@ export function AssignmentList() {
                 <thead>
                   <tr className="border-b border-secondary-200">
                     <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">
-                      Student
+                      Test
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">
-                      Test
+                      Student/Class
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">
+                      Deadline
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">
                       Status
@@ -273,26 +347,41 @@ export function AssignmentList() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">
                       Assigned
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">
-                      Deadline
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-secondary-500 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-secondary-200">
-                  {assignmentsData.data.map((assignment) => (
+                  {assignments.map((assignment) => (
                     <tr key={assignment.id} className="hover:bg-secondary-50">
-                      {/* Student */}
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      {/* Test */}
+                      <td className="px-6 py-4">
+                        <div>
+                          <p className="font-medium text-secondary-900">
+                            {assignment.test?.title || 'N/A'}
+                          </p>
+                          <p className="text-sm text-secondary-500">
+                            {assignment.test?.testCode || 'N/A'}
+                          </p>
+                        </div>
+                      </td>
+
+                      {/* Student/Class */}
+                      <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
                           <User className="w-4 h-4 text-secondary-400" />
                           <div>
                             <p className="font-medium text-secondary-900">
-                              {assignment.student.fullName}
+                              {assignment.student?.fullName || 'N/A'}
                             </p>
-                            {assignment.student.grade && (
+                            {assignment.class && (
+                              <div className="text-sm text-secondary-500 flex items-center gap-1">
+                                <Users className="w-3 h-3" />
+                                {assignment.class.name}
+                              </div>
+                            )}
+                            {assignment.student?.grade && !assignment.class && (
                               <p className="text-sm text-secondary-500">
                                 {assignment.student.grade}
                               </p>
@@ -301,33 +390,11 @@ export function AssignmentList() {
                         </div>
                       </td>
 
-                      {/* Test */}
-                      <td className="px-6 py-4">
-                        <div>
-                          <p className="font-medium text-secondary-900">
-                            {assignment.test.title}
-                          </p>
-                          <p className="text-sm text-secondary-500">
-                            {assignment.test.testCode}
-                          </p>
-                        </div>
-                      </td>
-
-                      {/* Status */}
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(assignment.status)}
-                      </td>
-
-                      {/* Assigned Date */}
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-500">
-                        {formatDate(assignment.createdAt)}
-                      </td>
-
                       {/* Deadline */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         {assignment.deadline ? (
                           <span
-                            className={`text-sm ${
+                            className={`text-sm flex items-center gap-1 ${
                               new Date(assignment.deadline) < new Date() &&
                               assignment.status !== "GRADED"
                                 ? "text-red-600 font-medium"
@@ -343,9 +410,19 @@ export function AssignmentList() {
                         )}
                       </td>
 
-                      {/* Actions */}
+                      {/* Status */}
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
+                        {getStatusBadge(assignment.status)}
+                      </td>
+
+                      {/* Assigned Date */}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-500">
+                        {formatDate(assignment.createdAt)}
+                      </td>
+
+                      {/* Actions */}
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
                           <Button
                             size="sm"
                             variant="outline"
@@ -375,19 +452,27 @@ export function AssignmentList() {
           </Card>
 
           {/* Pagination */}
-          {assignmentsData && assignmentsData.totalPages > 1 && (
+          {totalPages > 1 && (
             <Pagination
-              currentPage={filters.page || 1}
-              totalPages={assignmentsData.totalPages}
-              onPageChange={(page) => handleFilterChange("page", page)}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={(page) => setCurrentPage(page)}
             />
           )}
         </>
       ) : (
         <Card className="p-12 text-center">
-          <p className="text-secondary-500">
-            No assignments found. Try adjusting your filters.
+          <FileText className="w-16 h-16 text-secondary-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-secondary-900 mb-2">
+            No assignments yet
+          </h3>
+          <p className="text-secondary-500 mb-4">
+            Create your first test assignment
           </p>
+          <Button onClick={() => navigate("/teacher/assign-test")}>
+            <Plus className="w-4 h-4 mr-2" />
+            Assign Test
+          </Button>
         </Card>
       )}
 
@@ -405,16 +490,24 @@ export function AssignmentList() {
                 variant="outline"
                 onClick={() => setDeleteModalOpen(false)}
                 className="flex-1"
+                disabled={deleting}
               >
                 Cancel
               </Button>
               <Button
                 onClick={confirmDelete}
-                disabled={deleteMutation.isPending}
+                disabled={deleting}
                 variant="danger"
                 className="flex-1"
               >
-                {deleteMutation.isPending ? "Deleting..." : "Delete"}
+                {deleting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  "Delete"
+                )}
               </Button>
             </div>
           </div>

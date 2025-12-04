@@ -1,11 +1,9 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { classService } from '@/services/classService';
-import type {
-  IClass,
-  IStudent,
-  IClassStatistics,
-} from '@/types/class';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { classService } from "@/services/classService";
+import { assignmentService } from "@/services/assignmentService";
+import type { IClass, IClassStatistics } from "@/types/class";
+import type { IAssignment, AssignmentStatus } from "@/types/assignment";
 import {
   ArrowLeft,
   Edit,
@@ -15,17 +13,22 @@ import {
   UserMinus,
   BarChart3,
   BookOpen,
-} from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { Modal } from '@/components/ui/Modal';
-import { Input } from '@/components/ui/Input';
-import { Checkbox } from '@/components/ui/Checkbox';
-import { useStudents } from '@/hooks/useStudents';
-import { Search } from 'lucide-react';
-import { toastError, toastSuccess } from '@/lib/toast';
+  Plus,
+  Calendar,
+  Eye,
+  Loader2,
+} from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Modal } from "@/components/ui/Modal";
+import { Input } from "@/components/ui/Input";
+import { Checkbox } from "@/components/ui/Checkbox";
+import { useStudents } from "@/hooks/useStudents";
+import { Search } from "lucide-react";
+import { toastError, toastSuccess } from "@/lib/toast";
+import { formatDate, formatDateTime } from "@/lib/utils";
 
-type TabType = 'students' | 'assignments' | 'statistics';
+type TabType = "students" | "assignments" | "statistics";
 
 export default function ClassDetails() {
   const { id } = useParams<{ id: string }>();
@@ -34,15 +37,30 @@ export default function ClassDetails() {
   const [classData, setClassData] = useState<IClass | null>(null);
   const [statistics, setStatistics] = useState<IClassStatistics | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<TabType>('students');
+  const [activeTab, setActiveTab] = useState<TabType>("students");
   const [showAddStudentModal, setShowAddStudentModal] = useState(false);
+
+  // Assignments state
+  const [assignments, setAssignments] = useState<IAssignment[]>([]);
+  const [assignmentsLoading, setAssignmentsLoading] = useState(false);
+  const [deleteAssignmentId, setDeleteAssignmentId] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     if (id) {
       loadClassData();
       loadStatistics();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  useEffect(() => {
+    if (id && activeTab === "assignments") {
+      loadAssignments();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, activeTab]);
 
   const loadClassData = async () => {
     try {
@@ -50,9 +68,9 @@ export default function ClassDetails() {
       const data = await classService.getById(id!);
       setClassData(data);
     } catch (error: any) {
-      console.error('Failed to load class:', error);
-      toastError(error?.message || 'Failed to load class');
-      navigate('/teacher/classes');
+      console.error("Failed to load class:", error);
+      toastError(error?.message || "Failed to load class");
+      navigate("/teacher/classes");
     } finally {
       setLoading(false);
     }
@@ -63,37 +81,109 @@ export default function ClassDetails() {
       const stats = await classService.getStatistics(id!);
       setStatistics(stats);
     } catch (error: any) {
-      console.error('Failed to load statistics:', error);
-      toastError(error?.message || 'Failed to load statistics');
+      console.error("Failed to load statistics:", error);
+      toastError(error?.message || "Failed to load statistics");
     }
+  };
+
+  const loadAssignments = async () => {
+    if (!id) return;
+    try {
+      setAssignmentsLoading(true);
+      const response = await assignmentService.getTeacherAssignments({
+        classId: id,
+        limit: 100,
+      });
+      setAssignments(response.data);
+    } catch (error: any) {
+      console.error("Failed to load assignments:", error);
+      toastError(error?.message || "Failed to load assignments");
+    } finally {
+      setAssignmentsLoading(false);
+    }
+  };
+
+  const handleDeleteAssignment = async () => {
+    if (!deleteAssignmentId) return;
+
+    try {
+      await assignmentService.delete(deleteAssignmentId);
+      toastSuccess("Assignment deleted successfully");
+      setDeleteAssignmentId(null);
+      loadAssignments();
+    } catch (error: any) {
+      console.error("Failed to delete assignment:", error);
+      toastError(error?.message || "Failed to delete assignment");
+    }
+  };
+
+  const getStatusBadge = (status: AssignmentStatus) => {
+    const variants: Record<
+      AssignmentStatus,
+      {
+        variant: "default" | "success" | "warning" | "danger" | "info";
+        className: string;
+      }
+    > = {
+      PENDING: { variant: "info", className: "bg-gray-100 text-gray-800" },
+      IN_PROGRESS: {
+        variant: "warning",
+        className: "bg-blue-100 text-blue-800",
+      },
+      SUBMITTED: {
+        variant: "default",
+        className: "bg-green-100 text-green-800",
+      },
+      GRADED: {
+        variant: "success",
+        className: "bg-purple-100 text-purple-800",
+      },
+    };
+    const config = variants[status] || variants.PENDING;
+
+    return (
+      <span
+        className={`px-2 py-1 text-xs font-semibold rounded-full ${config.className}`}
+      >
+        {status.replace("_", " ")}
+      </span>
+    );
   };
 
   const handleDeleteClass = async () => {
     if (!classData) return;
 
-    if (!confirm(`Delete class "${classData.name}"? This action cannot be undone.`)) return;
+    if (
+      !confirm(
+        `Delete class "${classData.name}"? This action cannot be undone.`
+      )
+    )
+      return;
 
     try {
       await classService.delete(classData.id);
-      toastSuccess('Class deleted successfully');
-      navigate('/teacher/classes');
+      toastSuccess("Class deleted successfully");
+      navigate("/teacher/classes");
     } catch (error: any) {
-      console.error('Failed to delete class:', error);
-      toastError(error?.message || 'Failed to delete class');
+      console.error("Failed to delete class:", error);
+      toastError(error?.message || "Failed to delete class");
     }
   };
 
-  const handleRemoveStudent = async (studentId: string, studentName: string) => {
+  const handleRemoveStudent = async (
+    studentId: string,
+    studentName: string
+  ) => {
     if (!confirm(`Remove ${studentName} from this class?`)) return;
 
     try {
       await classService.removeStudent(id!, studentId);
-      toastSuccess('Student removed successfully');
+      toastSuccess("Student removed successfully");
       loadClassData();
       loadStatistics();
     } catch (error: any) {
-      console.error('Failed to remove student:', error);
-      toastError(error?.message || 'Failed to remove student');
+      console.error("Failed to remove student:", error);
+      toastError(error?.message || "Failed to remove student");
     }
   };
 
@@ -111,7 +201,7 @@ export default function ClassDetails() {
         <p className="text-gray-500">Class not found</p>
         <Button
           variant="outline"
-          onClick={() => navigate('/teacher/classes')}
+          onClick={() => navigate("/teacher/classes")}
           className="mt-4"
         >
           Back to Classes
@@ -128,13 +218,15 @@ export default function ClassDetails() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate('/teacher/classes')}
+            onClick={() => navigate("/teacher/classes")}
             className="p-2"
           >
             <ArrowLeft className="w-6 h-6" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{classData.name}</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {classData.name}
+            </h1>
             <p className="text-gray-600 mt-1">
               {classData.grade} {classData.term && `• ${classData.term}`}
               {classData.schoolYear && ` • ${classData.schoolYear}`}
@@ -196,11 +288,19 @@ export default function ClassDetails() {
             <div>
               <p className="text-gray-600 text-sm">Status</p>
               <p className="text-xl font-bold text-gray-900 mt-1">
-                {classData.isActive ? 'Active' : 'Inactive'}
+                {classData.isActive ? "Active" : "Inactive"}
               </p>
             </div>
-            <div className={`p-3 rounded-lg ${classData.isActive ? 'bg-green-100' : 'bg-gray-100'}`}>
-              <BarChart3 className={`w-8 h-8 ${classData.isActive ? 'text-green-600' : 'text-gray-600'}`} />
+            <div
+              className={`p-3 rounded-lg ${
+                classData.isActive ? "bg-green-100" : "bg-gray-100"
+              }`}
+            >
+              <BarChart3
+                className={`w-8 h-8 ${
+                  classData.isActive ? "text-green-600" : "text-gray-600"
+                }`}
+              />
             </div>
           </div>
         </Card>
@@ -219,11 +319,11 @@ export default function ClassDetails() {
         <div className="border-b border-gray-200">
           <nav className="flex gap-4 px-6">
             <button
-              onClick={() => setActiveTab('students')}
+              onClick={() => setActiveTab("students")}
               className={`py-4 px-1 border-b-2 font-medium text-sm transition ${
-                activeTab === 'students'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                activeTab === "students"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >
               <span className="flex items-center gap-2">
@@ -232,24 +332,24 @@ export default function ClassDetails() {
               </span>
             </button>
             <button
-              onClick={() => setActiveTab('assignments')}
+              onClick={() => setActiveTab("assignments")}
               className={`py-4 px-1 border-b-2 font-medium text-sm transition ${
-                activeTab === 'assignments'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                activeTab === "assignments"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >
               <span className="flex items-center gap-2">
                 <BookOpen className="w-5 h-5" />
-                Assignments
+                Assignments ({assignments.length})
               </span>
             </button>
             <button
-              onClick={() => setActiveTab('statistics')}
+              onClick={() => setActiveTab("statistics")}
               className={`py-4 px-1 border-b-2 font-medium text-sm transition ${
-                activeTab === 'statistics'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                activeTab === "statistics"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >
               <span className="flex items-center gap-2">
@@ -262,10 +362,12 @@ export default function ClassDetails() {
 
         <div className="p-6">
           {/* Students Tab */}
-          {activeTab === 'students' && (
+          {activeTab === "students" && (
             <div>
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Class Students</h3>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Class Students
+                </h3>
                 <Button
                   onClick={() => setShowAddStudentModal(true)}
                   className="flex items-center gap-2"
@@ -278,8 +380,12 @@ export default function ClassDetails() {
               {!classData.students || classData.students.length === 0 ? (
                 <div className="text-center py-12">
                   <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No students yet</h3>
-                  <p className="text-gray-600 mb-4">Add students to this class to get started</p>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No students yet
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Add students to this class to get started
+                  </p>
                   <Button
                     onClick={() => setShowAddStudentModal(true)}
                     className="inline-flex items-center gap-2"
@@ -314,31 +420,40 @@ export default function ClassDetails() {
                       {classData.students.map((student) => (
                         <tr key={student.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">{student.fullName}</div>
-                            <div className="text-sm text-gray-500">@{student.username}</div>
+                            <div className="text-sm font-medium text-gray-900">
+                              {student.fullName}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              @{student.username}
+                            </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {student.email}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {student.grade || '-'}
+                            {student.grade || "-"}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span
                               className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                                 student.isActive
-                                  ? 'bg-green-100 text-green-800'
-                                  : 'bg-gray-100 text-gray-800'
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-gray-100 text-gray-800"
                               }`}
                             >
-                              {student.isActive ? 'Active' : 'Inactive'}
+                              {student.isActive ? "Active" : "Inactive"}
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleRemoveStudent(student.id, student.fullName)}
+                              onClick={() =>
+                                handleRemoveStudent(
+                                  student.id,
+                                  student.fullName
+                                )
+                              }
                               className="text-red-600 hover:text-red-900"
                             >
                               <UserMinus className="w-5 h-5" />
@@ -354,26 +469,175 @@ export default function ClassDetails() {
           )}
 
           {/* Assignments Tab */}
-          {activeTab === 'assignments' && (
-            <div className="text-center py-12">
-              <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Assignments</h3>
-              <p className="text-gray-600">Test assignments feature coming soon...</p>
+          {activeTab === "assignments" && (
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Test Assignments
+                </h3>
+                <Button
+                  onClick={() => navigate(`/teacher/assign-test?classId=${id}`)}
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="w-5 h-5" />
+                  Assign Test
+                </Button>
+              </div>
+
+              {assignmentsLoading ? (
+                <div className="flex justify-center items-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                </div>
+              ) : assignments.length === 0 ? (
+                <div className="text-center py-12">
+                  <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No assignments yet
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Assign tests to this class to get started
+                  </p>
+                  <Button
+                    onClick={() =>
+                      navigate(`/teacher/assign-test?classId=${id}`)
+                    }
+                    className="inline-flex items-center gap-2"
+                  >
+                    <Plus className="w-5 h-5" />
+                    Assign Test
+                  </Button>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Test
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Student
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Deadline
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Status
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Assigned
+                        </th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {assignments.map((assignment) => (
+                        <tr key={assignment.id} className="hover:bg-gray-50">
+                          {/* Test */}
+                          <td className="px-6 py-4">
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">
+                                {assignment.test?.title || "N/A"}
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                {assignment.test?.testCode || "N/A"}
+                              </p>
+                            </div>
+                          </td>
+
+                          {/* Student */}
+                          <td className="px-6 py-4">
+                            <div className="text-sm text-gray-900">
+                              {assignment.student?.fullName || "N/A"}
+                            </div>
+                            {assignment.student?.grade && (
+                              <div className="text-sm text-gray-500">
+                                {assignment.student.grade}
+                              </div>
+                            )}
+                          </td>
+
+                          {/* Deadline */}
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {assignment.deadline ? (
+                              <div className="flex items-center gap-1 text-sm text-gray-600">
+                                <Calendar className="w-4 h-4" />
+                                {formatDateTime(assignment.deadline)}
+                              </div>
+                            ) : (
+                              <span className="text-sm text-gray-400">
+                                No deadline
+                              </span>
+                            )}
+                          </td>
+
+                          {/* Status */}
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {getStatusBadge(assignment.status)}
+                          </td>
+
+                          {/* Assigned Date */}
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {formatDate(assignment.createdAt)}
+                          </td>
+
+                          {/* Actions */}
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <div className="flex items-center justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() =>
+                                  navigate(
+                                    `/teacher/assignments/${assignment.id}`
+                                  )
+                                }
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                              {assignment.status === "PENDING" && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() =>
+                                    setDeleteAssignmentId(assignment.id)
+                                  }
+                                  className="text-red-600 hover:text-red-900"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
 
           {/* Statistics Tab */}
-          {activeTab === 'statistics' && statistics && (
+          {activeTab === "statistics" && statistics && (
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Class Statistics</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Class Statistics
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-gray-50 rounded-lg p-6">
                   <p className="text-gray-600 text-sm">Total Students</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-2">{statistics.totalStudents}</p>
+                  <p className="text-2xl font-bold text-gray-900 mt-2">
+                    {statistics.totalStudents}
+                  </p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-6">
                   <p className="text-gray-600 text-sm">Active Students</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-2">{statistics.activeStudents}</p>
+                  <p className="text-2xl font-bold text-gray-900 mt-2">
+                    {statistics.activeStudents}
+                  </p>
                 </div>
               </div>
               <p className="text-gray-500 text-sm mt-6">
@@ -393,7 +657,7 @@ export default function ClassDetails() {
       >
         <AddStudentForm
           classId={id!}
-          existingStudentIds={classData.students?.map(s => s.id) || []}
+          existingStudentIds={classData.students?.map((s) => s.id) || []}
           onClose={() => setShowAddStudentModal(false)}
           onSuccess={() => {
             setShowAddStudentModal(false);
@@ -401,6 +665,36 @@ export default function ClassDetails() {
             loadStatistics();
           }}
         />
+      </Modal>
+
+      {/* Delete Assignment Modal */}
+      <Modal
+        isOpen={!!deleteAssignmentId}
+        onClose={() => setDeleteAssignmentId(null)}
+        title="Delete Assignment"
+      >
+        <div className="space-y-4">
+          <p className="text-gray-600">
+            Are you sure you want to delete this assignment? This action cannot
+            be undone.
+          </p>
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteAssignmentId(null)}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              onClick={handleDeleteAssignment}
+              className="flex-1"
+            >
+              Delete
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );
@@ -418,11 +712,14 @@ function AddStudentForm({
   onClose: () => void;
   onSuccess: () => void;
 }) {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const { data: students = [], isLoading: studentsLoading } = useStudents(search, 100);
+  const { data: students = [], isLoading: studentsLoading } = useStudents(
+    search,
+    100
+  );
 
   // Filter out students already in the class
   const availableStudents = students.filter(
@@ -449,18 +746,20 @@ function AddStudentForm({
     e.preventDefault();
 
     if (selectedStudentIds.length === 0) {
-      toastError('Please select at least one student');
+      toastError("Please select at least one student");
       return;
     }
 
     try {
       setLoading(true);
       await classService.addStudents(classId, selectedStudentIds);
-      toastSuccess(`Successfully added ${selectedStudentIds.length} student(s)`);
+      toastSuccess(
+        `Successfully added ${selectedStudentIds.length} student(s)`
+      );
       onSuccess();
     } catch (error: any) {
-      console.error('Failed to add students:', error);
-      toastError(error?.message || 'Failed to add students');
+      console.error("Failed to add students:", error);
+      toastError(error?.message || "Failed to add students");
     } finally {
       setLoading(false);
     }
@@ -492,10 +791,10 @@ function AddStudentForm({
           <div className="text-center py-8">
             <p className="text-gray-500">
               {search
-                ? 'No students found matching your search'
+                ? "No students found matching your search"
                 : existingStudentIds.length > 0
-                ? 'All students are already in this class'
-                : 'No students available'}
+                ? "All students are already in this class"
+                : "No students available"}
             </p>
           </div>
         ) : (
@@ -534,7 +833,9 @@ function AddStudentForm({
                           <p className="text-sm font-medium text-gray-900">
                             {student.fullName}
                           </p>
-                          <p className="text-xs text-gray-500">{student.email}</p>
+                          <p className="text-xs text-gray-500">
+                            {student.email}
+                          </p>
                           {student.grade && (
                             <p className="text-xs text-gray-400 mt-0.5">
                               Grade: {student.grade}
@@ -575,11 +876,12 @@ function AddStudentForm({
           isLoading={loading}
           className="flex-1"
         >
-          Add {selectedStudentIds.length > 0 ? `${selectedStudentIds.length} ` : ''}Student
-          {selectedStudentIds.length !== 1 ? 's' : ''}
+          Add{" "}
+          {selectedStudentIds.length > 0 ? `${selectedStudentIds.length} ` : ""}
+          Student
+          {selectedStudentIds.length !== 1 ? "s" : ""}
         </Button>
       </div>
     </form>
   );
 }
-

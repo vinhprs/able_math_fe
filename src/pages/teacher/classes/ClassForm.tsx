@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { classService } from '@/services/classService';
-import type { ICreateClassDto } from '@/types/class';
-import { ArrowLeft, Save } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Textarea } from '@/components/ui/Textarea';
-import { Checkbox } from '@/components/ui/Checkbox';
-import { toastError, toastSuccess } from '@/lib/toast';
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { classService } from "@/services/classService";
+import type { ICreateClassDto } from "@/types/class";
+import { ArrowLeft, Save } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
+import { Checkbox } from "@/components/ui/Checkbox";
+import { toastError, toastSuccess } from "@/lib/toast";
 
 export default function ClassForm() {
   const navigate = useNavigate();
@@ -16,11 +16,11 @@ export default function ClassForm() {
 
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<ICreateClassDto>({
-    name: '',
-    description: '',
-    grade: 'E4',
-    term: 'T1',
-    schoolYear: '2024-2025',
+    name: "",
+    description: "",
+    grade: "E4",
+    term: "T1",
+    schoolYear: "2024-2025",
     isActive: true,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -37,16 +37,16 @@ export default function ClassForm() {
       const classData = await classService.getById(id!);
       setFormData({
         name: classData.name,
-        description: classData.description || '',
+        description: classData.description || "",
         grade: classData.grade,
-        term: classData.term || 'T1',
-        schoolYear: classData.schoolYear || '2024-2025',
+        term: classData.term || "T1",
+        schoolYear: classData.schoolYear || "2024-2025",
         isActive: classData.isActive,
       });
     } catch (error: any) {
-      console.error('Failed to load class:', error);
-      toastError(error?.message || 'Failed to load class');
-      navigate('/teacher/classes');
+      console.error("Failed to load class:", error);
+      toastError(error?.message || "Failed to load class");
+      navigate("/teacher/classes");
     } finally {
       setLoading(false);
     }
@@ -56,13 +56,13 @@ export default function ClassForm() {
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Class name is required';
+      newErrors.name = "Class name is required";
     } else if (formData.name.length > 100) {
-      newErrors.name = 'Class name must be less than 100 characters';
+      newErrors.name = "Class name must be less than 100 characters";
     }
 
     if (!formData.grade) {
-      newErrors.grade = 'Grade is required';
+      newErrors.grade = "Grade is required";
     }
 
     setErrors(newErrors);
@@ -79,16 +79,16 @@ export default function ClassForm() {
 
       if (isEdit && id) {
         await classService.update(id, formData);
-        toastSuccess('Class updated successfully');
+        toastSuccess("Class updated successfully");
       } else {
         await classService.create(formData);
-        toastSuccess('Class created successfully');
+        toastSuccess("Class created successfully");
       }
 
-      navigate('/teacher/classes');
+      navigate("/teacher/classes");
     } catch (error: any) {
-      console.error('Failed to save class:', error);
-      toastError(error?.message || 'Failed to save class');
+      console.error("Failed to save class:", error);
+      toastError(error?.message || "Failed to save class");
     } finally {
       setLoading(false);
     }
@@ -121,23 +121,26 @@ export default function ClassForm() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate('/teacher/classes')}
+          onClick={() => navigate("/teacher/classes")}
           className="p-2"
         >
           <ArrowLeft className="w-6 h-6" />
         </Button>
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
-            {isEdit ? 'Edit Class' : 'Create New Class'}
+            {isEdit ? "Edit Class" : "Create New Class"}
           </h1>
           <p className="text-gray-600 mt-1">
-            {isEdit ? 'Update class information' : 'Fill in the details below'}
+            {isEdit ? "Update class information" : "Fill in the details below"}
           </p>
         </div>
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6 space-y-6">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white rounded-lg shadow p-6 space-y-6"
+      >
         {/* Class Name */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -145,7 +148,7 @@ export default function ClassForm() {
           </label>
           <Input
             value={formData.name}
-            onChange={(e) => handleChange('name', e.target.value)}
+            onChange={(e) => handleChange("name", e.target.value)}
             placeholder="e.g., Math 4A"
             error={errors.name}
             required
@@ -159,7 +162,7 @@ export default function ClassForm() {
           </label>
           <Textarea
             value={formData.description}
-            onChange={(e) => handleChange('description', e.target.value)}
+            onChange={(e) => handleChange("description", e.target.value)}
             rows={3}
             placeholder="Brief description of the class..."
           />
@@ -174,9 +177,9 @@ export default function ClassForm() {
             </label>
             <select
               value={formData.grade}
-              onChange={(e) => handleChange('grade', e.target.value)}
+              onChange={(e) => handleChange("grade", e.target.value)}
               className={`w-full h-10 px-3 py-2 border rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                errors.grade ? 'border-red-500' : 'border-gray-300'
+                errors.grade ? "border-red-500" : "border-gray-300"
               }`}
             >
               <option value="E4">Elementary 4</option>
@@ -200,7 +203,7 @@ export default function ClassForm() {
             </label>
             <select
               value={formData.term}
-              onChange={(e) => handleChange('term', e.target.value)}
+              onChange={(e) => handleChange("term", e.target.value)}
               className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="T1">Term 1</option>
@@ -217,7 +220,7 @@ export default function ClassForm() {
           <Input
             type="text"
             value={formData.schoolYear}
-            onChange={(e) => handleChange('schoolYear', e.target.value)}
+            onChange={(e) => handleChange("schoolYear", e.target.value)}
             placeholder="e.g., 2024-2025"
           />
         </div>
@@ -226,7 +229,7 @@ export default function ClassForm() {
         <Checkbox
           id="isActive"
           checked={formData.isActive}
-          onChange={(e) => handleChange('isActive', e.target.checked)}
+          onChange={(e) => handleChange("isActive", e.target.checked)}
           label="Active (students can be assigned to this class)"
         />
 
@@ -235,7 +238,7 @@ export default function ClassForm() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate('/teacher/classes')}
+            onClick={() => navigate("/teacher/classes")}
             disabled={loading}
             className="flex-1"
           >
@@ -248,11 +251,10 @@ export default function ClassForm() {
             className="flex-1"
           >
             {!loading && <Save className="w-5 h-5 mr-2 inline" />}
-            {isEdit ? 'Update Class' : 'Create Class'}
+            {isEdit ? "Update Class" : "Create Class"}
           </Button>
         </div>
       </form>
     </div>
   );
 }
-

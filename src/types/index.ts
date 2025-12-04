@@ -53,3 +53,19 @@ export type {
   IClassStatistics,
 } from './class';
 
+// Export assignment types
+export type {
+  IAssignment,
+  IAssignToClassDto,
+  IAssignToStudentsDto,
+  IAssignmentQueryParams,
+  IStudentAssignmentQueryParams,
+  IPaginatedAssignmentsResponse,
+  IAssignToClassResponse,
+  IStudentAssignmentDetail,
+  IUpcomingDeadline,
+  IStudentAssignmentStats,
+} from './assignment';
+
+export { AssignmentStatus } from './assignment';
+

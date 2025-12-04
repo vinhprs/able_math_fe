@@ -21,6 +21,7 @@ import { TeacherTestBrowse } from "@/pages/teacher/tests/TestBrowse";
 import { AssignmentList } from "@/pages/teacher/assignments/AssignmentList";
 import { AssignTest } from "@/pages/teacher/assignments/AssignTest";
 import { AssignmentDetail } from "@/pages/teacher/assignments/AssignmentDetail";
+import AssignTestWizard from "@/pages/teacher/AssignTestWizard";
 import ClassList from "@/pages/teacher/classes/ClassList";
 import ClassForm from "@/pages/teacher/classes/ClassForm";
 import ClassDetails from "@/pages/teacher/classes/ClassDetails";
@@ -149,6 +150,10 @@ export default function createRoutes() {
                 {
                   path: "teacher/assignments/assign",
                   element: <AssignTest />,
+                },
+                {
+                  path: "teacher/assign-test",
+                  element: <AssignTestWizard />,
                 },
                 {
                   path: "teacher/assignments/:id",
