@@ -1,24 +1,28 @@
-import React, { useEffect } from 'react';
-import { useFieldArray, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Button, Input, Select, Textarea } from '@/components/ui';
-import { Plus, Trash2 } from 'lucide-react';
-import { DifficultyLevel } from '@shared/types/enum';
-import type { ICreateQuestionDto } from '@/types/test.types';
+import { Button, Input, Select, Textarea } from "@/components/ui";
+import type { ICreateQuestionDto } from "@/types/test.types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { DifficultyLevel } from "@shared/types/enum";
+import { Plus, Trash2 } from "lucide-react";
+import { useEffect } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
+import { z } from "zod";
 
 const questionSchema = z.object({
   questionNumber: z.number().positive(),
-  unitName: z.string().min(1, 'Unit name is required'),
-  correctAnswer: z.string().min(1, 'Correct answer is required'),
-  score: z.number().positive('Score must be positive'),
-  difficulty: z.nativeEnum(DifficultyLevel, { required_error: 'Difficulty is required' }),
+  unitName: z.string().min(1, "Unit name is required"),
+  correctAnswer: z.string().min(1, "Correct answer is required"),
+  score: z.number().positive("Score must be positive"),
+  difficulty: z.nativeEnum(DifficultyLevel, {
+    error: "Difficulty is required",
+  }),
   questionText: z.string().optional(),
   questionImage: z.string().optional(),
 });
 
 const questionArraySchema = z.object({
-  questions: z.array(questionSchema).min(1, 'At least one question is required'),
+  questions: z
+    .array(questionSchema)
+    .min(1, "At least one question is required"),
 });
 
 type QuestionArrayFormData = z.infer<typeof questionArraySchema>;
@@ -29,12 +33,15 @@ interface QuestionArrayFormProps {
 }
 
 const DIFFICULTY_OPTIONS = [
-  { value: DifficultyLevel.HIGH, label: 'High' },
-  { value: DifficultyLevel.MEDIUM, label: 'Medium' },
-  { value: DifficultyLevel.LOW, label: 'Low' },
+  { value: DifficultyLevel.HIGH, label: "High" },
+  { value: DifficultyLevel.MEDIUM, label: "Medium" },
+  { value: DifficultyLevel.LOW, label: "Low" },
 ];
 
-export function QuestionArrayForm({ initialQuestions, onChange }: QuestionArrayFormProps) {
+export function QuestionArrayForm({
+  initialQuestions,
+  onChange,
+}: QuestionArrayFormProps) {
   const {
     control,
     register,
@@ -48,11 +55,11 @@ export function QuestionArrayForm({ initialQuestions, onChange }: QuestionArrayF
         : [
             {
               questionNumber: 1,
-              unitName: '',
-              correctAnswer: '',
+              unitName: "",
+              correctAnswer: "",
               score: 1,
               difficulty: DifficultyLevel.MEDIUM,
-              questionText: '',
+              questionText: "",
             },
           ],
     },
@@ -60,13 +67,14 @@ export function QuestionArrayForm({ initialQuestions, onChange }: QuestionArrayF
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: 'questions',
+    name: "questions",
   });
 
-  const watchedQuestions = watch('questions');
+  const watchedQuestions = watch("questions");
 
   // Calculate total score
-  const totalScore = watchedQuestions?.reduce((sum, q) => sum + (q.score || 0), 0) || 0;
+  const totalScore =
+    watchedQuestions?.reduce((sum, q) => sum + (q.score || 0), 0) || 0;
 
   // Notify parent of changes
   useEffect(() => {
@@ -79,11 +87,11 @@ export function QuestionArrayForm({ initialQuestions, onChange }: QuestionArrayF
     const nextNumber = fields.length + 1;
     append({
       questionNumber: nextNumber,
-      unitName: '',
-      correctAnswer: '',
+      unitName: "",
+      correctAnswer: "",
       score: 1,
       difficulty: DifficultyLevel.MEDIUM,
-      questionText: '',
+      questionText: "",
     });
   };
 
@@ -150,7 +158,9 @@ export function QuestionArrayForm({ initialQuestions, onChange }: QuestionArrayF
                 type="number"
                 min="1"
                 error={questionErrors?.score?.message}
-                {...register(`questions.${index}.score`, { valueAsNumber: true })}
+                {...register(`questions.${index}.score`, {
+                  valueAsNumber: true,
+                })}
               />
 
               <Select
@@ -186,11 +196,14 @@ export function QuestionArrayForm({ initialQuestions, onChange }: QuestionArrayF
 
       <div className="p-4 bg-primary-50 border border-primary-200 rounded-lg">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-primary-900">Total Score</span>
-          <span className="text-2xl font-bold text-primary-700">{totalScore}</span>
+          <span className="text-sm font-medium text-primary-900">
+            Total Score
+          </span>
+          <span className="text-2xl font-bold text-primary-700">
+            {totalScore}
+          </span>
         </div>
       </div>
     </div>
   );
 }
-

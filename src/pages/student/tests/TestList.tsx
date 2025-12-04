@@ -10,8 +10,6 @@ import {
   Eye,
   Calendar,
   X,
-  Loader2,
-  TrendingUp,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
@@ -23,7 +21,6 @@ import {
   useAssignmentStats,
   useUpcomingDeadlines,
   type StudentAssignment,
-  type StudentAssignmentFilters,
 } from '@/hooks/useStudentAssignments';
 import { formatDateShort, formatDateTime, formatTimeRemaining } from '@/lib/utils';
 

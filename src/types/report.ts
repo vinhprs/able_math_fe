@@ -2,12 +2,14 @@
  * Report Status Enum
  * Tracks the approval and publishing status of reports
  */
-export enum ReportStatus {
-  PENDING_REVIEW = 'PENDING_REVIEW',
-  APPROVED = 'APPROVED',
-  PUBLISHED = 'PUBLISHED',
-  REJECTED = 'REJECTED',
-}
+export const ReportStatus = {
+  PENDING_REVIEW: 'PENDING_REVIEW',
+  APPROVED: 'APPROVED',
+  PUBLISHED: 'PUBLISHED',
+  REJECTED: 'REJECTED',
+} as const;
+
+export type ReportStatus = typeof ReportStatus[keyof typeof ReportStatus];
 
 /**
  * Pending report interface for teacher review list

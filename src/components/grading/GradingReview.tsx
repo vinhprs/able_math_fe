@@ -13,7 +13,7 @@ interface GradingReviewProps {
 }
 
 export function GradingReview({
-  questions,
+  questions: _questions,
   section1Questions,
   section2Questions,
   section3Questions,

@@ -15,7 +15,6 @@ import {
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Modal } from '@/components/ui/Modal';
-import { Alert } from '@/components/ui/Alert';
 import { toastSuccess, toastError } from '@/lib/toast';
 import api from '@/lib/api';
 import { QuestionNavigator } from './components/QuestionNavigator';
@@ -24,6 +23,42 @@ import { ProgressBar } from './components/ProgressBar';
 import { SubmitModal } from './components/SubmitModal';
 import { useAutoSave } from './hooks/useAutoSave';
 import { useTestTimer } from './hooks/useTestTimer';
+import type { TestType } from '@shared/types/enum';
+
+interface TestQuestion {
+  id: string;
+  questionNumber: number;
+  questionText: string;
+  questionImage: string | null;
+  score: number;
+  unitName: string | null;
+  difficulty: string | null;
+  studentAnswer: string;
+  answerId?: string;
+}
+
+interface TestSubmissionData {
+  submission: {
+    id: string;
+    status: string;
+    createdAt: string;
+  };
+  test: {
+    id: string;
+    title: string;
+    testCode: string;
+    totalScore: number;
+    testType: TestType;
+  };
+  assignment: {
+    deadline: string | null;
+  };
+  questions: TestQuestion[];
+  progress: {
+    answered: number;
+    total: number;
+  };
+}
 
 function LoadingScreen() {
   return (
@@ -82,45 +117,44 @@ export function TakeTest() {
     isLoading,
     isError,
     error: queryError,
-  } = useQuery({
+  } = useQuery<TestSubmissionData>({
     queryKey: ['test-submission', submissionId],
     queryFn: async () => {
       if (!submissionId) {
         throw new Error('Submission ID is required');
       }
       try {
-        const response = await api.get(`/student/submissions/${submissionId}/take`);
+        const response = await api.get<{ success: boolean; data: TestSubmissionData } | TestSubmissionData>(
+          `/student/submissions/${submissionId}/take`
+        );
         // Handle both wrapped and unwrapped responses
-        const data = response.data?.data || response.data;
+        const data = 'data' in response.data && response.data.data ? response.data.data : response.data as TestSubmissionData;
         console.log('Test data loaded:', { hasQuestions: !!data?.questions, questionCount: data?.questions?.length });
         return data;
       } catch (error: any) {
         console.error('Error fetching test data:', error);
+        toastError(
+          error.response?.data?.message || error.message || 'Failed to load test'
+        );
         throw error;
       }
     },
     enabled: !!submissionId,
     retry: 1,
-    onSuccess: (data) => {
-      console.log('Test data success:', { hasData: !!data, hasQuestions: !!data?.questions });
-      // Initialize answers from existing data
-      const existingAnswers: Record<string, string> = {};
-      if (data?.questions && Array.isArray(data.questions)) {
-        data.questions.forEach((q: any) => {
-          if (q.studentAnswer) {
-            existingAnswers[q.id] = q.studentAnswer;
-          }
-        });
-      }
-      setAnswers(existingAnswers);
-    },
-    onError: (error: any) => {
-      console.error('Failed to load test data:', error);
-      toastError(
-        error.response?.data?.message || error.message || 'Failed to load test'
-      );
-    },
   });
+
+  // Initialize answers from existing data when testData loads
+  useEffect(() => {
+    if (testData?.questions && Array.isArray(testData.questions)) {
+      const existingAnswers: Record<string, string> = {};
+      testData.questions.forEach((q) => {
+        if (q.studentAnswer) {
+          existingAnswers[q.id] = q.studentAnswer;
+        }
+      });
+      setAnswers(existingAnswers);
+    }
+  }, [testData]);
 
   // Submit test mutation
   const submitMutation = useMutation({
@@ -142,7 +176,7 @@ export function TakeTest() {
 
   // Timer hook (if deadline exists)
   const { timeRemaining, isOvertime } = useTestTimer(
-    testData?.assignment?.deadline
+    testData?.assignment?.deadline ?? undefined
   );
 
   // Start test on mount (only once)
@@ -219,9 +253,8 @@ export function TakeTest() {
     return <LoadingScreen />;
   }
 
-  const questions = testData.questions || [];
+  const questions = testData.questions;
   const currentQuestion = questions[currentQuestionIndex];
-  const progress = testData.progress || { answered: 0, total: questions.length };
 
   if (!currentQuestion) {
     return (
@@ -265,7 +298,7 @@ export function TakeTest() {
   const handleSubmit = () => {
     // Check unanswered questions
     const unanswered = questions.filter(
-      (q) => !answers[q.id] || answers[q.id].trim() === ''
+      (q: TestQuestion) => !answers[q.id] || answers[q.id].trim() === ''
     );
 
     if (unanswered.length > 0) {
@@ -405,7 +438,12 @@ export function TakeTest() {
           <div className="lg:col-span-3 space-y-4">
             {/* Question Card */}
             <QuestionCard
-              question={currentQuestion}
+              question={{
+                ...currentQuestion,
+                questionImage: currentQuestion.questionImage ?? undefined,
+                unitName: currentQuestion.unitName ?? undefined,
+                difficulty: currentQuestion.difficulty ?? undefined,
+              }}
               questionNumber={currentQuestionIndex + 1}
               totalQuestions={questions.length}
               answer={answers[currentQuestion.id] || ''}

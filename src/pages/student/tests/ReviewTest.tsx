@@ -26,7 +26,7 @@ export function ReviewTest() {
     isSubmitting,
   } = useTestStore();
 
-  const { data: submission, isLoading } = useSubmission(submissionId || null);
+  const { data: _submission, isLoading } = useSubmission(submissionId || null);
   const submitTestMutation = useSubmitTest();
 
   const unansweredQuestions = getUnansweredQuestions();

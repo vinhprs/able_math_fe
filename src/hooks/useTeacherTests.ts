@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
-import type { ITest, ITestDetail, IPaginatedTestResponse } from '@/types/test.types';
+import type { ITestDetail, IPaginatedTestResponse } from '@/types/test.types';
 
 interface TeacherTestFilters {
   page?: number;

@@ -70,7 +70,7 @@ const initialState = {
 
 export const useAdtmGradingStore = create<AdtmGradingState>()(
   persist(
-    (set, get) => ({
+    (set, _get) => ({
       ...initialState,
 
       setSubmissionId: (id) => {

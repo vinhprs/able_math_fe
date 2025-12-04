@@ -7,7 +7,6 @@ import {
   BookOpen,
   Users,
   Calendar,
-  FileText,
   Loader2,
 } from 'lucide-react';
 import { assignmentService } from '@/services/assignmentService';

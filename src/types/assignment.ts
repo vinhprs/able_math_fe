@@ -1,12 +1,14 @@
 /**
  * Assignment status enum
  */
-export enum AssignmentStatus {
-  PENDING = 'PENDING',
-  IN_PROGRESS = 'IN_PROGRESS',
-  SUBMITTED = 'SUBMITTED',
-  GRADED = 'GRADED',
-}
+export const AssignmentStatus = {
+  PENDING: 'PENDING',
+  IN_PROGRESS: 'IN_PROGRESS',
+  SUBMITTED: 'SUBMITTED',
+  GRADED: 'GRADED',
+} as const;
+
+export type AssignmentStatus = typeof AssignmentStatus[keyof typeof AssignmentStatus];
 
 /**
  * Assignment interface

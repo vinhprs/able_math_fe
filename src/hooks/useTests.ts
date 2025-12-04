@@ -3,6 +3,7 @@ import api from '@/lib/api';
 import type {
   ITest,
   ITestDetail,
+  ITestQuestion,
   ICreateTestDto,
   IUpdateTestDto,
   ICreateQuestionDto,

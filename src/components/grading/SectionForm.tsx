@@ -11,8 +11,8 @@ interface SectionFormProps {
 }
 
 export function SectionForm({
-  sectionNumber,
-  sectionTitle,
+  sectionNumber: _sectionNumber,
+  sectionTitle: _sectionTitle,
   questions,
   answers,
   onAnswerChange,

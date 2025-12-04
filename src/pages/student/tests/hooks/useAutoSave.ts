@@ -6,8 +6,8 @@ type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 export function useAutoSave(submissionId: string | null) {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
-  const saveTimeoutRef = useRef<NodeJS.Timeout>();
-  const idleTimeoutRef = useRef<NodeJS.Timeout>();
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const idleTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const saveMutation = useMutation({
     mutationFn: ({ questionId, answer }: { questionId: string; answer: string }) =>

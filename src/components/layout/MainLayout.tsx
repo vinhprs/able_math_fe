@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { UserRole } from "@shared/types/enum";
 import { Header } from "./Header";

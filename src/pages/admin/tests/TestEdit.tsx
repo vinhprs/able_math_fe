@@ -1,34 +1,24 @@
-import { useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { QuestionArrayForm } from "@/components/forms/QuestionArrayForm";
+import { TestInfoForm } from "@/components/forms/TestInfoForm";
 import {
-  useTest,
-  useUpdateTest,
-  useAddQuestion,
-  useUpdateQuestion,
-  useDeleteQuestion,
-} from "@/hooks/useTests";
-import {
+  Badge,
+  Button,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-  Button,
-  Badge,
 } from "@/components/ui";
-import { TestInfoForm } from "@/components/forms/TestInfoForm";
-import { QuestionArrayForm } from "@/components/forms/QuestionArrayForm";
-import { TestStatus } from "@shared/types/enum";
-import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { useTest, useUpdateTest } from "@/hooks/useTests";
 import type { ICreateQuestionDto } from "@/types/test.types";
+import { TestStatus } from "@shared/types/enum";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
 
 export function TestEdit() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: test, isLoading } = useTest(id || null);
   const updateTest = useUpdateTest();
-  const addQuestion = useAddQuestion();
-  const updateQuestion = useUpdateQuestion();
-  const deleteQuestion = useDeleteQuestion();
 
   if (isLoading) {
     return (
@@ -41,18 +31,18 @@ export function TestEdit() {
   if (!test) {
     return (
       <div className="max-w-4xl mx-auto">
-          <Card>
-            <CardContent className="py-12 text-center">
-              <p className="text-secondary-600">Test not found</p>
-              <Button
-                variant="outline"
-                onClick={() => navigate("/admin/tests")}
-                className="mt-4"
-              >
-                Back to Tests
-              </Button>
-            </CardContent>
-          </Card>
+        <Card>
+          <CardContent className="py-12 text-center">
+            <p className="text-secondary-600">Test not found</p>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/admin/tests")}
+              className="mt-4"
+            >
+              Back to Tests
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -60,26 +50,23 @@ export function TestEdit() {
   if (test.status === TestStatus.PUBLISHED) {
     return (
       <div className="max-w-4xl mx-auto">
-          <Card>
-            <CardHeader>
-              <CardTitle>Cannot Edit Published Test</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-                <p className="text-sm text-yellow-800">
-                  This test has been published and cannot be edited. Please
-                  archive it first if you need to make changes.
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                onClick={() => navigate("/admin/tests")}
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Tests
-              </Button>
-            </CardContent>
-          </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Cannot Edit Published Test</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+              <p className="text-sm text-yellow-800">
+                This test has been published and cannot be edited. Please
+                archive it first if you need to make changes.
+              </p>
+            </div>
+            <Button variant="outline" onClick={() => navigate("/admin/tests")}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Tests
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -104,8 +91,8 @@ export function TestEdit() {
   };
 
   const handleQuestionsChange = async (
-    newQuestions: ICreateQuestionDto[],
-    totalScore: number
+    _newQuestions: ICreateQuestionDto[],
+    _totalScore: number
   ) => {
     // This is a simplified version - in a real app, you'd want to compare
     // existing questions with new ones and update/delete/add accordingly
@@ -125,68 +112,65 @@ export function TestEdit() {
 
   return (
     <div className="max-w-4xl mx-auto">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Edit Test: {test.testCode}</CardTitle>
-                <p className="text-sm text-secondary-500 mt-1">
-                  Status:{" "}
-                  <Badge
-                    variant={
-                      test.status === TestStatus.DRAFT ? "default" : "success"
-                    }
-                  >
-                    {test.status}
-                  </Badge>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Edit Test: {test.testCode}</CardTitle>
+              <p className="text-sm text-secondary-500 mt-1">
+                Status:{" "}
+                <Badge
+                  variant={
+                    test.status === TestStatus.DRAFT ? "default" : "success"
+                  }
+                >
+                  {test.status}
+                </Badge>
+              </p>
+            </div>
+            <Button variant="outline" onClick={() => navigate("/admin/tests")}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-8">
+            {/* Test Info Section */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Test Information</h3>
+              <TestInfoForm
+                initialData={{
+                  title: test.title,
+                  curriculum: test.curriculum,
+                  grade: test.grade,
+                  semester: test.semester,
+                  term: test.term as any,
+                  level: test.level,
+                }}
+                onSubmit={handleTestInfoSubmit}
+                generatedTestCode={test.testCode}
+              />
+            </div>
+
+            {/* Questions Section */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Questions</h3>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                <p className="text-sm text-yellow-800">
+                  Note: To modify questions, please use the individual question
+                  actions. Adding new questions will automatically assign the
+                  next sequential number.
                 </p>
               </div>
-              <Button
-                variant="outline"
-                onClick={() => navigate("/admin/tests")}
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back
-              </Button>
+              <QuestionArrayForm
+                initialQuestions={existingQuestions}
+                onChange={handleQuestionsChange}
+              />
             </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-8">
-              {/* Test Info Section */}
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Test Information</h3>
-                <TestInfoForm
-                  initialData={{
-                    title: test.title,
-                    curriculum: test.curriculum,
-                    grade: test.grade,
-                    semester: test.semester,
-                    term: test.term as any,
-                    level: test.level,
-                  }}
-                  onSubmit={handleTestInfoSubmit}
-                  generatedTestCode={test.testCode}
-                />
-              </div>
-
-              {/* Questions Section */}
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Questions</h3>
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-                  <p className="text-sm text-yellow-800">
-                    Note: To modify questions, please use the individual
-                    question actions. Adding new questions will automatically
-                    assign the next sequential number.
-                  </p>
-                </div>
-                <QuestionArrayForm
-                  initialQuestions={existingQuestions}
-                  onChange={handleQuestionsChange}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

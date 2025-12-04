@@ -9,19 +9,21 @@ export function useAchievementReport(submissionId: string) {
   return useQuery({
     queryKey: ['reports', 'achievement', submissionId],
     queryFn: async () => {
-      const response = await api.get<{
-        success: boolean;
-        data: AchievementReportData;
-        timestamp: string;
-      }>(`/reports/achievement/${submissionId}`);
-      return response.data.data;
+      try {
+        const response = await api.get<{
+          success: boolean;
+          data: AchievementReportData;
+          timestamp: string;
+        }>(`/reports/achievement/${submissionId}`);
+        return response.data.data;
+      } catch (error) {
+        // Silently handle errors - wrong test type is expected for one of the queries
+        console.debug('Achievement report fetch failed (may be A-DTM test):', error);
+        throw error;
+      }
     },
     enabled: !!submissionId,
     retry: false, // Don't retry if it fails (wrong test type)
-    onError: (error) => {
-      // Silently handle errors - wrong test type is expected for one of the queries
-      console.debug('Achievement report fetch failed (may be A-DTM test):', error);
-    },
   });
 }
 
@@ -32,19 +34,21 @@ export function useAdtmReport(submissionId: string) {
   return useQuery({
     queryKey: ['reports', 'adtm', submissionId],
     queryFn: async () => {
-      const response = await api.get<{
-        success: boolean;
-        data: AdtmReportData;
-        timestamp: string;
-      }>(`/reports/adtm/${submissionId}`);
-      return response.data.data;
+      try {
+        const response = await api.get<{
+          success: boolean;
+          data: AdtmReportData;
+          timestamp: string;
+        }>(`/reports/adtm/${submissionId}`);
+        return response.data.data;
+      } catch (error) {
+        // Silently handle errors - wrong test type is expected for one of the queries
+        console.debug('A-DTM report fetch failed (may be Achievement test):', error);
+        throw error;
+      }
     },
     enabled: !!submissionId,
     retry: false, // Don't retry if it fails (wrong test type)
-    onError: (error) => {
-      // Silently handle errors - wrong test type is expected for one of the queries
-      console.debug('A-DTM report fetch failed (may be Achievement test):', error);
-    },
   });
 }
 
@@ -59,11 +63,11 @@ export function useGeneratePdf() {
       const response = await api.post<{ success: boolean; pdfUrl: string; message: string }>(
         `/reports/${submissionId}/generate-pdf`
       );
-      return response.data;
+      return { ...response.data, submissionId };
     },
-    onSuccess: (data, submissionId) => {
+    onSuccess: (data) => {
       // Invalidate report queries to refresh data
-      queryClient.invalidateQueries({ queryKey: ['reports', submissionId] });
+      queryClient.invalidateQueries({ queryKey: ['reports', data.submissionId] });
     },
   });
 }

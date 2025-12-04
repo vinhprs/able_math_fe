@@ -167,8 +167,6 @@ interface ChangePasswordModalProps {
 }
 
 function ChangePasswordModal({ onClose }: ChangePasswordModalProps) {
-  const queryClient = useQueryClient();
-
   const {
     register,
     handleSubmit,

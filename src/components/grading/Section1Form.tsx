@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, Input, Badge } from '@/components/ui';
-import { useAdtmGradingStore } from '@/store/adtmGradingStore';
 import type { ITestQuestion } from '@/types/test.types';
 
 interface Section1FormProps {
@@ -68,10 +67,10 @@ export function Section1Form({
     return 'Mistake';
   };
 
-  const getStatusBadgeVariant = (status: string): 'primary' | 'secondary' | 'outline' => {
-    if (status === 'Correct') return 'primary';
-    if (status === 'Mistake') return 'secondary';
-    return 'outline';
+  const getStatusBadgeVariant = (status: string): 'default' | 'success' | 'warning' | 'danger' | 'info' => {
+    if (status === 'Correct') return 'success';
+    if (status === 'Mistake') return 'warning';
+    return 'default';
   };
 
   return (

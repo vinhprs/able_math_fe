@@ -146,13 +146,12 @@ export function AdtmGrading() {
       case 4:
       case 5: {
         // Validate sections 2-5
-        const sectionKey = `section${currentStep}` as keyof typeof section2;
         const sectionData =
-          sectionKey === "section2"
+          currentStep === 2
             ? section2
-            : sectionKey === "section3"
+            : currentStep === 3
             ? section3
-            : sectionKey === "section4"
+            : currentStep === 4
             ? section4
             : section5;
         const questions = questionsBySection[currentStep];

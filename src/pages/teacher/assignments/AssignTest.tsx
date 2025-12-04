@@ -32,7 +32,10 @@ interface Step1SelectTestProps {
   onSelect: (testId: string) => void;
 }
 
-function Step1SelectTest({ selectedTestId, onSelect }: Step1SelectTestProps) {
+function Step1SelectTest({
+  selectedTestId,
+  onSelect: _onSelect,
+}: Step1SelectTestProps) {
   const navigate = useNavigate();
 
   // For now, we'll redirect to browse tests page
@@ -180,7 +183,6 @@ function Step3SetDeadline({ deadline, onChange }: Step3SetDeadlineProps) {
   // Get tomorrow as minimum date
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  const minDate = tomorrow.toISOString().split("T")[0];
   const minDateTime = tomorrow.toISOString().slice(0, 16);
 
   return (
@@ -343,12 +345,12 @@ export function AssignTest() {
   });
 
   // Fetch test details
-  const { data: test, isLoading: isLoadingTest } = useTeacherTestDetails(
+  const { data: test, isLoading: _isLoadingTest } = useTeacherTestDetails(
     assignmentData.testId || null
   );
 
   // Fetch students
-  const { data: students = [], isLoading: isLoadingStudents } = useStudents();
+  const { data: students = [], isLoading: _isLoadingStudents } = useStudents();
 
   // Bulk assign mutation
   const assignMutation = useBulkAssign();

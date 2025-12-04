@@ -32,7 +32,7 @@ export const reportService = {
    * This will be used to get reportId from submissionId
    * Note: Backend endpoint needs to be added, or use existing report generation
    */
-  async getReportCardBySubmissionId(submissionId: string): Promise<ReportCard | null> {
+  async getReportCardBySubmissionId(_submissionId: string): Promise<ReportCard | null> {
     // For now, we'll generate the report which creates/updates the report card
     // Then we can extract the reportId from it
     // This is a workaround until a proper endpoint is added

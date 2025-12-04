@@ -15,8 +15,8 @@ export function ScoreSummary({
   maxScore,
   standardScore,
   questions,
-  submittedAt,
-  gradedAt,
+  submittedAt: _submittedAt,
+  gradedAt: _gradedAt,
 }: ScoreSummaryProps) {
   const correctCount = questions.filter((q) => q.isCorrect).length;
   const incorrectCount = questions.length - correctCount;

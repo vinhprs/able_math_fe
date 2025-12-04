@@ -5,9 +5,9 @@ import {
   ResponsiveContainer,
   Legend,
   Tooltip,
-} from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import type { ChartData } from '@/types/reports.types';
+} from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import type { ChartData } from "@/types/reports.types";
 
 interface ReportPieChartProps {
   title: string;
@@ -26,7 +26,14 @@ function transformData(chartData: ChartData) {
   }));
 }
 
-const DEFAULT_COLORS = ['#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#ec4899'];
+const DEFAULT_COLORS = [
+  "#3b82f6",
+  "#f59e0b",
+  "#10b981",
+  "#ef4444",
+  "#8b5cf6",
+  "#ec4899",
+];
 
 export function ReportPieChart({
   title,
@@ -69,22 +76,27 @@ export function ReportPieChart({
               cx="50%"
               cy="50%"
               labelLine={false}
-              label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+              label={({ name, percent }) =>
+                `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`
+              }
               outerRadius={80}
               fill="#8884d8"
               dataKey="value"
             >
-              {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
+              {chartData.map((_, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={chartColors[index % chartColors.length]}
+                />
               ))}
             </Pie>
             <Tooltip
               contentStyle={{
-                backgroundColor: 'white',
-                border: '1px solid #e5e7eb',
-                borderRadius: '8px',
+                backgroundColor: "white",
+                border: "1px solid #e5e7eb",
+                borderRadius: "8px",
               }}
-              formatter={(value: number) => [`${value.toFixed(1)}%`, 'Score']}
+              formatter={(value: number) => [`${value.toFixed(1)}%`, "Score"]}
             />
             <Legend />
           </RechartsPieChart>
@@ -93,4 +105,3 @@ export function ReportPieChart({
     </Card>
   );
 }
-

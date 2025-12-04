@@ -1,4 +1,5 @@
-import { useEffect, ReactNode } from 'react';
+import { useEffect } from 'react';
+import type { ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { Button } from './Button';
 import { cn } from '@/lib/cn';
