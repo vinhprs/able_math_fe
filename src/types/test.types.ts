@@ -1,4 +1,9 @@
-import { TestType, TestStatus, DifficultyLevel, Term } from '@shared/types/enum';
+import {
+  TestType,
+  TestStatus,
+  DifficultyLevel,
+  Term,
+} from "@/shared/types/enum";
 
 /**
  * Test interface matching backend entity
@@ -121,4 +126,3 @@ export interface IPaginatedTestResponse {
   page: number;
   totalPages: number;
 }
-

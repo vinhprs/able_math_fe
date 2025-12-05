@@ -1,5 +1,8 @@
-import { useState } from 'react';
-import { useAdtmTemplates, useUpdateTemplateStatus } from '@/hooks/useAdtmTemplates';
+import { useState } from "react";
+import {
+  useAdtmTemplates,
+  useUpdateTemplateStatus,
+} from "@/hooks/useAdtmTemplates";
 import {
   Button,
   Card,
@@ -9,37 +12,39 @@ import {
   Input,
   Select,
   Badge,
-} from '@/components/ui';
-import { TestStatus } from '@shared/types/enum';
-import { Search, Eye, BarChart3, Loader2, Power, PowerOff } from 'lucide-react';
-import { format } from 'date-fns';
-import { AdtmTemplateDetailsModal } from '@/components/admin/AdtmTemplateDetailsModal';
-import { AdtmTemplateStatisticsModal } from '@/components/admin/AdtmTemplateStatisticsModal';
-import type { AdtmTemplate } from '@/types/adtm-template.types';
+} from "@/components/ui";
+import { TestStatus } from "@/shared/types/enum";
+import { Search, Eye, BarChart3, Loader2, Power, PowerOff } from "lucide-react";
+import { format } from "date-fns";
+import { AdtmTemplateDetailsModal } from "@/components/admin/AdtmTemplateDetailsModal";
+import { AdtmTemplateStatisticsModal } from "@/components/admin/AdtmTemplateStatisticsModal";
+import type { AdtmTemplate } from "@/types/adtm-template.types";
 
 const LEVEL_OPTIONS = [
-  { value: '', label: 'All Levels' },
-  { value: 'Elementary', label: 'Elementary' },
-  { value: 'Middle School', label: 'Middle School' },
-  { value: 'High School', label: 'High School' },
+  { value: "", label: "All Levels" },
+  { value: "Elementary", label: "Elementary" },
+  { value: "Middle School", label: "Middle School" },
+  { value: "High School", label: "High School" },
 ];
 
 const STATUS_OPTIONS = [
-  { value: 'All', label: 'All Statuses' },
-  { value: TestStatus.PUBLISHED, label: 'Active' },
-  { value: TestStatus.ARCHIVED, label: 'Inactive' },
+  { value: "All", label: "All Statuses" },
+  { value: TestStatus.PUBLISHED, label: "Active" },
+  { value: TestStatus.ARCHIVED, label: "Inactive" },
 ];
 
 export function AdtmTemplatesPage() {
   const [filters, setFilters] = useState({
     page: 1,
     limit: 20,
-    level: '',
-    status: 'All' as 'All' | TestStatus,
-    search: '',
+    level: "",
+    status: "All" as "All" | TestStatus,
+    search: "",
   });
 
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
+    null
+  );
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [statisticsModalOpen, setStatisticsModalOpen] = useState(false);
 
@@ -61,7 +66,7 @@ export function AdtmTemplatesPage() {
         isActive: !template.isActive,
       });
     } catch (error: any) {
-      alert(error.message || 'Failed to update template status');
+      alert(error.message || "Failed to update template status");
     }
   };
 
@@ -76,9 +81,9 @@ export function AdtmTemplatesPage() {
   };
 
   const getLevelBadge = (grade: string) => {
-    if (grade.startsWith('E')) {
+    if (grade.startsWith("E")) {
       return <Badge variant="info">Elementary</Badge>;
-    } else if (grade.startsWith('M')) {
+    } else if (grade.startsWith("M")) {
       return <Badge variant="info">Middle School</Badge>;
     } else {
       return <Badge variant="info">High School</Badge>;
@@ -111,8 +116,12 @@ export function AdtmTemplatesPage() {
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-bold text-secondary-900">A-DTM Templates</h1>
-        <p className="text-secondary-500 mt-1">Manage and view all A-DTM test templates</p>
+        <h1 className="text-3xl font-bold text-secondary-900">
+          A-DTM Templates
+        </h1>
+        <p className="text-secondary-500 mt-1">
+          Manage and view all A-DTM test templates
+        </p>
       </div>
 
       {/* Filters */}
@@ -131,12 +140,12 @@ export function AdtmTemplatesPage() {
             <Select
               options={LEVEL_OPTIONS}
               value={filters.level}
-              onChange={(e) => handleFilterChange('level', e.target.value)}
+              onChange={(e) => handleFilterChange("level", e.target.value)}
             />
             <Select
               options={STATUS_OPTIONS}
               value={filters.status}
-              onChange={(e) => handleFilterChange('status', e.target.value)}
+              onChange={(e) => handleFilterChange("status", e.target.value)}
             />
           </div>
         </CardContent>
@@ -154,7 +163,7 @@ export function AdtmTemplatesPage() {
                     onClick={() => handleToggleStatus(template)}
                     className="text-secondary-600 hover:text-primary-600 transition-colors"
                     disabled={updateStatus.isPending}
-                    title={template.isActive ? 'Deactivate' : 'Activate'}
+                    title={template.isActive ? "Deactivate" : "Activate"}
                   >
                     {template.isActive ? (
                       <Power className="w-6 h-6 text-green-600" />
@@ -163,8 +172,12 @@ export function AdtmTemplatesPage() {
                     )}
                   </button>
                 </div>
-                <CardTitle className="mt-2 text-lg">{template.testCode}</CardTitle>
-                <p className="text-sm text-secondary-600 mt-1">{template.title}</p>
+                <CardTitle className="mt-2 text-lg">
+                  {template.testCode}
+                </CardTitle>
+                <p className="text-sm text-secondary-600 mt-1">
+                  {template.title}
+                </p>
               </CardHeader>
 
               <CardContent className="flex-1">
@@ -183,7 +196,9 @@ export function AdtmTemplatesPage() {
                   </div>
                   <div>
                     <p className="text-xs text-secondary-500">Questions</p>
-                    <p className="text-sm font-medium">{template.questionCount}</p>
+                    <p className="text-sm font-medium">
+                      {template.questionCount}
+                    </p>
                   </div>
                 </div>
 
@@ -213,7 +228,9 @@ export function AdtmTemplatesPage() {
                       <Badge variant="default">Inactive</Badge>
                     )}
                   </span>
-                  <span>{format(new Date(template.createdAt), 'MMM d, yyyy')}</span>
+                  <span>
+                    {format(new Date(template.createdAt), "MMM d, yyyy")}
+                  </span>
                 </div>
               </CardContent>
 
@@ -252,15 +269,17 @@ export function AdtmTemplatesPage() {
       {data && data.totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-secondary-600">
-            Showing {((data.page - 1) * filters.limit + 1).toLocaleString()} to{' '}
-            {Math.min(data.page * filters.limit, data.total).toLocaleString()} of{' '}
-            {data.total.toLocaleString()} templates
+            Showing {((data.page - 1) * filters.limit + 1).toLocaleString()} to{" "}
+            {Math.min(data.page * filters.limit, data.total).toLocaleString()}{" "}
+            of {data.total.toLocaleString()} templates
           </p>
           <div className="flex gap-2">
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setFilters((prev) => ({ ...prev, page: prev.page - 1 }))}
+              onClick={() =>
+                setFilters((prev) => ({ ...prev, page: prev.page - 1 }))
+              }
               disabled={data.page === 1}
             >
               Previous
@@ -268,7 +287,9 @@ export function AdtmTemplatesPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setFilters((prev) => ({ ...prev, page: prev.page + 1 }))}
+              onClick={() =>
+                setFilters((prev) => ({ ...prev, page: prev.page + 1 }))
+              }
               disabled={data.page >= data.totalPages}
             >
               Next
@@ -298,4 +319,3 @@ export function AdtmTemplatesPage() {
     </div>
   );
 }
-

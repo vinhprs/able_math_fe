@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
   ArrowRight,
@@ -11,19 +11,19 @@ import {
   CheckCircle,
   List,
   Loader2,
-} from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Card, CardContent } from '@/components/ui/Card';
-import { Modal } from '@/components/ui/Modal';
-import { toastSuccess, toastError } from '@/lib/toast';
-import api from '@/lib/api';
-import { QuestionNavigator } from './components/QuestionNavigator';
-import { QuestionCard } from './components/QuestionCard';
-import { ProgressBar } from './components/ProgressBar';
-import { SubmitModal } from './components/SubmitModal';
-import { useAutoSave } from './hooks/useAutoSave';
-import { useTestTimer } from './hooks/useTestTimer';
-import type { TestType } from '@shared/types/enum';
+} from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent } from "@/components/ui/Card";
+import { Modal } from "@/components/ui/Modal";
+import { toastSuccess, toastError } from "@/lib/toast";
+import api from "@/lib/api";
+import { QuestionNavigator } from "./components/QuestionNavigator";
+import { QuestionCard } from "./components/QuestionCard";
+import { ProgressBar } from "./components/ProgressBar";
+import { SubmitModal } from "./components/SubmitModal";
+import { useAutoSave } from "./hooks/useAutoSave";
+import { useTestTimer } from "./hooks/useTestTimer";
+import type { TestType } from "@/shared/types/enum";
 
 interface TestQuestion {
   id: string;
@@ -86,8 +86,7 @@ export function TakeTest() {
 
   // Start test or get existing submission
   const startMutation = useMutation({
-    mutationFn: () =>
-      api.post('/student/submissions/start', { assignmentId }),
+    mutationFn: () => api.post("/student/submissions/start", { assignmentId }),
     onSuccess: (response) => {
       // Handle both wrapped and unwrapped responses
       const data = response.data?.data || response.data;
@@ -95,19 +94,19 @@ export function TakeTest() {
       if (submissionId) {
         setSubmissionId(submissionId);
       } else {
-        console.error('No submissionId in response:', response.data);
-        toastError('Failed to get submission ID from server');
+        console.error("No submissionId in response:", response.data);
+        toastError("Failed to get submission ID from server");
         hasStartedRef.current = false;
       }
     },
     onError: (error: any) => {
       // Reset ref on error so user can retry
       hasStartedRef.current = false;
-      console.error('Failed to start test:', error);
+      console.error("Failed to start test:", error);
       toastError(
-        error.response?.data?.message || error.message || 'Failed to start test'
+        error.response?.data?.message || error.message || "Failed to start test"
       );
-      navigate('/student/tests');
+      navigate("/student/tests");
     },
   });
 
@@ -118,23 +117,31 @@ export function TakeTest() {
     isError,
     error: queryError,
   } = useQuery<TestSubmissionData>({
-    queryKey: ['test-submission', submissionId],
+    queryKey: ["test-submission", submissionId],
     queryFn: async () => {
       if (!submissionId) {
-        throw new Error('Submission ID is required');
+        throw new Error("Submission ID is required");
       }
       try {
-        const response = await api.get<{ success: boolean; data: TestSubmissionData } | TestSubmissionData>(
-          `/student/submissions/${submissionId}/take`
-        );
+        const response = await api.get<
+          { success: boolean; data: TestSubmissionData } | TestSubmissionData
+        >(`/student/submissions/${submissionId}/take`);
         // Handle both wrapped and unwrapped responses
-        const data = 'data' in response.data && response.data.data ? response.data.data : response.data as TestSubmissionData;
-        console.log('Test data loaded:', { hasQuestions: !!data?.questions, questionCount: data?.questions?.length });
+        const data =
+          "data" in response.data && response.data.data
+            ? response.data.data
+            : (response.data as TestSubmissionData);
+        console.log("Test data loaded:", {
+          hasQuestions: !!data?.questions,
+          questionCount: data?.questions?.length,
+        });
         return data;
       } catch (error: any) {
-        console.error('Error fetching test data:', error);
+        console.error("Error fetching test data:", error);
         toastError(
-          error.response?.data?.message || error.message || 'Failed to load test'
+          error.response?.data?.message ||
+            error.message ||
+            "Failed to load test"
         );
         throw error;
       }
@@ -160,13 +167,15 @@ export function TakeTest() {
   const submitMutation = useMutation({
     mutationFn: () => api.post(`/student/submissions/${submissionId}/submit`),
     onSuccess: () => {
-      toastSuccess('Test submitted successfully!');
-      queryClient.invalidateQueries({ queryKey: ['student-assignments'] });
-      navigate('/student/tests');
+      toastSuccess("Test submitted successfully!");
+      queryClient.invalidateQueries({ queryKey: ["student-assignments"] });
+      navigate("/student/tests");
     },
     onError: (error: any) => {
       toastError(
-        error.response?.data?.message || error.message || 'Failed to submit test'
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to submit test"
       );
     },
   });
@@ -197,12 +206,12 @@ export function TakeTest() {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasUnsavedChanges) {
         e.preventDefault();
-        e.returnValue = '';
+        e.returnValue = "";
       }
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [hasUnsavedChanges]);
 
   // Show error state if query failed
@@ -214,9 +223,9 @@ export function TakeTest() {
           <p className="text-gray-600 mb-4">
             {queryError instanceof Error
               ? queryError.message
-              : 'Failed to load test'}
+              : "Failed to load test"}
           </p>
-          <Button onClick={() => navigate('/student/tests')}>
+          <Button onClick={() => navigate("/student/tests")}>
             Back to Tests
           </Button>
         </div>
@@ -240,7 +249,7 @@ export function TakeTest() {
         <div className="text-center">
           <AlertTriangle className="w-12 h-12 text-red-600 mx-auto mb-4" />
           <p className="text-gray-600 mb-4">No test data available</p>
-          <Button onClick={() => navigate('/student/tests')}>
+          <Button onClick={() => navigate("/student/tests")}>
             Back to Tests
           </Button>
         </div>
@@ -261,7 +270,7 @@ export function TakeTest() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <p className="text-gray-600 mb-4">No questions found</p>
-          <Button onClick={() => navigate('/student/tests')}>
+          <Button onClick={() => navigate("/student/tests")}>
             Back to Tests
           </Button>
         </div>
@@ -298,7 +307,7 @@ export function TakeTest() {
   const handleSubmit = () => {
     // Check unanswered questions
     const unanswered = questions.filter(
-      (q: TestQuestion) => !answers[q.id] || answers[q.id].trim() === ''
+      (q: TestQuestion) => !answers[q.id] || answers[q.id].trim() === ""
     );
 
     if (unanswered.length > 0) {
@@ -327,10 +336,10 @@ export function TakeTest() {
                 onClick={() => {
                   if (
                     window.confirm(
-                      'Are you sure you want to leave? Your progress is saved.'
+                      "Are you sure you want to leave? Your progress is saved."
                     )
                   ) {
-                    navigate('/student/tests');
+                    navigate("/student/tests");
                   }
                 }}
               >
@@ -339,10 +348,10 @@ export function TakeTest() {
               </Button>
               <div>
                 <h1 className="font-bold text-lg">
-                  {testData.test?.title || 'Test'}
+                  {testData.test?.title || "Test"}
                 </h1>
                 <p className="text-sm text-gray-500">
-                  {testData.test?.testCode || ''}
+                  {testData.test?.testCode || ""}
                 </p>
               </div>
             </div>
@@ -350,9 +359,11 @@ export function TakeTest() {
             {/* Center: Progress */}
             <div className="flex-1 max-w-md mx-8">
               <ProgressBar
-                answered={Object.keys(answers).filter(
-                  (id) => answers[id] && answers[id].trim() !== ''
-                ).length}
+                answered={
+                  Object.keys(answers).filter(
+                    (id) => answers[id] && answers[id].trim() !== ""
+                  ).length
+                }
                 total={questions.length}
               />
             </div>
@@ -364,10 +375,10 @@ export function TakeTest() {
                 <div
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
                     isOvertime
-                      ? 'bg-red-100 text-red-700'
+                      ? "bg-red-100 text-red-700"
                       : timeRemaining && timeRemaining.hours < 1
-                      ? 'bg-yellow-100 text-yellow-700'
-                      : 'bg-blue-100 text-blue-700'
+                      ? "bg-yellow-100 text-yellow-700"
+                      : "bg-blue-100 text-blue-700"
                   }`}
                 >
                   <Clock className="w-4 h-4" />
@@ -375,29 +386,29 @@ export function TakeTest() {
                     {timeRemaining
                       ? `${timeRemaining.hours}:${timeRemaining.minutes
                           .toString()
-                          .padStart(2, '0')}:${timeRemaining.seconds
+                          .padStart(2, "0")}:${timeRemaining.seconds
                           .toString()
-                          .padStart(2, '0')}`
-                      : 'Overtime'}
+                          .padStart(2, "0")}`
+                      : "Overtime"}
                   </span>
                 </div>
               )}
 
               {/* Save Status */}
               <div className="flex items-center gap-2 text-sm">
-                {saveStatus === 'saving' && (
+                {saveStatus === "saving" && (
                   <>
                     <Save className="w-4 h-4 text-blue-600 animate-pulse" />
                     <span className="text-blue-600">Saving...</span>
                   </>
                 )}
-                {saveStatus === 'saved' && (
+                {saveStatus === "saved" && (
                   <>
                     <CheckCircle className="w-4 h-4 text-green-600" />
                     <span className="text-green-600">Saved</span>
                   </>
                 )}
-                {saveStatus === 'error' && (
+                {saveStatus === "error" && (
                   <>
                     <AlertTriangle className="w-4 h-4 text-red-600" />
                     <span className="text-red-600">Error</span>
@@ -446,7 +457,7 @@ export function TakeTest() {
               }}
               questionNumber={currentQuestionIndex + 1}
               totalQuestions={questions.length}
-              answer={answers[currentQuestion.id] || ''}
+              answer={answers[currentQuestion.id] || ""}
               onAnswerChange={(answer) =>
                 handleAnswerChange(currentQuestion.id, answer)
               }
@@ -493,9 +504,11 @@ export function TakeTest() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium text-blue-900">
-                    {Object.keys(answers).filter(
-                      (id) => answers[id] && answers[id].trim() !== ''
-                    ).length}{' '}
+                    {
+                      Object.keys(answers).filter(
+                        (id) => answers[id] && answers[id].trim() !== ""
+                      ).length
+                    }{" "}
                     of {questions.length} questions answered
                   </p>
                   <p className="text-sm text-blue-700">

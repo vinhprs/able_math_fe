@@ -10,7 +10,7 @@ import {
 } from "@/components/ui";
 import { useTest, useUpdateTest } from "@/hooks/useTests";
 import type { ICreateQuestionDto } from "@/types/test.types";
-import { TestStatus } from "@shared/types/enum";
+import { TestStatus } from "@/shared/types/enum";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 

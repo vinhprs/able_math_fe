@@ -4,7 +4,7 @@ import type {
   AxiosInstance,
   InternalAxiosRequestConfig,
 } from "axios";
-import type { IAuthResponse } from "@shared/types/users.types";
+import type { IAuthResponse } from "@/shared/types/users.types";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
@@ -69,13 +69,15 @@ api.interceptors.response.use(
         }
 
         // Attempt to refresh token
-        const response = await axios.post<{ success: boolean; data: IAuthResponse; timestamp: string }>(
-          `${API_BASE_URL}/auth/refresh`,
-          { refreshToken }
-        );
+        const response = await axios.post<{
+          success: boolean;
+          data: IAuthResponse;
+          timestamp: string;
+        }>(`${API_BASE_URL}/auth/refresh`, { refreshToken });
 
         // Backend wraps response in { success, data, timestamp }
-        const { accessToken, refreshToken: newRefreshToken } = response.data.data;
+        const { accessToken, refreshToken: newRefreshToken } =
+          response.data.data;
 
         // Update tokens in localStorage
         localStorage.setItem("accessToken", accessToken);

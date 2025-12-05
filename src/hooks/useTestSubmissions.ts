@@ -1,7 +1,7 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '@/lib/api';
-import type { ITest, ITestQuestion } from '@/types/test.types';
-import { SubmissionStatus } from '@shared/types/enum';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import api from "@/lib/api";
+import type { ITest, ITestQuestion } from "@/types/test.types";
+import { SubmissionStatus } from "@/shared/types/enum";
 
 export interface StudentAssignment {
   id: string;
@@ -46,13 +46,13 @@ export interface TestWithQuestions extends ITest {
  */
 export function useStudentAssignments(status?: SubmissionStatus) {
   return useQuery({
-    queryKey: ['student', 'assignments', status],
+    queryKey: ["student", "assignments", status],
     queryFn: async () => {
       const response = await api.get<{
         success: boolean;
         data: StudentAssignment[];
         timestamp: string;
-      }>('/student/assignments', {
+      }>("/student/assignments", {
         params: status ? { status } : undefined,
       });
       return response.data.data;
@@ -72,11 +72,11 @@ export function useStartTest() {
         success: boolean;
         data: Submission;
         timestamp: string;
-      }>('/student/submissions', data);
+      }>("/student/submissions", data);
       return response.data.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['student', 'assignments'] });
+      queryClient.invalidateQueries({ queryKey: ["student", "assignments"] });
     },
   });
 }
@@ -86,7 +86,7 @@ export function useStartTest() {
  */
 export function useTestForTaking(testId: string | null) {
   return useQuery({
-    queryKey: ['test', 'taking', testId],
+    queryKey: ["test", "taking", testId],
     queryFn: async () => {
       if (!testId) return null;
       const response = await api.get<{
@@ -105,7 +105,7 @@ export function useTestForTaking(testId: string | null) {
  */
 export function useSubmission(submissionId: string | null) {
   return useQuery({
-    queryKey: ['submission', submissionId],
+    queryKey: ["submission", submissionId],
     queryFn: async () => {
       if (!submissionId) return null;
       const response = await api.get<{
@@ -143,7 +143,7 @@ export function useSaveAnswer() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ['submission', variables.submissionId],
+        queryKey: ["submission", variables.submissionId],
       });
     },
   });
@@ -166,10 +166,9 @@ export function useSubmitTest() {
     },
     onSuccess: (_, submissionId) => {
       queryClient.invalidateQueries({
-        queryKey: ['submission', submissionId],
+        queryKey: ["submission", submissionId],
       });
-      queryClient.invalidateQueries({ queryKey: ['student', 'assignments'] });
+      queryClient.invalidateQueries({ queryKey: ["student", "assignments"] });
     },
   });
 }
-

@@ -1,5 +1,9 @@
-import type { IUser, ILoginCredentials, IAuthResponse } from '@shared/types/users.types';
-import type { UserRole } from '@shared/types/enum';
+import type {
+  IUser,
+  ILoginCredentials,
+  IAuthResponse,
+} from "@/shared/types/users.types";
+import type { UserRole } from "@/shared/types/enum";
 
 export type { IUser, ILoginCredentials, IAuthResponse, UserRole };
 
@@ -40,7 +44,7 @@ export type {
   AchievementReportData,
   AdtmSectionData,
   AdtmReportData,
-} from './reports.types';
+} from "./reports.types";
 
 // Export report workflow types
 export type {
@@ -48,9 +52,9 @@ export type {
   ReportCard,
   ApproveReportDto,
   RejectReportDto,
-} from './report';
+} from "./report";
 
-export { ReportStatus } from './report';
+export { ReportStatus } from "./report";
 
 // Export class types
 export type {
@@ -61,7 +65,7 @@ export type {
   IClassQueryParams,
   IPaginatedClassResponse,
   IClassStatistics,
-} from './class';
+} from "./class";
 
 // Export assignment types
 export type {
@@ -75,7 +79,6 @@ export type {
   IStudentAssignmentDetail,
   IUpcomingDeadline,
   IStudentAssignmentStats,
-} from './assignment';
+} from "./assignment";
 
-export { AssignmentStatus } from './assignment';
-
+export { AssignmentStatus } from "./assignment";

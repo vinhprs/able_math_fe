@@ -8,7 +8,7 @@ import {
 } from "@/components/ui";
 import { Home, ArrowLeft } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
-import { UserRole } from "@shared/types/enum";
+import { UserRole } from "@/shared/types/enum";
 
 /**
  * Get dashboard route based on user role

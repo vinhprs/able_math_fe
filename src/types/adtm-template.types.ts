@@ -1,4 +1,4 @@
-import { TestStatus, DifficultyLevel } from '@shared/types/enum';
+import { TestStatus, DifficultyLevel } from "@/shared/types/enum";
 
 export interface AdtmTemplate {
   id: string;
@@ -80,9 +80,8 @@ export interface AdtmTemplateStatistics {
 
 export interface AdtmTemplateFilters {
   level?: string;
-  status?: TestStatus | 'All';
+  status?: TestStatus | "All";
   search?: string;
   page?: number;
   limit?: number;
 }
-

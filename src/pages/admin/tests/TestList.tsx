@@ -11,7 +11,7 @@ import {
   Select,
   Badge,
 } from "@/components/ui";
-import { TestStatus, TestType } from "@shared/types/enum";
+import { TestStatus, TestType } from "@/shared/types/enum";
 import { Search, Plus, Eye, Edit, Trash2, Send, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 

@@ -2,7 +2,7 @@ import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { Badge, Button } from "@/components/ui";
 import { FileText, Play, Eye } from "lucide-react";
-import { SubmissionStatus } from "@shared/types/enum";
+import { SubmissionStatus } from "@/shared/types/enum";
 
 interface StudentTest {
   id: string;
@@ -40,9 +40,7 @@ export function StudentTestsList({ tests }: StudentTestsListProps) {
       [SubmissionStatus.GRADED]: "Graded",
     };
 
-    return (
-      <Badge variant={variants[status]}>{labels[status]}</Badge>
-    );
+    return <Badge variant={variants[status]}>{labels[status]}</Badge>;
   };
 
   const getActionButton = (test: StudentTest) => {
@@ -104,13 +102,17 @@ export function StudentTestsList({ tests }: StudentTestsListProps) {
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <h3 className="font-semibold text-secondary-900">{test.title}</h3>
+                <h3 className="font-semibold text-secondary-900">
+                  {test.title}
+                </h3>
                 {getStatusBadge(test.status)}
               </div>
               <div className="flex items-center gap-4 text-sm text-secondary-500">
                 <span className="font-mono">{test.testCode}</span>
                 {test.dueDate && (
-                  <span>Due: {format(new Date(test.dueDate), "MMM d, yyyy")}</span>
+                  <span>
+                    Due: {format(new Date(test.dueDate), "MMM d, yyyy")}
+                  </span>
                 )}
                 {test.score !== null && (
                   <span className="font-semibold text-secondary-900">
@@ -126,4 +128,3 @@ export function StudentTestsList({ tests }: StudentTestsListProps) {
     </div>
   );
 }
-

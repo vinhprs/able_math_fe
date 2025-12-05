@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { useAuthStore } from "@/store/authStore";
-import { UserRole } from "@shared/types/enum";
+import { UserRole } from "@/shared/types/enum";
 import { Header } from "./Header";
 import { AdminSidebar } from "./AdminSidebar";
 import { TeacherSidebar } from "./TeacherSidebar";
@@ -39,4 +39,3 @@ export function MainLayout({ children }: MainLayoutProps) {
     </div>
   );
 }
-

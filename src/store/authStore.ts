@@ -4,7 +4,7 @@ import type {
   IUser,
   ILoginCredentials,
   IAuthResponse,
-} from "@shared/types/users.types";
+} from "@/shared/types/users.types";
 import api from "@/lib/api";
 
 interface AuthState {
@@ -45,10 +45,11 @@ export const useAuthStore = create<AuthStore>()(
       login: async (credentials: ILoginCredentials) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await api.post<{ success: boolean; data: IAuthResponse; timestamp: string }>(
-            "/auth/login",
-            credentials
-          );
+          const response = await api.post<{
+            success: boolean;
+            data: IAuthResponse;
+            timestamp: string;
+          }>("/auth/login", credentials);
           // Backend wraps response in { success, data, timestamp }
           const { accessToken, refreshToken, user } = response.data.data;
 
@@ -124,11 +125,16 @@ export const useAuthStore = create<AuthStore>()(
         }
 
         try {
-          const response = await api.post<{ success: boolean; data: IAuthResponse; timestamp: string }>("/auth/refresh", {
+          const response = await api.post<{
+            success: boolean;
+            data: IAuthResponse;
+            timestamp: string;
+          }>("/auth/refresh", {
             refreshToken: currentRefreshToken,
           });
           // Backend wraps response in { success, data, timestamp }
-          const { accessToken, refreshToken: newRefreshToken } = response.data.data;
+          const { accessToken, refreshToken: newRefreshToken } =
+            response.data.data;
 
           localStorage.setItem("accessToken", accessToken);
           localStorage.setItem("refreshToken", newRefreshToken);
@@ -165,7 +171,9 @@ export const useAuthStore = create<AuthStore>()(
 
             // Verify token is still valid by fetching current user (async, non-blocking)
             api
-              .get<{ success: boolean; data: IUser; timestamp: string }>("/auth/me")
+              .get<{ success: boolean; data: IUser; timestamp: string }>(
+                "/auth/me"
+              )
               .then((response) => {
                 // Backend wraps response in { success, data, timestamp }
                 const currentUser = response.data.data;
@@ -179,7 +187,11 @@ export const useAuthStore = create<AuthStore>()(
                     .refreshAccessToken()
                     .then(() => {
                       // After refresh, fetch user again
-                      return api.get<{ success: boolean; data: IUser; timestamp: string }>("/auth/me");
+                      return api.get<{
+                        success: boolean;
+                        data: IUser;
+                        timestamp: string;
+                      }>("/auth/me");
                     })
                     .then((response) => {
                       // Backend wraps response in { success, data, timestamp }

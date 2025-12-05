@@ -14,7 +14,7 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui";
-import { UserRole } from "@shared/types/enum";
+import { UserRole } from "@/shared/types/enum";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Username or email is required"),

@@ -1,7 +1,7 @@
 import { Button, Input, Select, Textarea } from "@/components/ui";
 import type { ICreateQuestionDto } from "@/types/test.types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DifficultyLevel } from "@shared/types/enum";
+import { DifficultyLevel } from "@/shared/types/enum";
 import { Plus, Trash2 } from "lucide-react";
 import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";

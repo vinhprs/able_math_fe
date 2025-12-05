@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Input, Select } from "@/components/ui";
-import { Term } from "@shared/types/enum";
+import { Term } from "@/shared/types/enum";
 import type { ICreateTestDto } from "@/types/test.types";
 
 // Input schema (what the form uses - level as string)

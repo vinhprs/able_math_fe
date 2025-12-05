@@ -8,7 +8,7 @@ import {
   Button,
   Badge,
 } from "@/components/ui";
-import { TestStatus } from "@shared/types/enum";
+import { TestStatus } from "@/shared/types/enum";
 import { ArrowLeft, Loader2, BarChart3 } from "lucide-react";
 import { format } from "date-fns";
 

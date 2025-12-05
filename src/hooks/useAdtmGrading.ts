@@ -1,7 +1,7 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '@/lib/api';
-import type { ITest, ITestQuestion } from '@/types/test.types';
-import { SubmissionStatus } from '@shared/types/enum';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import api from "@/lib/api";
+import type { ITest, ITestQuestion } from "@/types/test.types";
+import { SubmissionStatus } from "@/shared/types/enum";
 
 /**
  * A-DTM submission with full details
@@ -35,16 +35,28 @@ export interface AdtmSubmission {
     section1StandardScore: number;
     section2RawScore: number;
     section2StandardScore: number;
-    section2UnitScores: Record<string, { rawScore: number; maxScore: number }> | null;
+    section2UnitScores: Record<
+      string,
+      { rawScore: number; maxScore: number }
+    > | null;
     section3RawScore: number;
     section3StandardScore: number;
-    section3UnitScores: Record<string, { rawScore: number; maxScore: number }> | null;
+    section3UnitScores: Record<
+      string,
+      { rawScore: number; maxScore: number }
+    > | null;
     section4RawScore: number;
     section4StandardScore: number;
-    section4UnitScores: Record<string, { rawScore: number; maxScore: number }> | null;
+    section4UnitScores: Record<
+      string,
+      { rawScore: number; maxScore: number }
+    > | null;
     section5RawScore: number;
     section5StandardScore: number;
-    section5UnitScores: Record<string, { rawScore: number; maxScore: number }> | null;
+    section5UnitScores: Record<
+      string,
+      { rawScore: number; maxScore: number }
+    > | null;
     overallStandardScore: number | null;
   };
   answers: Array<{
@@ -62,7 +74,7 @@ export interface AdtmSubmission {
  */
 export function useAdtmSubmission(submissionId: string | null) {
   return useQuery({
-    queryKey: ['adtm-submission', submissionId],
+    queryKey: ["adtm-submission", submissionId],
     queryFn: async () => {
       if (!submissionId) return null;
       const response = await api.get<{
@@ -156,9 +168,10 @@ export function useGradeAdtmSubmission() {
       return response.data.data;
     },
     onSuccess: (_, submissionId) => {
-      queryClient.invalidateQueries({ queryKey: ['adtm-submission', submissionId] });
-      queryClient.invalidateQueries({ queryKey: ['submissions'] });
+      queryClient.invalidateQueries({
+        queryKey: ["adtm-submission", submissionId],
+      });
+      queryClient.invalidateQueries({ queryKey: ["submissions"] });
     },
   });
 }
-

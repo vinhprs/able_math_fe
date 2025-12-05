@@ -1,8 +1,17 @@
-import { Modal, Button, Badge, Alert, Card, CardContent, CardHeader, CardTitle } from '@/components/ui';
-import { useAdtmTemplateDetails } from '@/hooks/useAdtmTemplates';
-import { Download, Loader2 } from 'lucide-react';
-import type { AdtmTemplateSection } from '@/types/adtm-template.types';
-import { DifficultyLevel } from '@shared/types/enum';
+import {
+  Modal,
+  Button,
+  Badge,
+  Alert,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui";
+import { useAdtmTemplateDetails } from "@/hooks/useAdtmTemplates";
+import { Download, Loader2 } from "lucide-react";
+import type { AdtmTemplateSection } from "@/types/adtm-template.types";
+import { DifficultyLevel } from "@/shared/types/enum";
 
 interface AdtmTemplateDetailsModalProps {
   isOpen: boolean;
@@ -30,9 +39,11 @@ export function AdtmTemplateDetailsModal({
       sections: data.template.sections,
     };
 
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `${data.template.testCode}_template.json`;
     document.body.appendChild(a);
@@ -42,7 +53,12 @@ export function AdtmTemplateDetailsModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={data?.template?.testCode} size="xl">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={data?.template?.testCode}
+      size="xl"
+    >
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
@@ -58,7 +74,9 @@ export function AdtmTemplateDetailsModal({
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <div>
                   <p className="text-xs text-secondary-500">Code</p>
-                  <p className="text-sm font-medium">{data.template.testCode}</p>
+                  <p className="text-sm font-medium">
+                    {data.template.testCode}
+                  </p>
                 </div>
                 <div>
                   <p className="text-xs text-secondary-500">Grade</p>
@@ -66,11 +84,15 @@ export function AdtmTemplateDetailsModal({
                 </div>
                 <div>
                   <p className="text-xs text-secondary-500">Semester</p>
-                  <p className="text-sm font-medium">{data.template.semester}</p>
+                  <p className="text-sm font-medium">
+                    {data.template.semester}
+                  </p>
                 </div>
                 <div>
                   <p className="text-xs text-secondary-500">Total Score</p>
-                  <p className="text-sm font-medium">{data.template.totalScore}</p>
+                  <p className="text-sm font-medium">
+                    {data.template.totalScore}
+                  </p>
                 </div>
                 <div>
                   <p className="text-xs text-secondary-500">Status</p>
@@ -85,7 +107,9 @@ export function AdtmTemplateDetailsModal({
                 {data.template.pdfFile && (
                   <div>
                     <p className="text-xs text-secondary-500">PDF File</p>
-                    <p className="text-sm font-medium">{data.template.pdfFile}</p>
+                    <p className="text-sm font-medium">
+                      {data.template.pdfFile}
+                    </p>
                   </div>
                 )}
               </div>
@@ -107,7 +131,9 @@ export function AdtmTemplateDetailsModal({
           </div>
         </div>
       ) : (
-        <p className="text-center text-secondary-500 py-12">Template not found</p>
+        <p className="text-center text-secondary-500 py-12">
+          Template not found
+        </p>
       )}
     </Modal>
   );
@@ -116,11 +142,12 @@ export function AdtmTemplateDetailsModal({
 function SectionDetails({ section }: { section: AdtmTemplateSection }) {
   const getDifficultyBadge = (difficulty?: DifficultyLevel) => {
     if (!difficulty) return <Badge variant="default">-</Badge>;
-    const variants: Record<DifficultyLevel, 'default' | 'warning' | 'danger'> = {
-      [DifficultyLevel.LOW]: 'default',
-      [DifficultyLevel.MEDIUM]: 'warning',
-      [DifficultyLevel.HIGH]: 'danger',
-    };
+    const variants: Record<DifficultyLevel, "default" | "warning" | "danger"> =
+      {
+        [DifficultyLevel.LOW]: "default",
+        [DifficultyLevel.MEDIUM]: "warning",
+        [DifficultyLevel.HIGH]: "danger",
+      };
     return <Badge variant={variants[difficulty]}>{difficulty}</Badge>;
   };
 
@@ -143,7 +170,9 @@ function SectionDetails({ section }: { section: AdtmTemplateSection }) {
           </div>
           <div>
             <p className="text-xs text-secondary-500">Special Inputs</p>
-            <p className="text-sm font-medium">{section.hasSpecialInputs ? 'Yes' : 'No'}</p>
+            <p className="text-sm font-medium">
+              {section.hasSpecialInputs ? "Yes" : "No"}
+            </p>
           </div>
         </div>
 
@@ -163,7 +192,9 @@ function SectionDetails({ section }: { section: AdtmTemplateSection }) {
                   <tr key={q.id} className="border-b border-secondary-100">
                     <td className="py-2 px-3">{q.questionNumber}</td>
                     <td className="py-2 px-3">{q.score}</td>
-                    <td className="py-2 px-3">{getDifficultyBadge(q.difficulty)}</td>
+                    <td className="py-2 px-3">
+                      {getDifficultyBadge(q.difficulty)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -193,7 +224,9 @@ function SectionDetails({ section }: { section: AdtmTemplateSection }) {
                       >
                         <span className="text-sm">Q{q.questionNumber}</span>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm text-secondary-600">{q.score}pts</span>
+                          <span className="text-sm text-secondary-600">
+                            {q.score}pts
+                          </span>
                           {getDifficultyBadge(q.difficulty)}
                         </div>
                       </div>
@@ -215,4 +248,3 @@ function SectionDetails({ section }: { section: AdtmTemplateSection }) {
     </Card>
   );
 }
-

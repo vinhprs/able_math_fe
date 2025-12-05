@@ -3,7 +3,7 @@ import { Login } from "@/pages/auth/Login";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { RoleRoute } from "./RoleRoute";
 import { LayoutRoute } from "./LayoutRoute";
-import { UserRole } from "@shared/types/enum";
+import { UserRole } from "@/shared/types/enum";
 import { useAuthStore } from "@/store/authStore";
 import { NotFound } from "@/pages/NotFound";
 
