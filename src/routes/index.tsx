@@ -13,10 +13,15 @@ import { TestList } from "@/pages/admin/tests/TestList";
 import { TestCreate } from "@/pages/admin/tests/TestCreate";
 import { TestEdit } from "@/pages/admin/tests/TestEdit";
 import { TestDetail } from "@/pages/admin/tests/TestDetail";
+import { AdtmTemplatesPage } from "@/pages/admin/adtm/AdtmTemplatesPage";
 
 // Teacher Pages
 import { TeacherDashboard } from "@/pages/teacher/Dashboard";
 import { AdtmGrading } from "@/pages/teacher/adtm/AdtmGrading";
+import { AdtmStudents } from "@/pages/teacher/adtm/AdtmStudents";
+import { RegisterStudent } from "@/pages/teacher/adtm/RegisterStudent";
+import { AdtmGradingEnhanced } from "@/pages/teacher/adtm/AdtmGradingEnhanced";
+import { AssignStudentsPage } from "@/pages/teacher/adtm/AssignStudentsPage";
 import { TeacherTestBrowse } from "@/pages/teacher/tests/TestBrowse";
 import { AssignmentList } from "@/pages/teacher/assignments/AssignmentList";
 import { AssignTest } from "@/pages/teacher/assignments/AssignTest";
@@ -41,6 +46,8 @@ import StudentReportDetail from "@/pages/student/StudentReportDetail";
 // Teacher Pages - Results
 import { ResultReview } from "@/pages/teacher/results/ResultReview";
 import PendingReports from "@/pages/teacher/PendingReports";
+// Teacher Pages - A-DTM
+import { AdtmGradingList } from "@/pages/teacher/adtm/AdtmGradingList";
 
 /**
  * Get dashboard route based on user role
@@ -108,17 +115,8 @@ export default function createRoutes() {
                   element: <TestEdit />,
                 },
                 {
-                  path: "admin/tests/adtm",
-                  element: (
-                    <div className="max-w-7xl mx-auto">
-                      <h1 className="text-3xl font-bold text-secondary-900">
-                        A-DTM Tests
-                      </h1>
-                      <p className="mt-2 text-secondary-600">
-                        A-DTM test management will be implemented here.
-                      </p>
-                    </div>
-                  ),
+                  path: "admin/adtm/templates",
+                  element: <AdtmTemplatesPage />,
                 },
                 {
                   path: "admin",
@@ -153,6 +151,30 @@ export default function createRoutes() {
                 {
                   path: "teacher/reports",
                   element: <Navigate to="/teacher/reports/pending" replace />,
+                },
+                {
+                  path: "teacher/adtm/students",
+                  element: <AdtmStudents />,
+                },
+                {
+                  path: "teacher/adtm/register",
+                  element: <RegisterStudent />,
+                },
+                {
+                  path: "teacher/adtm/assign",
+                  element: <AssignStudentsPage />,
+                },
+                {
+                  path: "teacher/grading",
+                  element: <AdtmGradingList />,
+                },
+                {
+                  path: "teacher/adtm/grade/:submissionId",
+                  element: <AdtmGradingEnhanced />,
+                },
+                {
+                  path: "teacher/adtm/:submissionId/grade",
+                  element: <AdtmGrading />,
                 },
                 {
                   path: "teacher/tests/browse",

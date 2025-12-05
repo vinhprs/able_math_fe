@@ -7,6 +7,7 @@ import {
   FileCheck,
   BarChart3,
   Search,
+  UserPlus,
 } from "lucide-react";
 
 interface MenuItem {
@@ -35,6 +36,11 @@ const menuItems: MenuItem[] = [
     label: "Assignments",
     icon: ClipboardCheck,
     path: "/teacher/assignments",
+  },
+  {
+    label: "A-DTM Assignment",
+    icon: UserPlus,
+    path: "/teacher/adtm/assign",
   },
   {
     label: "A-DTM Grading",

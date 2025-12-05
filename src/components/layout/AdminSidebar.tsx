@@ -3,11 +3,11 @@ import { cn } from "@/lib/cn";
 import {
   Home,
   FileText,
-  ClipboardList,
   Users,
   GraduationCap,
   BarChart3,
   Settings,
+  Layers,
 } from "lucide-react";
 
 interface MenuItem {
@@ -28,9 +28,9 @@ const menuItems: MenuItem[] = [
     path: "/admin/tests/achievement",
   },
   {
-    label: "A-DTM Tests",
-    icon: ClipboardList,
-    path: "/admin/tests/adtm",
+    label: "A-DTM Templates",
+    icon: Layers,
+    path: "/admin/adtm/templates",
   },
   {
     label: "Teachers",

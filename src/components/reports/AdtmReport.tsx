@@ -2,6 +2,7 @@ import { ReportHeader } from './ReportHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { ReportBarChart } from '@/components/charts/ReportBarChart';
 import { ReportRadarChart } from '@/components/charts/ReportRadarChart';
+import { DifficultyBreakdownTable } from './DifficultyBreakdownTable';
 import { cn } from '@/lib/cn';
 import type { AdtmReportData } from '@/types/reports.types';
 
@@ -80,51 +81,67 @@ export function AdtmReport({ reportData }: AdtmReportProps) {
           <CardTitle>Section Details</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="space-y-6">
             {reportData.sections.map((section) => (
-              <div
-                key={section.number}
-                className="border border-secondary-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold text-secondary-900">
-                    Section {section.number}: {section.name}
-                  </h3>
-                </div>
-                <div className={cn('text-3xl font-bold mb-2', getScoreColor(section.standardScore))}>
-                  {section.standardScore.toFixed(1)}%
-                </div>
-                <div className="text-sm text-secondary-600 mb-3">
-                  {section.rawScore} / {section.maxScore} points
-                </div>
-                {section.correctCount !== undefined && (
-                  <div className="text-xs text-secondary-500 space-y-1">
-                    <div>Correct: {section.correctCount}</div>
-                    {section.mistakeCount !== undefined && (
-                      <div>Mistake: {section.mistakeCount}</div>
-                    )}
-                    {section.unsolvedCount !== undefined && (
-                      <div>Unsolved: {section.unsolvedCount}</div>
-                    )}
+              <div key={section.number} className="space-y-4">
+                {/* Section Summary Card */}
+                <div className="border border-secondary-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold text-secondary-900">
+                      Section {section.number}: {section.name}
+                    </h3>
                   </div>
-                )}
-                {section.unitScores && section.unitScores.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-secondary-200">
-                    <p className="text-xs font-semibold text-secondary-700 mb-2">Unit Scores:</p>
-                    <div className="space-y-1">
-                      {section.unitScores.map((unit) => (
-                        <div
-                          key={unit.unitName}
-                          className="flex justify-between text-xs text-secondary-600"
-                        >
-                          <span>{unit.unitName}</span>
-                          <span className="font-medium">
-                            {unit.standardScore.toFixed(1)}%
-                          </span>
-                        </div>
-                      ))}
+                  <div className={cn('text-3xl font-bold mb-2', getScoreColor(section.standardScore))}>
+                    {section.standardScore.toFixed(1)}%
+                  </div>
+                  <div className="text-sm text-secondary-600 mb-3">
+                    {section.rawScore} / {section.maxScore} points
+                  </div>
+                  {section.correctCount !== undefined && (
+                    <div className="text-xs text-secondary-500 space-y-1">
+                      <div>Correct: {section.correctCount}</div>
+                      {section.mistakeCount !== undefined && (
+                        <div>Mistake: {section.mistakeCount}</div>
+                      )}
+                      {section.unsolvedCount !== undefined && (
+                        <div>Unsolved: {section.unsolvedCount}</div>
+                      )}
                     </div>
-                  </div>
+                  )}
+                  {section.unitScores && section.unitScores.length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-secondary-200">
+                      <p className="text-xs font-semibold text-secondary-700 mb-2">Unit Scores:</p>
+                      <div className="space-y-1">
+                        {section.unitScores.map((unit) => (
+                          <div
+                            key={unit.unitName}
+                            className="flex justify-between text-xs text-secondary-600"
+                          >
+                            <span>{unit.unitName}</span>
+                            <span className="font-medium">
+                              {unit.standardScore.toFixed(1)}%
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Difficulty Breakdown Table for Sections 1, 2, 3 */}
+                {section.difficultyBreakdown && section.difficultyBreakdown.length > 0 && (
+                  <DifficultyBreakdownTable
+                    title={
+                      section.number === 1
+                        ? 'Calculation Difficulty'
+                        : section.number === 2
+                          ? 'Concept Understanding - Difficulty'
+                          : 'Concept Application - Difficulty'
+                    }
+                    data={section.difficultyBreakdown}
+                    showInsights={true}
+                    showTotal={true}
+                  />
                 )}
               </div>
             ))}

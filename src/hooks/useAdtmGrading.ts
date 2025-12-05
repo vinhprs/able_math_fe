@@ -69,7 +69,7 @@ export function useAdtmSubmission(submissionId: string | null) {
         success: boolean;
         data: AdtmSubmission;
         timestamp: string;
-      }>(`/teacher/submissions/${submissionId}`);
+      }>(`/teacher/adtm/submissions/${submissionId}`);
       return response.data.data;
     },
     enabled: !!submissionId,
@@ -152,7 +152,7 @@ export function useGradeAdtmSubmission() {
           totalMaxScore: number;
         };
         timestamp: string;
-      }>(`/grading/adtm/${submissionId}`);
+      }>(`/teacher/adtm/submissions/${submissionId}/submit`);
       return response.data.data;
     },
     onSuccess: (_, submissionId) => {
