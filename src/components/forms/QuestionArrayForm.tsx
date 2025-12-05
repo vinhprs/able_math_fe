@@ -1,7 +1,6 @@
 import { Button, Input, Select, Textarea } from "@/components/ui";
 import type { ICreateQuestionDto } from "@/types/test.types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DifficultyLevel } from "@/shared/types/enum";
 import { Plus, Trash2 } from "lucide-react";
 import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -12,8 +11,8 @@ const questionSchema = z.object({
   unitName: z.string().min(1, "Unit name is required"),
   correctAnswer: z.string().min(1, "Correct answer is required"),
   score: z.number().positive("Score must be positive"),
-  difficulty: z.nativeEnum(DifficultyLevel, {
-    error: "Difficulty is required",
+  difficulty: z.number().int().min(1).max(4, {
+    message: "Difficulty must be between 1 and 4",
   }),
   questionText: z.string().optional(),
   questionImage: z.string().optional(),
@@ -33,9 +32,10 @@ interface QuestionArrayFormProps {
 }
 
 const DIFFICULTY_OPTIONS = [
-  { value: DifficultyLevel.HIGH, label: "High" },
-  { value: DifficultyLevel.MEDIUM, label: "Medium" },
-  { value: DifficultyLevel.LOW, label: "Low" },
+  { value: "1", label: "Level 1 (Easy)" },
+  { value: "2", label: "Level 2 (Medium)" },
+  { value: "3", label: "Level 3 (Hard)" },
+  { value: "4", label: "Level 4 (Very Hard)" },
 ];
 
 export function QuestionArrayForm({
@@ -58,7 +58,7 @@ export function QuestionArrayForm({
               unitName: "",
               correctAnswer: "",
               score: 1,
-              difficulty: DifficultyLevel.MEDIUM,
+              difficulty: 2, // Default to Medium (Level 2)
               questionText: "",
             },
           ],
@@ -90,7 +90,7 @@ export function QuestionArrayForm({
       unitName: "",
       correctAnswer: "",
       score: 1,
-      difficulty: DifficultyLevel.MEDIUM,
+      difficulty: 2, // Default to Medium (Level 2)
       questionText: "",
     });
   };
@@ -167,7 +167,9 @@ export function QuestionArrayForm({
                 label="Difficulty"
                 options={DIFFICULTY_OPTIONS}
                 error={questionErrors?.difficulty?.message}
-                {...register(`questions.${index}.difficulty`)}
+                {...register(`questions.${index}.difficulty`, {
+                  valueAsNumber: true,
+                })}
               />
             </div>
 

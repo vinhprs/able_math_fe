@@ -1,4 +1,4 @@
-import { UserRole } from "./enum";
+import type { UserRole } from "./enum";
 
 /**
  * Base user interface

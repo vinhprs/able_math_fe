@@ -105,7 +105,7 @@ export function TestEdit() {
       unitName: q.unitName || "",
       correctAnswer: q.correctAnswer,
       score: q.score,
-      difficulty: q.difficulty || ("MEDIUM" as any),
+      difficulty: q.difficulty || 2, // Default to Level 2 (Medium)
       questionText: q.questionText,
       questionImage: q.questionImage || undefined,
     })) || [];

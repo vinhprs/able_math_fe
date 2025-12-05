@@ -1,9 +1,4 @@
-import {
-  TestType,
-  TestStatus,
-  DifficultyLevel,
-  Term,
-} from "@/shared/types/enum";
+import { TestType, TestStatus, Term } from "@/shared/types/enum";
 
 /**
  * Test interface matching backend entity
@@ -44,7 +39,7 @@ export interface ITestQuestion {
   questionImage: string | null;
   correctAnswer: string;
   score: number;
-  difficulty: DifficultyLevel | null;
+  difficulty: number | null; // 1-4: 1=Easy, 2=Medium, 3=Hard, 4=Very Hard
   createdAt: string;
   updatedAt: string;
 }
@@ -99,7 +94,7 @@ export interface ICreateQuestionDto {
   unitName: string;
   correctAnswer: string;
   score: number;
-  difficulty: DifficultyLevel;
+  difficulty: number; // 1-4: 1=Easy, 2=Medium, 3=Hard, 4=Very Hard
   questionText?: string;
   questionImage?: string;
 }

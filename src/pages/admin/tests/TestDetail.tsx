@@ -216,7 +216,9 @@ export function TestDetail() {
                         Question {question.questionNumber}
                       </span>
                       <Badge variant="info">
-                        {question.difficulty || "N/A"}
+                        {question.difficulty
+                          ? `Level ${question.difficulty}`
+                          : "N/A"}
                       </Badge>
                       <span className="text-sm text-secondary-600">
                         {question.score} point

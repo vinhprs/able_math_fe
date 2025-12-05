@@ -228,7 +228,7 @@ export function TestCreate() {
                           Question {q.questionNumber}
                         </span>
                         <span className="text-sm text-secondary-600">
-                          {q.score} point{q.score !== 1 ? "s" : ""} •{" "}
+                          {q.score} point{q.score !== 1 ? "s" : ""} • Level{" "}
                           {q.difficulty}
                         </span>
                       </div>
