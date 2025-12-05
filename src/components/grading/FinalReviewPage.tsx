@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAdtmGradingStore } from '@/store/adtmGradingStore';
-import { useGradeAdtmSubmission } from '@/hooks/useAdtmGrading';
+import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAdtmGradingStore } from "@/store/adtmGradingStore";
+import { useGradeAdtmSubmission } from "@/hooks/useAdtmGrading";
 import {
   Card,
   CardContent,
@@ -11,7 +11,7 @@ import {
   Badge,
   Checkbox,
   Alert,
-} from '@/components/ui';
+} from "@/components/ui";
 import {
   Edit,
   CheckCircle2,
@@ -19,14 +19,14 @@ import {
   XCircle,
   Star,
   Loader2,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   useCalculateSection1Scores,
   useCalculateSectionScores,
   useCalculateSimpleSectionScores,
-} from '@/hooks/useCalculateScores';
-import type { AdtmSubmission } from '@/hooks/useAdtmGrading';
-import type { ITestQuestion } from '@/types/test.types';
+} from "@/hooks/useCalculateScores";
+import type { AdtmSubmission } from "@/hooks/useAdtmGrading";
+import type { ITestQuestion } from "@/types/test.types";
 
 interface FinalReviewPageProps {
   submission: AdtmSubmission;
@@ -41,14 +41,8 @@ export function FinalReviewPage({
 }: FinalReviewPageProps) {
   const navigate = useNavigate();
   const [confirmed, setConfirmed] = useState(false);
-  const {
-    section1,
-    section2,
-    section3,
-    section4,
-    section5,
-    setCurrentStep,
-  } = useAdtmGradingStore();
+  const { section1, section2, section3, section4, section5, setCurrentStep } =
+    useAdtmGradingStore();
 
   const gradeMutation = useGradeAdtmSubmission();
 
@@ -94,14 +88,21 @@ export function FinalReviewPage({
       section4Scores.maxScore +
       section5Scores.maxScore;
 
-    const overallStandardScore = totalMaxScore > 0 ? (totalRawScore / totalMaxScore) * 100 : 0;
+    const overallStandardScore =
+      totalMaxScore > 0 ? (totalRawScore / totalMaxScore) * 100 : 0;
 
     return {
       totalRawScore,
       totalMaxScore,
       overallStandardScore: Math.round(overallStandardScore * 100) / 100,
     };
-  }, [section1Scores, section2Scores, section3Scores, section4Scores, section5Scores]);
+  }, [
+    section1Scores,
+    section2Scores,
+    section3Scores,
+    section4Scores,
+    section5Scores,
+  ]);
 
   // Validation warnings
   const validationWarnings = useMemo(() => {
@@ -109,13 +110,13 @@ export function FinalReviewPage({
 
     // Check Section 1 special inputs
     if (section1.concentrationLevel === null) {
-      warnings.push({ section: 1, message: 'Concentration level is missing' });
+      warnings.push({ section: 1, message: "Concentration level is missing" });
     }
     if (section1.currentMood === null) {
-      warnings.push({ section: 1, message: 'Current mood is missing' });
+      warnings.push({ section: 1, message: "Current mood is missing" });
     }
     if (section1.expectedScore === null) {
-      warnings.push({ section: 1, message: 'Expected score is missing' });
+      warnings.push({ section: 1, message: "Expected score is missing" });
     }
 
     // Check for unanswered questions
@@ -125,15 +126,15 @@ export function FinalReviewPage({
         sectionNum === 1
           ? section1
           : sectionNum === 2
-            ? section2
-            : sectionNum === 3
-              ? section3
-              : sectionNum === 4
-                ? section4
-                : section5;
+          ? section2
+          : sectionNum === 3
+          ? section3
+          : sectionNum === 4
+          ? section4
+          : section5;
 
       const unanswered = questions.filter(
-        (q) => sectionData.answers[q.id] === undefined,
+        (q) => sectionData.answers[q.id] === undefined
       );
       if (unanswered.length > 0) {
         warnings.push({
@@ -147,21 +148,21 @@ export function FinalReviewPage({
   }, [section1, section2, section3, section4, section5, questionsBySection]);
 
   const getPerformanceRating = (score: number): string => {
-    if (score >= 90) return 'Excellent';
-    if (score >= 80) return 'Very Good';
-    if (score >= 70) return 'Good';
-    if (score >= 60) return 'Fair';
-    return 'Needs Improvement';
+    if (score >= 90) return "Excellent";
+    if (score >= 80) return "Very Good";
+    if (score >= 70) return "Good";
+    if (score >= 60) return "Fair";
+    return "Needs Improvement";
   };
 
   const getSectionName = (sectionNum: number): string => {
     const names = [
-      '',
-      'Computational Ability',
-      'Conceptual Understanding',
-      'Concept Application',
-      'Reasoning Ability',
-      'Problem Solving',
+      "",
+      "Computational Ability",
+      "Conceptual Understanding",
+      "Concept Application",
+      "Reasoning Ability",
+      "Problem Solving",
     ];
     return names[sectionNum];
   };
@@ -232,9 +233,10 @@ export function FinalReviewPage({
 
     try {
       await gradeMutation.mutateAsync(submission.id);
-      navigate('/teacher/adtm/students');
+      // Navigate to grading list - query will be automatically refreshed due to invalidation
+      navigate("/teacher/grading");
     } catch (error: any) {
-      alert(error.message || 'Failed to submit grading');
+      alert(error.message || "Failed to submit grading");
     }
   };
 
@@ -246,7 +248,9 @@ export function FinalReviewPage({
     <div className="space-y-6 max-w-6xl">
       {/* Page Header */}
       <div>
-        <h2 className="text-3xl font-bold text-secondary-900">Review Before Submit</h2>
+        <h2 className="text-3xl font-bold text-secondary-900">
+          Review Before Submit
+        </h2>
         <p className="text-secondary-500 mt-1">
           Please review all sections before finalizing the grading
         </p>
@@ -260,14 +264,14 @@ export function FinalReviewPage({
         <CardContent>
           <div className="flex items-center gap-6 mb-6">
             <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold text-xl">
-              {submission.student?.fullName?.charAt(0).toUpperCase() || 'S'}
+              {submission.student?.fullName?.charAt(0).toUpperCase() || "S"}
             </div>
             <div className="flex-1">
               <div className="font-semibold text-lg">
-                {submission.student?.fullName || 'Unknown Student'}
+                {submission.student?.fullName || "Unknown Student"}
               </div>
               <div className="text-sm text-secondary-500">
-                {submission.student?.username} • {submission.test.grade} •{' '}
+                {submission.student?.username} • {submission.test.grade} •{" "}
                 {submission.test.title}
               </div>
               <div className="text-sm text-secondary-500 mt-1">
@@ -278,10 +282,14 @@ export function FinalReviewPage({
 
           <div className="pt-6 border-t border-secondary-200">
             <div className="text-center">
-              <div className="text-sm text-secondary-500 mb-2">Overall Score</div>
+              <div className="text-sm text-secondary-500 mb-2">
+                Overall Score
+              </div>
               <div className="text-4xl font-bold mb-1">
                 {overallScores.totalRawScore}
-                <span className="text-2xl text-secondary-500">/{overallScores.totalMaxScore}</span>
+                <span className="text-2xl text-secondary-500">
+                  /{overallScores.totalMaxScore}
+                </span>
               </div>
               <div className="text-3xl font-bold text-primary-600 mb-4">
                 {overallScores.overallStandardScore.toFixed(1)}%
@@ -289,10 +297,10 @@ export function FinalReviewPage({
               <Badge
                 variant={
                   overallScores.overallStandardScore >= 80
-                    ? 'success'
+                    ? "success"
                     : overallScores.overallStandardScore >= 60
-                      ? 'warning'
-                      : 'danger'
+                    ? "warning"
+                    : "danger"
                 }
                 className="text-base px-4 py-2"
               >
@@ -315,7 +323,11 @@ export function FinalReviewPage({
                     Section {sectionNum}: {getSectionName(sectionNum)}
                   </CardTitle>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => goToSection(sectionNum)}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => goToSection(sectionNum)}
+                >
                   <Edit className="w-4 h-4 mr-2" />
                   Edit
                 </Button>
@@ -326,15 +338,17 @@ export function FinalReviewPage({
               {sectionNum === 1 && (
                 <div className="grid grid-cols-3 gap-4 p-4 bg-secondary-50 rounded-lg">
                   <div>
-                    <div className="text-xs text-secondary-500 mb-1">Concentration</div>
+                    <div className="text-xs text-secondary-500 mb-1">
+                      Concentration
+                    </div>
                     <div className="flex gap-1">
                       {[1, 2, 3, 4, 5].map((level) => (
                         <Star
                           key={level}
                           className={`w-4 h-4 ${
                             level <= (section1.concentrationLevel || 0)
-                              ? 'text-yellow-500 fill-yellow-500'
-                              : 'text-secondary-300'
+                              ? "text-yellow-500 fill-yellow-500"
+                              : "text-secondary-300"
                           }`}
                         />
                       ))}
@@ -348,16 +362,20 @@ export function FinalReviewPage({
                           key={mood}
                           className={`w-4 h-4 ${
                             mood <= (section1.currentMood || 0)
-                              ? 'text-yellow-500 fill-yellow-500'
-                              : 'text-secondary-300'
+                              ? "text-yellow-500 fill-yellow-500"
+                              : "text-secondary-300"
                           }`}
                         />
                       ))}
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-secondary-500 mb-1">Expected</div>
-                    <div className="font-semibold">{section1.expectedScore || 0} pts</div>
+                    <div className="text-xs text-secondary-500 mb-1">
+                      Expected
+                    </div>
+                    <div className="font-semibold">
+                      {section1.expectedScore || 0} pts
+                    </div>
                   </div>
                 </div>
               )}
@@ -365,13 +383,18 @@ export function FinalReviewPage({
               {/* Scores */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <div className="text-sm text-secondary-500 mb-1">Raw Score</div>
+                  <div className="text-sm text-secondary-500 mb-1">
+                    Raw Score
+                  </div>
                   <div className="text-xl font-semibold">
-                    {getSectionRawScore(sectionNum)} / {getSectionMaxScore(sectionNum)}
+                    {getSectionRawScore(sectionNum)} /{" "}
+                    {getSectionMaxScore(sectionNum)}
                   </div>
                 </div>
                 <div>
-                  <div className="text-sm text-secondary-500 mb-1">Standard Score</div>
+                  <div className="text-sm text-secondary-500 mb-1">
+                    Standard Score
+                  </div>
                   <div className="text-xl font-semibold text-primary-600">
                     {getSectionStandardScore(sectionNum).toFixed(1)}%
                   </div>
@@ -383,15 +406,21 @@ export function FinalReviewPage({
                 <div className="flex gap-4">
                   <div className="flex items-center gap-2 text-green-600">
                     <CheckCircle2 className="w-4 h-4" />
-                    <span className="text-sm">Correct: {section1Scores.correctCount}</span>
+                    <span className="text-sm">
+                      Correct: {section1Scores.correctCount}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 text-yellow-600">
                     <AlertCircle className="w-4 h-4" />
-                    <span className="text-sm">Mistakes: {section1Scores.mistakeCount}</span>
+                    <span className="text-sm">
+                      Mistakes: {section1Scores.mistakeCount}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 text-red-600">
                     <XCircle className="w-4 h-4" />
-                    <span className="text-sm">Unsolved: {section1Scores.unsolvedCount}</span>
+                    <span className="text-sm">
+                      Unsolved: {section1Scores.unsolvedCount}
+                    </span>
                   </div>
                 </div>
               )}
@@ -405,9 +434,12 @@ export function FinalReviewPage({
                       key={unit.unitName}
                       className="flex items-center justify-between p-2 bg-secondary-50 rounded"
                     >
-                      <span className="text-sm font-medium">{unit.unitName}</span>
+                      <span className="text-sm font-medium">
+                        {unit.unitName}
+                      </span>
                       <span className="text-sm text-secondary-600">
-                        {unit.rawScore}/{unit.maxScore} ({unit.standardScore.toFixed(1)}%)
+                        {unit.rawScore}/{unit.maxScore} (
+                        {unit.standardScore.toFixed(1)}%)
                       </span>
                     </div>
                   ))}
@@ -426,7 +458,10 @@ export function FinalReviewPage({
             <div className="font-medium mb-2">Validation Warnings</div>
             <ul className="space-y-1">
               {validationWarnings.map((warning, i) => (
-                <li key={i} className="flex items-center justify-between text-sm">
+                <li
+                  key={i}
+                  className="flex items-center justify-between text-sm"
+                >
                   <span>
                     Section {warning.section}: {warning.message}
                   </span>
@@ -466,7 +501,11 @@ export function FinalReviewPage({
             variant="primary"
             size="lg"
             onClick={handleFinalSubmit}
-            disabled={!confirmed || validationWarnings.length > 0 || gradeMutation.isPending}
+            disabled={
+              !confirmed ||
+              validationWarnings.length > 0 ||
+              gradeMutation.isPending
+            }
           >
             {gradeMutation.isPending ? (
               <>
@@ -474,7 +513,7 @@ export function FinalReviewPage({
                 Submitting...
               </>
             ) : (
-              'Complete Grading & Generate Report'
+              "Complete Grading & Generate Report"
             )}
           </Button>
         </div>
@@ -482,4 +521,3 @@ export function FinalReviewPage({
     </div>
   );
 }
-

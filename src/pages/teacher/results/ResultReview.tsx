@@ -6,7 +6,8 @@ import {
   useGeneratePdf,
   downloadPdf,
 } from "@/hooks/useReports";
-import { AchievementReport, AdtmReport } from "@/components/reports";
+import { AchievementReport } from "@/components/reports";
+import { AdtmReportPageForTeacher } from "./AdtmReportPageForTeacher";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Modal } from "@/components/ui/Modal";
@@ -21,6 +22,7 @@ import {
 } from "lucide-react";
 import { reportService } from "@/services/reportService";
 import { toastSuccess, toastError } from "@/lib/toast";
+import { ReportStatus } from "@/types/report";
 
 export function ResultReview() {
   const params = useParams<{ submissionId?: string; reportId?: string }>();
@@ -42,10 +44,21 @@ export function ResultReview() {
   const [comment, setComment] = useState("");
   const [showCommentModal, setShowCommentModal] = useState(false);
   const [loadingReportCard, setLoadingReportCard] = useState(false);
+  const [knownTestType, setKnownTestType] = useState<
+    "ACHIEVEMENT" | "ADTM" | null
+  >(null);
+  const [reportStatus, setReportStatus] = useState<string | null>(null);
 
   // Determine test type from submission
-  const achievementQuery = useAchievementReport(actualSubmissionId || "");
-  const adtmQuery = useAdtmReport(actualSubmissionId || "");
+  // Only enable queries based on known test type (if available from report card)
+  const achievementQuery = useAchievementReport(
+    actualSubmissionId || "",
+    knownTestType === null || knownTestType === "ACHIEVEMENT"
+  );
+  const adtmQuery = useAdtmReport(
+    actualSubmissionId || "",
+    knownTestType === null || knownTestType === "ADTM"
+  );
   const generatePdfMutation = useGeneratePdf();
 
   const isLoading =
@@ -62,40 +75,62 @@ export function ResultReview() {
 
   // Fetch reportId or submissionId based on route params
   useEffect(() => {
+    // Reset known test type and report status when route changes
+    setKnownTestType(null);
+    setReportStatus(null);
+
     const fetchReportInfo = async () => {
       // If we have reportId from route, we need to get submissionId from report card
       if (routeReportId && !routeSubmissionId) {
         try {
           setLoadingReportCard(true);
           setReportId(routeReportId);
-          // For now, we'll need to get submissionId from the report card
-          // Since we don't have an endpoint, we'll try to get it from pending reports
-          const pendingReports = await reportService.getPendingReports();
-          const matchingReport = pendingReports.find(
-            (r) => r.id === routeReportId
+          // Get report card from reportId to get submissionId and testType
+          const reportCard = await reportService.getReportCardById(
+            routeReportId
           );
-          if (matchingReport) {
-            setActualSubmissionId(matchingReport.submissionId);
+          if (reportCard) {
+            setActualSubmissionId(reportCard.submissionId);
+            // Get testType from report card to avoid calling wrong API
+            const testTypeFromCard =
+              reportCard.test?.testType ||
+              reportCard.reportData?.testInfo?.testType;
+            if (testTypeFromCard) {
+              setKnownTestType(testTypeFromCard as "ACHIEVEMENT" | "ADTM");
+            }
+            // Get report status for conditional button rendering
+            setReportStatus(reportCard.status);
           }
         } catch (error) {
           console.error("Failed to fetch report info:", error);
+          toastError("Failed to load report. Please try again.");
         } finally {
           setLoadingReportCard(false);
         }
         return;
       }
 
-      // If we have submissionId from route, we need to get reportId from pending reports
+      // If we have submissionId from route, we can use it directly
+      // ReportId is optional in this case
       if (routeSubmissionId && !routeReportId) {
         try {
           setLoadingReportCard(true);
           setActualSubmissionId(routeSubmissionId);
-          const pendingReports = await reportService.getPendingReports();
-          const matchingReport = pendingReports.find(
-            (r) => r.submissionId === routeSubmissionId
+          setKnownTestType(null); // Reset known test type, will be determined from API calls
+          // Try to get report card from submissionId to get reportId and status
+          const reportCard = await reportService.getReportCardBySubmissionId(
+            routeSubmissionId
           );
-          if (matchingReport) {
-            setReportId(matchingReport.id);
+          if (reportCard) {
+            setReportId(reportCard.id);
+            setReportStatus(reportCard.status);
+            // Get testType from report card to avoid calling wrong API
+            const testTypeFromCard =
+              reportCard.test?.testType ||
+              reportCard.reportData?.testInfo?.testType;
+            if (testTypeFromCard) {
+              setKnownTestType(testTypeFromCard as "ACHIEVEMENT" | "ADTM");
+            }
           }
         } catch (error) {
           console.error("Failed to fetch report ID:", error);
@@ -105,10 +140,22 @@ export function ResultReview() {
         return;
       }
 
-      // If we have both, just set them
+      // If we have both, just set them and fetch report status
       if (routeReportId && routeSubmissionId) {
         setReportId(routeReportId);
         setActualSubmissionId(routeSubmissionId);
+        setKnownTestType(null); // Reset known test type
+        // Fetch report card to get status
+        try {
+          const reportCard = await reportService.getReportCardById(
+            routeReportId
+          );
+          if (reportCard) {
+            setReportStatus(reportCard.status);
+          }
+        } catch (error) {
+          console.error("Failed to fetch report status:", error);
+        }
         setLoadingReportCard(false);
       }
     };
@@ -148,6 +195,18 @@ export function ResultReview() {
 
       toastSuccess("Report approved successfully!");
 
+      // Refresh report status after approve
+      if (reportId) {
+        try {
+          const reportCard = await reportService.getReportCardById(reportId);
+          if (reportCard) {
+            setReportStatus(reportCard.status);
+          }
+        } catch (error) {
+          console.error("Failed to refresh report status:", error);
+        }
+      }
+
       // Refresh data
       achievementQuery.refetch();
       adtmQuery.refetch();
@@ -180,7 +239,7 @@ export function ResultReview() {
 
       await reportService.publishReport(idToUse);
       toastSuccess("Report published successfully!");
-      navigate("/teacher/reports/pending");
+      navigate("/teacher/reports");
     } catch (error: any) {
       console.error("Failed to publish:", error);
       toastError(error?.message || "Failed to publish report");
@@ -241,11 +300,38 @@ export function ResultReview() {
     );
   }
 
+  // If A-DTM, use the enhanced report page component
+  if (testType === "ADTM" && reportData && actualSubmissionId) {
+    return (
+      <>
+        <AdtmReportPageForTeacher
+          submissionId={actualSubmissionId}
+          reportId={reportId}
+          reportData={reportData as any}
+          isLoading={adtmQuery.isLoading || loadingReportCard}
+          error={adtmQuery.error}
+          reportStatus={reportStatus}
+          onApprove={() => {
+            adtmQuery.refetch();
+            // Refresh report status after approve
+            if (reportId) {
+              reportService.getReportCardById(reportId).then((card) => {
+                setReportStatus(card.status);
+              });
+            }
+          }}
+        />
+        {/* Comment Modal for A-DTM (handled inside AdtmReportPageForTeacher) */}
+      </>
+    );
+  }
+
+  // For Achievement tests, use the standard review page
   return (
     <div className="space-y-6 print:space-y-0">
       {/* Action Buttons - Hidden in print */}
       <div className="flex items-center justify-between print:hidden">
-        <Button variant="outline" onClick={() => navigate(-1)}>
+        <Button variant="outline" onClick={() => navigate("/teacher/reports")}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
         </Button>
@@ -276,52 +362,55 @@ export function ResultReview() {
               </>
             )}
           </Button>
-          <Button
-            variant="secondary"
-            onClick={() => setShowCommentModal(true)}
-            disabled={approving}
-            className="print:hidden"
-          >
-            {approving ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Approving...
-              </>
-            ) : (
-              <>
-                <CheckCircle className="mr-2 h-4 w-4" />
-                Approve
-              </>
+          {/* Show Approve button only if status is not APPROVED or PUBLISHED */}
+          {reportStatus !== ReportStatus.APPROVED &&
+            reportStatus !== ReportStatus.PUBLISHED && (
+              <Button
+                variant="secondary"
+                onClick={() => setShowCommentModal(true)}
+                disabled={approving}
+                className="print:hidden"
+              >
+                {approving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Approving...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="mr-2 h-4 w-4" />
+                    Approve
+                  </>
+                )}
+              </Button>
             )}
-          </Button>
-          <Button
-            onClick={handlePublish}
-            disabled={publishing}
-            className="print:hidden"
-          >
-            {publishing ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Publishing...
-              </>
-            ) : (
-              <>
-                <Eye className="mr-2 h-4 w-4" />
-                Publish
-              </>
-            )}
-          </Button>
+          {/* Show Publish button only if status is APPROVED and not PUBLISHED */}
+          {reportStatus === ReportStatus.APPROVED && (
+            <Button
+              onClick={handlePublish}
+              disabled={publishing}
+              className="print:hidden"
+            >
+              {publishing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Publishing...
+                </>
+              ) : (
+                <>
+                  <Eye className="mr-2 h-4 w-4" />
+                  Publish
+                </>
+              )}
+            </Button>
+          )}
         </div>
       </div>
 
       {/* Report Content */}
       {reportData && testType && (
         <div className="report-container">
-          {testType === "ACHIEVEMENT" ? (
-            <AchievementReport reportData={reportData as any} />
-          ) : (
-            <AdtmReport reportData={reportData as any} />
-          )}
+          <AchievementReport reportData={reportData as any} />
         </div>
       )}
 

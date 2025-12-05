@@ -1,11 +1,14 @@
-import api from '@/lib/api';
+import api from "@/lib/api";
 import type {
   PendingReport,
   ReportCard,
   ApproveReportDto,
   RejectReportDto,
-} from '@/types/report';
-import type { AchievementReportData, AdtmReportData } from '@/types/reports.types';
+} from "@/types/report";
+import type {
+  AchievementReportData,
+  AdtmReportData,
+} from "@/types/reports.types";
 
 /**
  * Report service for API calls
@@ -23,7 +26,44 @@ export const reportService = {
       success: boolean;
       data: PendingReport[];
       timestamp: string;
-    }>('/reports/pending');
+    }>("/reports/pending");
+    return response.data.data;
+  },
+
+  /**
+   * Get all reports for teacher (with optional filters)
+   * GET /api/reports/teacher/all
+   * Query params: status, testType
+   */
+  async getAllReportsForTeacher(filters?: {
+    status?: string;
+    testType?: string;
+  }): Promise<any[]> {
+    const params = new URLSearchParams();
+    if (filters?.status) params.append("status", filters.status);
+    if (filters?.testType) params.append("testType", filters.testType);
+
+    const queryString = params.toString();
+    const url = `/reports/teacher/all${queryString ? `?${queryString}` : ""}`;
+
+    const response = await api.get<{
+      success: boolean;
+      data: any[];
+      timestamp: string;
+    }>(url);
+    return response.data.data;
+  },
+
+  /**
+   * Get report card by ID for teacher
+   * GET /api/reports/teacher/:reportId
+   */
+  async getReportCardById(reportId: string): Promise<ReportCard> {
+    const response = await api.get<{
+      success: boolean;
+      data: ReportCard;
+      timestamp: string;
+    }>(`/reports/teacher/${reportId}`);
     return response.data.data;
   },
 
@@ -40,12 +80,12 @@ export const reportService = {
     teacherId?: string;
   }): Promise<any[]> {
     const params = new URLSearchParams();
-    if (filters?.status) params.append('status', filters.status);
-    if (filters?.testType) params.append('testType', filters.testType);
-    if (filters?.teacherId) params.append('teacherId', filters.teacherId);
+    if (filters?.status) params.append("status", filters.status);
+    if (filters?.testType) params.append("testType", filters.testType);
+    if (filters?.teacherId) params.append("teacherId", filters.teacherId);
 
     const queryString = params.toString();
-    const url = `/reports/admin/all${queryString ? `?${queryString}` : ''}`;
+    const url = `/reports/admin/all${queryString ? `?${queryString}` : ""}`;
 
     const response = await api.get<{
       success: boolean;
@@ -56,19 +96,21 @@ export const reportService = {
   },
 
   /**
-   * Get report card by submission ID
-   * This will be used to get reportId from submissionId
-   * Note: Backend endpoint needs to be added, or use existing report generation
+   * Get report card by submission ID for teacher
+   * GET /api/reports/teacher/by-submission/:submissionId
    */
-  async getReportCardBySubmissionId(_submissionId: string): Promise<ReportCard | null> {
-    // For now, we'll generate the report which creates/updates the report card
-    // Then we can extract the reportId from it
-    // This is a workaround until a proper endpoint is added
+  async getReportCardBySubmissionId(
+    submissionId: string
+  ): Promise<ReportCard | null> {
     try {
-      // Try to get report data - this ensures report card exists
-      // We'll need to parse the report card from the response or add a backend endpoint
-      return null; // Placeholder - will be implemented when backend endpoint is added
-    } catch {
+      const response = await api.get<{
+        success: boolean;
+        data: ReportCard;
+        timestamp: string;
+      }>(`/reports/teacher/by-submission/${submissionId}`);
+      return response.data.data;
+    } catch (error) {
+      console.error("Failed to get report card by submission ID:", error);
       return null;
     }
   },
@@ -78,7 +120,9 @@ export const reportService = {
    * Note: This endpoint needs to be added to backend or use submissionId-based endpoints
    * GET /api/reports/:reportId
    */
-  async getReportForReview(reportId: string): Promise<AchievementReportData | AdtmReportData> {
+  async getReportForReview(
+    reportId: string
+  ): Promise<AchievementReportData | AdtmReportData> {
     const response = await api.get<{
       success: boolean;
       data: AchievementReportData | AdtmReportData;
@@ -93,7 +137,7 @@ export const reportService = {
    */
   async approveReport(
     reportId: string,
-    data?: ApproveReportDto,
+    data?: ApproveReportDto
   ): Promise<ReportCard> {
     const response = await api.post<{
       success: boolean;
@@ -122,7 +166,7 @@ export const reportService = {
    */
   async rejectReport(
     reportId: string,
-    data: RejectReportDto,
+    data: RejectReportDto
   ): Promise<ReportCard> {
     const response = await api.post<{
       success: boolean;
@@ -145,7 +189,7 @@ export const reportService = {
     }>(`/reports/${submissionId}/generate-pdf`);
     // Backend returns direct JSON: { success, pdfUrl, message }
     const responseData = response.data as any;
-    return responseData.pdfUrl || '';
+    return responseData.pdfUrl || "";
   },
 
   // ========== STUDENT APIs ==========
@@ -159,7 +203,7 @@ export const reportService = {
       success: boolean;
       data: ReportCard[];
       timestamp: string;
-    }>('/reports/student/my-reports');
+    }>("/reports/student/my-reports");
     return response.data.data;
   },
 
@@ -167,7 +211,9 @@ export const reportService = {
    * Get published report detail
    * GET /api/reports/student/:reportId
    */
-  async getPublishedReport(reportId: string): Promise<AchievementReportData | AdtmReportData> {
+  async getPublishedReport(
+    reportId: string
+  ): Promise<AchievementReportData | AdtmReportData> {
     const response = await api.get<{
       success: boolean;
       data: AchievementReportData | AdtmReportData;
@@ -182,9 +228,8 @@ export const reportService = {
    */
   downloadPdf(pdfUrl: string): void {
     if (!pdfUrl) {
-      throw new Error('PDF URL is required');
+      throw new Error("PDF URL is required");
     }
-    window.open(pdfUrl, '_blank');
+    window.open(pdfUrl, "_blank");
   },
 };
-

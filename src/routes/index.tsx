@@ -48,13 +48,12 @@ import { ResultDetail } from "@/pages/student/results/ResultDetail";
 import MyReports from "@/pages/student/MyReports";
 import StudentReportDetail from "@/pages/student/StudentReportDetail";
 import { AdtmReportPage } from "@/pages/reports/AdtmReportPage";
-import { TeacherSubmissionsList } from "@/pages/teacher/submissions/SubmissionsList";
 import { AdminSubmissionsList } from "@/pages/admin/submissions/AdminSubmissionsList";
 import { AdminReportsList } from "@/pages/admin/AdminReportsList";
 
-// Teacher Pages - Results
+// Teacher Pages - Results & Reports
 import { ResultReview } from "@/pages/teacher/results/ResultReview";
-import PendingReports from "@/pages/teacher/PendingReports";
+import { TeacherReportsList } from "@/pages/teacher/reports/TeacherReportsList";
 // Teacher Pages - A-DTM
 import { AdtmGradingList } from "@/pages/teacher/adtm/AdtmGradingList";
 
@@ -178,16 +177,12 @@ export default function createRoutes() {
                   element: <ResultReview />,
                 },
                 {
-                  path: "teacher/reports/pending",
-                  element: <PendingReports />,
+                  path: "teacher/reports",
+                  element: <TeacherReportsList />,
                 },
                 {
                   path: "teacher/reports/:reportId/review",
                   element: <ResultReview />,
-                },
-                {
-                  path: "teacher/reports",
-                  element: <Navigate to="/teacher/reports/pending" replace />,
                 },
                 {
                   path: "teacher/adtm/students",
@@ -248,10 +243,6 @@ export default function createRoutes() {
                 {
                   path: "teacher/classes/:id",
                   element: <ClassDetails />,
-                },
-                {
-                  path: "teacher/submissions",
-                  element: <TeacherSubmissionsList />,
                 },
                 {
                   path: "teacher",

@@ -1,14 +1,21 @@
-import { useEffect, useMemo } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { useAdtmSubmission } from '@/hooks/useAdtmGradingWorkflow';
-import { useAutoSave } from '@/hooks/useAutoSave';
+import { useEffect, useMemo } from "react";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useAdtmSubmission } from "@/hooks/useAdtmGradingWorkflow";
+import { useAutoSave } from "@/hooks/useAutoSave";
 import {
   useCalculateSection1Scores,
   useCalculateSectionScores,
   useCalculateSimpleSectionScores,
-} from '@/hooks/useCalculateScores';
-import { useAdtmGradingStore } from '@/store/adtmGradingStore';
-import { Card, CardContent, CardHeader, CardTitle, Button, Stepper } from '@/components/ui';
+} from "@/hooks/useCalculateScores";
+import { useAdtmGradingStore } from "@/store/adtmGradingStore";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Button,
+  Stepper,
+} from "@/components/ui";
 import {
   QuestionInput,
   UnitCard,
@@ -16,36 +23,38 @@ import {
   ConcentrationLevelInput,
   CurrentMoodInput,
   ExpectedScoreInput,
-} from '@/components/grading';
-import { ArrowLeft, ArrowRight, Check, Loader2, Save } from 'lucide-react';
-import { toastSuccess, toastError } from '@/lib/toast';
-import { useSubmitGrading } from '@/hooks/useAdtmGradingWorkflow';
+} from "@/components/grading";
+import { ArrowLeft, ArrowRight, Check, Loader2, Save } from "lucide-react";
+import { toastSuccess, toastError } from "@/lib/toast";
+import { useSubmitGrading } from "@/hooks/useAdtmGradingWorkflow";
 
 const STEPS = [
-  'Section 1 - Calculation',
-  'Section 2 - Conceptual Understanding',
-  'Section 3 - Conceptual Application',
-  'Section 4 - Reasoning',
-  'Section 5 - Problem-Solving',
-  'Review & Submit',
+  "Section 1 - Calculation",
+  "Section 2 - Conceptual Understanding",
+  "Section 3 - Conceptual Application",
+  "Section 4 - Reasoning",
+  "Section 5 - Problem-Solving",
+  "Review & Submit",
 ];
 
 const SECTION_TITLES = [
-  '',
-  'Calculation Ability',
-  'Conceptual Understanding',
-  'Conceptual Application',
-  'Reasoning Ability',
-  'Problem-Solving Ability',
+  "",
+  "Calculation Ability",
+  "Conceptual Understanding",
+  "Conceptual Application",
+  "Reasoning Ability",
+  "Problem-Solving Ability",
 ];
 
 export function GradeAdtm() {
   const { submissionId } = useParams<{ submissionId: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const sectionParam = searchParams.get('section');
+  const sectionParam = searchParams.get("section");
 
-  const { data: submission, isLoading } = useAdtmSubmission(submissionId || null);
+  const { data: submission, isLoading } = useAdtmSubmission(
+    submissionId || null
+  );
   const submitMutation = useSubmitGrading();
 
   const {
@@ -95,12 +104,14 @@ export function GradeAdtm() {
       5: [],
     };
 
-    Object.entries(submission.answersBySection).forEach(([sectionNum, answers]) => {
-      const num = parseInt(sectionNum, 10);
-      if (num >= 1 && num <= 5) {
-        sections[num] = answers;
+    Object.entries(submission.answersBySection).forEach(
+      ([sectionNum, answers]) => {
+        const num = parseInt(sectionNum, 10);
+        if (num >= 1 && num <= 5) {
+          sections[num] = answers;
+        }
       }
-    });
+    );
 
     // Extract unique questions
     const questionsBySectionNum: Record<number, any[]> = {
@@ -188,14 +199,18 @@ export function GradeAdtm() {
   const handlePrevious = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
-      navigate(`/teacher/adtm/grade/${submissionId}?section=${currentStep - 1}`);
+      navigate(
+        `/teacher/adtm/grade/${submissionId}?section=${currentStep - 1}`
+      );
     }
   };
 
   const handleNext = () => {
     if (currentStep < 6) {
       setCurrentStep(currentStep + 1);
-      navigate(`/teacher/adtm/grade/${submissionId}?section=${currentStep + 1}`);
+      navigate(
+        `/teacher/adtm/grade/${submissionId}?section=${currentStep + 1}`
+      );
     }
   };
 
@@ -204,10 +219,11 @@ export function GradeAdtm() {
 
     try {
       await submitMutation.mutateAsync(submissionId);
-      toastSuccess('Grading submitted successfully');
-      navigate('/teacher/adtm/students');
+      toastSuccess("Grading submitted successfully");
+      // Navigate to grading list - query will be automatically refreshed due to invalidation
+      navigate("/teacher/grading");
     } catch (error: any) {
-      toastError(error.message || 'Failed to submit grading');
+      toastError(error.message || "Failed to submit grading");
     }
   };
 
@@ -222,7 +238,9 @@ export function GradeAdtm() {
           return false;
         }
         return questionsBySection[1].every(
-          (q) => section1.answers[q.id] !== null && section1.answers[q.id] !== undefined
+          (q) =>
+            section1.answers[q.id] !== null &&
+            section1.answers[q.id] !== undefined
         );
       }
       case 2:
@@ -238,7 +256,9 @@ export function GradeAdtm() {
             ? section4
             : section5;
         return questionsBySection[currentStep].every(
-          (q) => sectionData.answers[q.id] !== null && sectionData.answers[q.id] !== undefined
+          (q) =>
+            sectionData.answers[q.id] !== null &&
+            sectionData.answers[q.id] !== undefined
         );
       }
       case 6:
@@ -262,7 +282,10 @@ export function GradeAdtm() {
         <Card>
           <CardContent className="py-12 text-center">
             <p className="text-secondary-600">Submission not found</p>
-            <Button onClick={() => navigate('/teacher/adtm/students')} className="mt-4">
+            <Button
+              onClick={() => navigate("/teacher/adtm/students")}
+              className="mt-4"
+            >
               Back to Students
             </Button>
           </CardContent>
@@ -276,7 +299,9 @@ export function GradeAdtm() {
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-secondary-900">A-DTM Grading</h1>
+          <h1 className="text-3xl font-bold text-secondary-900">
+            A-DTM Grading
+          </h1>
           <p className="text-secondary-600 mt-1">
             {submission.student?.fullName} - {submission.test.testCode}
           </p>
@@ -302,7 +327,7 @@ export function GradeAdtm() {
           <CardTitle>
             {currentStep <= 5
               ? `Section ${currentStep}: ${SECTION_TITLES[currentStep]}`
-              : 'Review & Submit'}
+              : "Review & Submit"}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -313,7 +338,9 @@ export function GradeAdtm() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <ConcentrationLevelInput
                   value={section1.concentrationLevel}
-                  onChange={(level) => setSection1PreTest({ concentrationLevel: level })}
+                  onChange={(level) =>
+                    setSection1PreTest({ concentrationLevel: level })
+                  }
                 />
                 <CurrentMoodInput
                   value={section1.currentMood}
@@ -321,14 +348,18 @@ export function GradeAdtm() {
                 />
                 <ExpectedScoreInput
                   value={section1.expectedScore}
-                  onChange={(score) => setSection1PreTest({ expectedScore: score })}
+                  onChange={(score) =>
+                    setSection1PreTest({ expectedScore: score })
+                  }
                   maxScore={section1Scores.maxScore}
                 />
               </div>
 
               {/* Questions */}
               <div className="space-y-3">
-                <h3 className="text-lg font-semibold text-secondary-900">Questions</h3>
+                <h3 className="text-lg font-semibold text-secondary-900">
+                  Questions
+                </h3>
                 {questionsBySection[1].map((question) => (
                   <QuestionInput
                     key={question.id}
@@ -343,15 +374,15 @@ export function GradeAdtm() {
               {/* Stats */}
               <SectionStats
                 stats={[
-                  { label: 'Correct', value: section1Scores.correctCount },
-                  { label: 'Mistakes', value: section1Scores.mistakeCount },
-                  { label: 'Unsolved', value: section1Scores.unsolvedCount },
+                  { label: "Correct", value: section1Scores.correctCount },
+                  { label: "Mistakes", value: section1Scores.mistakeCount },
+                  { label: "Unsolved", value: section1Scores.unsolvedCount },
                   {
-                    label: 'Raw Score',
+                    label: "Raw Score",
                     value: `${section1Scores.rawScore} / ${section1Scores.maxScore}`,
                   },
                   {
-                    label: 'Standard Score',
+                    label: "Standard Score",
                     value: `${section1Scores.standardScore.toFixed(1)}%`,
                     highlight: true,
                   },
@@ -365,13 +396,15 @@ export function GradeAdtm() {
             <div className="space-y-6">
               {(() => {
                 const questions = questionsBySection[currentStep];
-                const answers = currentStep === 2 ? section2.answers : section3.answers;
-                const scores = currentStep === 2 ? section2Scores : section3Scores;
+                const answers =
+                  currentStep === 2 ? section2.answers : section3.answers;
+                const scores =
+                  currentStep === 2 ? section2Scores : section3Scores;
 
                 // Group by unit
                 const unitGroups: Record<string, typeof questions> = {};
                 questions.forEach((q) => {
-                  const unitName = q.unitName || 'No Unit';
+                  const unitName = q.unitName || "No Unit";
                   if (!unitGroups[unitName]) {
                     unitGroups[unitName] = [];
                   }
@@ -380,32 +413,36 @@ export function GradeAdtm() {
 
                 return (
                   <>
-                    {Object.entries(unitGroups).map(([unitName, unitQuestions]) => {
-                      const unitScore = scores.unitScores.find((u) => u.unitName === unitName);
-                      return (
-                        <UnitCard
-                          key={unitName}
-                          unitName={unitName}
-                          questions={unitQuestions}
-                          answers={answers}
-                          onAnswerChange={(questionId, score) =>
-                            setSectionAnswer(currentStep, questionId, score)
-                          }
-                          unitRawScore={unitScore?.rawScore}
-                          unitMaxScore={unitScore?.maxScore}
-                          unitStandardScore={unitScore?.standardScore}
-                        />
-                      );
-                    })}
+                    {Object.entries(unitGroups).map(
+                      ([unitName, unitQuestions]) => {
+                        const unitScore = scores.unitScores.find(
+                          (u) => u.unitName === unitName
+                        );
+                        return (
+                          <UnitCard
+                            key={unitName}
+                            unitName={unitName}
+                            questions={unitQuestions}
+                            answers={answers}
+                            onAnswerChange={(questionId, score) =>
+                              setSectionAnswer(currentStep, questionId, score)
+                            }
+                            unitRawScore={unitScore?.rawScore}
+                            unitMaxScore={unitScore?.maxScore}
+                            unitStandardScore={unitScore?.standardScore}
+                          />
+                        );
+                      }
+                    )}
 
                     <SectionStats
                       stats={[
                         {
-                          label: 'Section Total',
+                          label: "Section Total",
                           value: `${scores.rawScore} / ${scores.maxScore}`,
                         },
                         {
-                          label: 'Standard Score',
+                          label: "Standard Score",
                           value: `${scores.standardScore.toFixed(1)}%`,
                           highlight: true,
                         },
@@ -421,32 +458,38 @@ export function GradeAdtm() {
           {(currentStep === 4 || currentStep === 5) && (
             <div className="space-y-6">
               <div className="space-y-3">
-                <h3 className="text-lg font-semibold text-secondary-900">Questions</h3>
+                <h3 className="text-lg font-semibold text-secondary-900">
+                  Questions
+                </h3>
                 {questionsBySection[currentStep].map((question) => {
-                  const answers = currentStep === 4 ? section4.answers : section5.answers;
+                  const answers =
+                    currentStep === 4 ? section4.answers : section5.answers;
                   return (
                     <QuestionInput
                       key={question.id}
                       questionNumber={question.questionNumber}
                       maxScore={question.score}
                       currentScore={answers[question.id]}
-                      onChange={(score) => setSectionAnswer(currentStep, question.id, score)}
+                      onChange={(score) =>
+                        setSectionAnswer(currentStep, question.id, score)
+                      }
                     />
                   );
                 })}
               </div>
 
               {(() => {
-                const scores = currentStep === 4 ? section4Scores : section5Scores;
+                const scores =
+                  currentStep === 4 ? section4Scores : section5Scores;
                 return (
                   <SectionStats
                     stats={[
                       {
-                        label: 'Total',
+                        label: "Total",
                         value: `${scores.rawScore} / ${scores.maxScore}`,
                       },
                       {
-                        label: 'Standard Score',
+                        label: "Standard Score",
                         value: `${scores.standardScore.toFixed(1)}%`,
                         highlight: true,
                       },
@@ -461,7 +504,8 @@ export function GradeAdtm() {
           {currentStep === 6 && (
             <div className="space-y-6">
               <p className="text-secondary-600">
-                Review all sections before submitting. Make sure all questions are graded.
+                Review all sections before submitting. Make sure all questions
+                are graded.
               </p>
               {/* Review content will be added */}
             </div>
@@ -469,7 +513,11 @@ export function GradeAdtm() {
 
           {/* Navigation */}
           <div className="flex justify-between mt-8 pt-6 border-t border-secondary-200">
-            <Button variant="outline" onClick={handlePrevious} disabled={currentStep === 1}>
+            <Button
+              variant="outline"
+              onClick={handlePrevious}
+              disabled={currentStep === 1}
+            >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Previous
             </Button>
@@ -495,4 +543,3 @@ export function GradeAdtm() {
     </div>
   );
 }
-

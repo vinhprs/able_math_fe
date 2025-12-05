@@ -1,13 +1,19 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '@/lib/api';
-import type { AchievementReportData, AdtmReportData } from '@/types/reports.types';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import api from "@/lib/api";
+import type {
+  AchievementReportData,
+  AdtmReportData,
+} from "@/types/reports.types";
 
 /**
  * Fetch Achievement test report
  */
-export function useAchievementReport(submissionId: string) {
+export function useAchievementReport(
+  submissionId: string,
+  enabled: boolean = true
+) {
   return useQuery({
-    queryKey: ['reports', 'achievement', submissionId],
+    queryKey: ["reports", "achievement", submissionId],
     queryFn: async () => {
       try {
         const response = await api.get<{
@@ -18,11 +24,14 @@ export function useAchievementReport(submissionId: string) {
         return response.data.data;
       } catch (error) {
         // Silently handle errors - wrong test type is expected for one of the queries
-        console.debug('Achievement report fetch failed (may be A-DTM test):', error);
+        console.debug(
+          "Achievement report fetch failed (may be A-DTM test):",
+          error
+        );
         throw error;
       }
     },
-    enabled: !!submissionId,
+    enabled: !!submissionId && enabled,
     retry: false, // Don't retry if it fails (wrong test type)
   });
 }
@@ -30,9 +39,9 @@ export function useAchievementReport(submissionId: string) {
 /**
  * Fetch A-DTM test report
  */
-export function useAdtmReport(submissionId: string) {
+export function useAdtmReport(submissionId: string, enabled: boolean = true) {
   return useQuery({
-    queryKey: ['reports', 'adtm', submissionId],
+    queryKey: ["reports", "adtm", submissionId],
     queryFn: async () => {
       try {
         const response = await api.get<{
@@ -43,11 +52,14 @@ export function useAdtmReport(submissionId: string) {
         return response.data.data;
       } catch (error) {
         // Silently handle errors - wrong test type is expected for one of the queries
-        console.debug('A-DTM report fetch failed (may be Achievement test):', error);
+        console.debug(
+          "A-DTM report fetch failed (may be Achievement test):",
+          error
+        );
         throw error;
       }
     },
-    enabled: !!submissionId,
+    enabled: !!submissionId && enabled,
     retry: false, // Don't retry if it fails (wrong test type)
   });
 }
@@ -60,14 +72,18 @@ export function useGeneratePdf() {
 
   return useMutation({
     mutationFn: async (submissionId: string) => {
-      const response = await api.post<{ success: boolean; pdfUrl: string; message: string }>(
-        `/reports/${submissionId}/generate-pdf`
-      );
+      const response = await api.post<{
+        success: boolean;
+        pdfUrl: string;
+        message: string;
+      }>(`/reports/${submissionId}/generate-pdf`);
       return { ...response.data, submissionId };
     },
     onSuccess: (data) => {
       // Invalidate report queries to refresh data
-      queryClient.invalidateQueries({ queryKey: ['reports', data.submissionId] });
+      queryClient.invalidateQueries({
+        queryKey: ["reports", data.submissionId],
+      });
     },
   });
 }
@@ -76,7 +92,8 @@ export function useGeneratePdf() {
  * Download PDF file
  */
 export function downloadPdf(submissionId: string) {
-  const url = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000'}/reports/${submissionId}/download-pdf`;
-  window.open(url, '_blank');
+  const url = `${
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:4000"
+  }/reports/${submissionId}/download-pdf`;
+  window.open(url, "_blank");
 }
-

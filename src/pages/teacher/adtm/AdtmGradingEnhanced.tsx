@@ -1,34 +1,34 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useAdtmSubmission } from '@/hooks/useAdtmGrading';
-import { useAdtmGradingStore } from '@/store/adtmGradingStore';
-import { useAdtmAutoSave } from '@/hooks/useAdtmAutoSave';
-import { useCalculateSection1Scores, useCalculateSectionScores, useCalculateSimpleSectionScores } from '@/hooks/useCalculateScores';
+import { useEffect, useMemo, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useAdtmSubmission } from "@/hooks/useAdtmGrading";
+import { useAdtmGradingStore } from "@/store/adtmGradingStore";
+import { useAdtmAutoSave } from "@/hooks/useAdtmAutoSave";
 import {
-  Button,
-  Card,
-  CardContent,
-} from '@/components/ui';
+  useCalculateSection1Scores,
+  useCalculateSectionScores,
+  useCalculateSimpleSectionScores,
+} from "@/hooks/useCalculateScores";
+import { Button, Card, CardContent } from "@/components/ui";
 import {
   ArrowLeft,
   CheckCircle2,
   Circle,
   HelpCircle,
   Loader2,
-} from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-import { Section1GradingEnhanced } from '@/components/grading/Section1GradingEnhanced';
-import { SectionWithUnitsGrading } from '@/components/grading/SectionWithUnitsGrading';
-import { SimpleSectionGrading } from '@/components/grading/SimpleSectionGrading';
-import { FinalReviewPage } from '@/components/grading/FinalReviewPage';
+} from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { Section1GradingEnhanced } from "@/components/grading/Section1GradingEnhanced";
+import { SectionWithUnitsGrading } from "@/components/grading/SectionWithUnitsGrading";
+import { SimpleSectionGrading } from "@/components/grading/SimpleSectionGrading";
+import { FinalReviewPage } from "@/components/grading/FinalReviewPage";
 
 const SECTION_NAMES = [
-  '',
-  'Computational Ability',
-  'Conceptual Understanding',
-  'Concept Application',
-  'Reasoning Ability',
-  'Problem Solving',
+  "",
+  "Computational Ability",
+  "Conceptual Understanding",
+  "Concept Application",
+  "Reasoning Ability",
+  "Problem Solving",
 ];
 
 export function AdtmGradingEnhanced() {
@@ -36,7 +36,9 @@ export function AdtmGradingEnhanced() {
   const navigate = useNavigate();
   const [currentSection, setCurrentSection] = useState(1);
 
-  const { data: submission, isLoading } = useAdtmSubmission(submissionId || null);
+  const { data: submission, isLoading } = useAdtmSubmission(
+    submissionId || null
+  );
   const {
     section1,
     section2,
@@ -61,7 +63,10 @@ export function AdtmGradingEnhanced() {
   const questionsBySection = useMemo(() => {
     if (!submission?.answers) return { 1: [], 2: [], 3: [], 4: [], 5: [] };
 
-    const sections: Record<number, typeof submission.answers[0]['question'][]> = {
+    const sections: Record<
+      number,
+      (typeof submission.answers)[0]["question"][]
+    > = {
       1: [],
       2: [],
       3: [],
@@ -129,25 +134,40 @@ export function AdtmGradingEnhanced() {
       section4Scores.maxScore +
       section5Scores.maxScore;
 
-    const overallStandardScore = totalMaxScore > 0 ? (totalRawScore / totalMaxScore) * 100 : 0;
+    const overallStandardScore =
+      totalMaxScore > 0 ? (totalRawScore / totalMaxScore) * 100 : 0;
 
     return {
       totalRawScore,
       totalMaxScore,
       overallStandardScore: Math.round(overallStandardScore * 100) / 100,
     };
-  }, [section1Scores, section2Scores, section3Scores, section4Scores, section5Scores]);
+  }, [
+    section1Scores,
+    section2Scores,
+    section3Scores,
+    section4Scores,
+    section5Scores,
+  ]);
 
   // Calculate progress
   const completedSections = useMemo(() => {
     let count = 0;
-    if (section1Scores.rawScore > 0 && section1.concentrationLevel !== null) count++;
+    if (section1Scores.rawScore > 0 && section1.concentrationLevel !== null)
+      count++;
     if (section2Scores.rawScore > 0) count++;
     if (section3Scores.rawScore > 0) count++;
     if (section4Scores.rawScore > 0) count++;
     if (section5Scores.rawScore > 0) count++;
     return count;
-  }, [section1Scores, section2Scores, section3Scores, section4Scores, section5Scores, section1.concentrationLevel]);
+  }, [
+    section1Scores,
+    section2Scores,
+    section3Scores,
+    section4Scores,
+    section5Scores,
+    section1.concentrationLevel,
+  ]);
 
   const progress = (completedSections / 5) * 100;
 
@@ -159,16 +179,26 @@ export function AdtmGradingEnhanced() {
           section1.concentrationLevel !== null &&
           section1.currentMood !== null &&
           section1.expectedScore !== null &&
-          questionsBySection[1].every((q) => section1.answers[q.id] !== undefined)
+          questionsBySection[1].every(
+            (q) => section1.answers[q.id] !== undefined
+          )
         );
       case 2:
-        return questionsBySection[2].every((q) => section2.answers[q.id] !== undefined);
+        return questionsBySection[2].every(
+          (q) => section2.answers[q.id] !== undefined
+        );
       case 3:
-        return questionsBySection[3].every((q) => section3.answers[q.id] !== undefined);
+        return questionsBySection[3].every(
+          (q) => section3.answers[q.id] !== undefined
+        );
       case 4:
-        return questionsBySection[4].every((q) => section4.answers[q.id] !== undefined);
+        return questionsBySection[4].every(
+          (q) => section4.answers[q.id] !== undefined
+        );
       case 5:
-        return questionsBySection[5].every((q) => section5.answers[q.id] !== undefined);
+        return questionsBySection[5].every(
+          (q) => section5.answers[q.id] !== undefined
+        );
       default:
         return false;
     }
@@ -194,7 +224,10 @@ export function AdtmGradingEnhanced() {
         <Card>
           <CardContent className="py-12 text-center">
             <p className="text-secondary-600">Submission not found</p>
-            <Button onClick={() => navigate('/teacher/adtm/students')} className="mt-4">
+            <Button
+              onClick={() => navigate("/teacher/adtm/students")}
+              className="mt-4"
+            >
               Back to List
             </Button>
           </CardContent>
@@ -208,7 +241,11 @@ export function AdtmGradingEnhanced() {
       {/* Top Navigation Bar - Fixed */}
       <div className="bg-white border-b border-secondary-200 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-4 flex-1">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/teacher/adtm/students')}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/teacher/grading")}
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to List
           </Button>
@@ -217,11 +254,11 @@ export function AdtmGradingEnhanced() {
 
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-medium">
-              {submission.student?.fullName?.charAt(0).toUpperCase() || 'S'}
+              {submission.student?.fullName?.charAt(0).toUpperCase() || "S"}
             </div>
             <div>
               <div className="font-medium text-secondary-900">
-                {submission.student?.fullName || 'Unknown Student'}
+                {submission.student?.fullName || "Unknown Student"}
               </div>
               <div className="text-sm text-secondary-500">
                 {submission.test.testCode} • {submission.test.title}
@@ -254,7 +291,9 @@ export function AdtmGradingEnhanced() {
             ) : savedAt ? (
               <>
                 <CheckCircle2 className="w-4 h-4 text-green-600" />
-                <span>Saved {formatDistanceToNow(savedAt, { addSuffix: true })}</span>
+                <span>
+                  Saved {formatDistanceToNow(savedAt, { addSuffix: true })}
+                </span>
               </>
             ) : null}
           </div>
@@ -316,7 +355,9 @@ export function AdtmGradingEnhanced() {
                   key={sectionNum}
                   onClick={() => goToSection(sectionNum)}
                   className={`w-full p-4 text-left border-b border-secondary-100 transition-colors ${
-                    isActive ? 'bg-primary-50 border-l-4 border-l-primary-600' : 'hover:bg-secondary-50'
+                    isActive
+                      ? "bg-primary-50 border-l-4 border-l-primary-600"
+                      : "hover:bg-secondary-50"
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1">
@@ -349,7 +390,9 @@ export function AdtmGradingEnhanced() {
             <div className="text-xs text-secondary-500 mb-1">Overall Score</div>
             <div className="text-2xl font-bold text-secondary-900">
               {overallScores.totalRawScore}
-              <span className="text-lg text-secondary-500">/{overallScores.totalMaxScore}</span>
+              <span className="text-lg text-secondary-500">
+                /{overallScores.totalMaxScore}
+              </span>
             </div>
             <div className="text-lg font-semibold text-primary-600">
               {overallScores.overallStandardScore.toFixed(1)}%
@@ -419,4 +462,3 @@ export function AdtmGradingEnhanced() {
     </div>
   );
 }
-

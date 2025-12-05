@@ -171,6 +171,7 @@ export function useGradeAdtmSubmission() {
       queryClient.invalidateQueries({
         queryKey: ["adtm-submission", submissionId],
       });
+      queryClient.invalidateQueries({ queryKey: ["adtm-submissions"] });
       queryClient.invalidateQueries({ queryKey: ["submissions"] });
     },
   });
