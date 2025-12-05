@@ -24,6 +24,11 @@ const menuItems: MenuItem[] = [
     path: "/teacher/dashboard",
   },
   {
+    label: "My Students",
+    icon: Users,
+    path: "/teacher/students",
+  },
+  {
     label: "My Classes",
     icon: Users,
     path: "/teacher/classes",

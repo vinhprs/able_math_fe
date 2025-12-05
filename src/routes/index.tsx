@@ -14,6 +14,9 @@ import { TestCreate } from "@/pages/admin/tests/TestCreate";
 import { TestEdit } from "@/pages/admin/tests/TestEdit";
 import { TestDetail } from "@/pages/admin/tests/TestDetail";
 import { AdtmTemplatesPage } from "@/pages/admin/adtm/AdtmTemplatesPage";
+import { TeachersPage } from "@/pages/admin/TeachersPage";
+import { TeacherDetail } from "@/pages/admin/TeacherDetail";
+import { StudentsPage } from "@/pages/admin/StudentsPage";
 
 // Teacher Pages
 import { TeacherDashboard } from "@/pages/teacher/Dashboard";
@@ -30,6 +33,8 @@ import AssignTestWizard from "@/pages/teacher/AssignTestWizard";
 import ClassList from "@/pages/teacher/classes/ClassList";
 import ClassForm from "@/pages/teacher/classes/ClassForm";
 import ClassDetails from "@/pages/teacher/classes/ClassDetails";
+import { MyStudentsPage } from "@/pages/teacher/MyStudentsPage";
+import { StudentDetail } from "@/pages/teacher/StudentDetail";
 
 // Student Pages
 import { StudentDashboard } from "@/pages/student/Dashboard";
@@ -107,6 +112,18 @@ export default function createRoutes() {
                   element: <AdminDashboard />,
                 },
                 {
+                  path: "admin/teachers",
+                  element: <TeachersPage />,
+                },
+                {
+                  path: "admin/teachers/:id",
+                  element: <TeacherDetail />,
+                },
+                {
+                  path: "admin/students",
+                  element: <StudentsPage />,
+                },
+                {
                   path: "admin/tests/achievement",
                   element: <TestList />,
                 },
@@ -143,6 +160,14 @@ export default function createRoutes() {
                 {
                   path: "teacher/dashboard",
                   element: <TeacherDashboard />,
+                },
+                {
+                  path: "teacher/students",
+                  element: <MyStudentsPage />,
+                },
+                {
+                  path: "teacher/students/:id",
+                  element: <StudentDetail />,
                 },
                 {
                   path: "teacher/adtm/:submissionId/grade",
