@@ -27,6 +27,34 @@ export const reportService = {
     return response.data.data;
   },
 
+  // ========== ADMIN APIs ==========
+
+  /**
+   * Get all reports for admin (with optional filters)
+   * GET /api/reports/admin/all
+   * Query params: status, testType, teacherId
+   */
+  async getAllReports(filters?: {
+    status?: string;
+    testType?: string;
+    teacherId?: string;
+  }): Promise<any[]> {
+    const params = new URLSearchParams();
+    if (filters?.status) params.append('status', filters.status);
+    if (filters?.testType) params.append('testType', filters.testType);
+    if (filters?.teacherId) params.append('teacherId', filters.teacherId);
+
+    const queryString = params.toString();
+    const url = `/reports/admin/all${queryString ? `?${queryString}` : ''}`;
+
+    const response = await api.get<{
+      success: boolean;
+      data: any[];
+      timestamp: string;
+    }>(url);
+    return response.data.data;
+  },
+
   /**
    * Get report card by submission ID
    * This will be used to get reportId from submissionId

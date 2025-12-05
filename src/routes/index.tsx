@@ -42,6 +42,10 @@ import { ResultsList } from "@/pages/student/results/ResultsList";
 import { ResultDetail } from "@/pages/student/results/ResultDetail";
 import MyReports from "@/pages/student/MyReports";
 import StudentReportDetail from "@/pages/student/StudentReportDetail";
+import { AdtmReportPage } from "@/pages/reports/AdtmReportPage";
+import { TeacherSubmissionsList } from "@/pages/teacher/submissions/SubmissionsList";
+import { AdminSubmissionsList } from "@/pages/admin/submissions/AdminSubmissionsList";
+import { AdminReportsList } from "@/pages/admin/AdminReportsList";
 
 // Teacher Pages - Results
 import { ResultReview } from "@/pages/teacher/results/ResultReview";
@@ -117,6 +121,14 @@ export default function createRoutes() {
                 {
                   path: "admin/adtm/templates",
                   element: <AdtmTemplatesPage />,
+                },
+                {
+                  path: "admin/submissions",
+                  element: <AdminSubmissionsList />,
+                },
+                {
+                  path: "admin/reports",
+                  element: <AdminReportsList />,
                 },
                 {
                   path: "admin",
@@ -213,6 +225,10 @@ export default function createRoutes() {
                   element: <ClassDetails />,
                 },
                 {
+                  path: "teacher/submissions",
+                  element: <TeacherSubmissionsList />,
+                },
+                {
                   path: "teacher",
                   element: <Navigate to="/teacher/dashboard" replace />,
                 },
@@ -283,6 +299,11 @@ export default function createRoutes() {
                   element: <TestDetail />,
                 },
               ],
+            },
+            // Report routes (accessible by all authenticated users)
+            {
+              path: "reports/adtm/:submissionId",
+              element: <AdtmReportPage />,
             },
           ],
         },

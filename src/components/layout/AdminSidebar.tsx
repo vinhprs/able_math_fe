@@ -8,6 +8,7 @@ import {
   BarChart3,
   Settings,
   Layers,
+  ClipboardList,
 } from "lucide-react";
 
 interface MenuItem {
@@ -31,6 +32,11 @@ const menuItems: MenuItem[] = [
     label: "A-DTM Templates",
     icon: Layers,
     path: "/admin/adtm/templates",
+  },
+  {
+    label: "All Submissions",
+    icon: ClipboardList,
+    path: "/admin/submissions",
   },
   {
     label: "Teachers",

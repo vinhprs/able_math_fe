@@ -1,19 +1,24 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { reportService } from '@/services/reportService';
-import { AchievementReport, AdtmReport } from '@/components/reports';
-import { Loader2, ArrowLeft, Download, Printer } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Card, CardContent } from '@/components/ui/Card';
-import type { AchievementReportData, AdtmReportData } from '@/types/reports.types';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { reportService } from "@/services/reportService";
+import { AchievementReport, AdtmReport } from "@/components/reports";
+import { Loader2, ArrowLeft, Download, Printer } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent } from "@/components/ui/Card";
+import type {
+  AchievementReportData,
+  AdtmReportData,
+} from "@/types/reports.types";
 
 export default function StudentReportDetail() {
   const { reportId } = useParams<{ reportId: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [reportData, setReportData] = useState<AchievementReportData | AdtmReportData | null>(null);
+  const [reportData, setReportData] = useState<
+    AchievementReportData | AdtmReportData | null
+  >(null);
   const [reportCard, setReportCard] = useState<any>(null);
-  const [testType, setTestType] = useState<'ACHIEVEMENT' | 'ADTM' | null>(null);
+  const [testType, setTestType] = useState<"ACHIEVEMENT" | "ADTM" | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -32,13 +37,13 @@ export default function StudentReportDetail() {
       // First, get the report card to check status and get teacher comment
       const reports = await reportService.getMyReports();
       const card = reports.find((r) => r.id === reportId);
-      
+
       if (!card) {
-        throw new Error('Report not found');
+        throw new Error("Report not found");
       }
 
-      if (card.status !== 'PUBLISHED') {
-        throw new Error('Report is not published yet');
+      if (card.status !== "PUBLISHED") {
+        throw new Error("Report is not published yet");
       }
 
       setReportCard(card);
@@ -47,16 +52,24 @@ export default function StudentReportDetail() {
       const data = await reportService.getPublishedReport(reportId);
 
       // Determine test type from response
-      if ((data as any).test?.testType === 'ACHIEVEMENT' || (data as AchievementReportData).test?.code) {
-        setTestType('ACHIEVEMENT');
-      } else if ((data as any).test?.testType === 'ADTM' || (data as AdtmReportData).test?.testCode) {
-        setTestType('ADTM');
+      if (
+        (data as any).test?.testType === "ACHIEVEMENT" ||
+        (data as AchievementReportData).test?.code
+      ) {
+        setTestType("ACHIEVEMENT");
+      } else if (
+        (data as any).test?.testType === "ADTM" ||
+        (data as AdtmReportData).test?.testCode
+      ) {
+        setTestType("ADTM");
       }
 
       setReportData(data);
     } catch (err: any) {
-      console.error('Failed to load report:', err);
-      setError(err?.response?.data?.message || err?.message || 'Failed to load report');
+      console.error("Failed to load report:", err);
+      setError(
+        err?.response?.data?.message || err?.message || "Failed to load report"
+      );
     } finally {
       setLoading(false);
     }
@@ -68,7 +81,7 @@ export default function StudentReportDetail() {
 
   const handleDownloadPdf = async () => {
     if (!reportCard?.pdfUrl) {
-      alert('PDF not available yet');
+      alert("PDF not available yet");
       return;
     }
     reportService.downloadPdf(reportCard.pdfUrl);
@@ -90,10 +103,12 @@ export default function StudentReportDetail() {
       <Card>
         <CardContent className="p-6">
           <div className="text-center">
-            <h3 className="text-xl font-semibold text-secondary-900 mb-2">Error Loading Report</h3>
+            <h3 className="text-xl font-semibold text-secondary-900 mb-2">
+              Error Loading Report
+            </h3>
             <p className="text-sm text-secondary-600 mb-4">{error}</p>
             <Button
-              onClick={() => navigate('/student/reports')}
+              onClick={() => navigate("/student/reports")}
               variant="outline"
             >
               Back to Reports
@@ -109,10 +124,14 @@ export default function StudentReportDetail() {
       <Card>
         <CardContent className="p-6">
           <div className="text-center">
-            <h3 className="text-xl font-semibold text-secondary-900 mb-2">Report Not Found</h3>
-            <p className="text-secondary-600 mb-4">The report you're looking for doesn't exist or couldn't be loaded.</p>
+            <h3 className="text-xl font-semibold text-secondary-900 mb-2">
+              Report Not Found
+            </h3>
+            <p className="text-secondary-600 mb-4">
+              The report you're looking for doesn't exist or couldn't be loaded.
+            </p>
             <Button
-              onClick={() => navigate('/student/reports')}
+              onClick={() => navigate("/student/reports")}
               variant="primary"
             >
               Back to Reports
@@ -130,26 +149,20 @@ export default function StudentReportDetail() {
         <div className="flex items-center justify-between">
           <Button
             variant="outline"
-            onClick={() => navigate('/student/reports')}
+            onClick={() => navigate("/student/reports")}
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
             Back to Reports
           </Button>
 
           <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={handlePrint}
-            >
+            <Button variant="outline" onClick={handlePrint}>
               <Printer className="w-5 h-5 mr-2" />
               Print
             </Button>
 
             {reportCard?.pdfUrl && (
-              <Button
-                variant="primary"
-                onClick={handleDownloadPdf}
-              >
+              <Button variant="primary" onClick={handleDownloadPdf}>
                 <Download className="w-5 h-5 mr-2" />
                 Download PDF
               </Button>
@@ -160,7 +173,7 @@ export default function StudentReportDetail() {
 
       {/* Report Content */}
       <div className="bg-white rounded-lg shadow-lg print:shadow-none print:rounded-none">
-        {testType === 'ACHIEVEMENT' ? (
+        {testType === "ACHIEVEMENT" ? (
           <AchievementReport reportData={reportData as AchievementReportData} />
         ) : (
           <AdtmReport reportData={reportData as AdtmReportData} />
@@ -209,4 +222,3 @@ export default function StudentReportDetail() {
     </div>
   );
 }
-

@@ -25,15 +25,15 @@
   --color-secondary-900: #0f172a;
   --color-secondary-950: #020617;
 
-  --font-family-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-family-mono: 'Fira Code', monospace;
+  --font-family-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-family-mono: "Fira Code", monospace;
 }
 
 @layer base {
   * {
     @apply border-secondary-200;
   }
-  
+
   body {
     @apply bg-white text-secondary-900 antialiased;
     font-family: var(--font-family-sans);
@@ -43,21 +43,46 @@
 /* Print Styles */
 @media print {
   @page {
-    margin: 1cm;
+    size: A4;
+    margin: 1.5cm;
   }
 
   body {
     background: white !important;
     color: black !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 
   .print\:hidden {
     display: none !important;
   }
 
+  .print\:block {
+    display: block !important;
+  }
+
   .print\:break-inside-avoid {
     break-inside: avoid;
     page-break-inside: avoid;
+  }
+
+  .print\:break-after {
+    break-after: page;
+    page-break-after: always;
+  }
+
+  .print\:shadow-none {
+    box-shadow: none !important;
+  }
+
+  .print\:bg-white {
+    background-color: white !important;
+  }
+
+  .print\:border-2 {
+    border-width: 2px !important;
+    border-color: #000 !important;
   }
 
   .report-card {
@@ -67,6 +92,21 @@
   /* Ensure charts don't break across pages */
   .recharts-wrapper {
     page-break-inside: avoid;
+    max-height: 300px !important;
+  }
+
+  /* Chart canvas optimization */
+  canvas {
+    max-height: 300px !important;
+  }
+
+  /* Two-page report layout */
+  .report-page-1 {
+    page-break-after: always;
+  }
+
+  .report-page-2 {
+    page-break-before: always;
   }
 
   /* Optimize table printing */
