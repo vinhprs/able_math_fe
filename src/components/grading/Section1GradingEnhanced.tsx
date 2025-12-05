@@ -330,15 +330,17 @@ export function Section1GradingEnhanced({
                     </span>
                     <Badge
                       variant={
-                        question.difficulty === "HIGH"
+                        question.difficulty === 4 || question.difficulty === 3
                           ? "danger"
-                          : question.difficulty === "MEDIUM"
+                          : question.difficulty === 2
                           ? "warning"
                           : "default"
                       }
                       className="text-xs"
                     >
-                      {question.difficulty || "MEDIUM"}
+                      {question.difficulty
+                        ? `Level ${question.difficulty}`
+                        : "N/A"}
                     </Badge>
                   </div>
 

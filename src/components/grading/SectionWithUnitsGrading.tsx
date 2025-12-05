@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react';
-import { useAdtmGradingStore } from '@/store/adtmGradingStore';
-import { useCalculateSectionScores } from '@/hooks/useCalculateScores';
-import { useDifficultyBreakdown } from '@/hooks/useDifficultyBreakdown';
+import { useState, useMemo } from "react";
+import { useAdtmGradingStore } from "@/store/adtmGradingStore";
+import { useCalculateSectionScores } from "@/hooks/useCalculateScores";
+import { useDifficultyBreakdown } from "@/hooks/useDifficultyBreakdown";
 import {
   Card,
   CardContent,
@@ -10,10 +10,16 @@ import {
   Input,
   Button,
   Badge,
-} from '@/components/ui';
-import { ChevronDown, ChevronUp, CheckCircle2, TrendingUp, Activity } from 'lucide-react';
-import type { ITestQuestion } from '@/types/test.types';
-import { DifficultyBreakdownTable } from '@/components/reports/DifficultyBreakdownTable';
+} from "@/components/ui";
+import {
+  ChevronDown,
+  ChevronUp,
+  CheckCircle2,
+  TrendingUp,
+  Activity,
+} from "lucide-react";
+import type { ITestQuestion } from "@/types/test.types";
+import { DifficultyBreakdownTable } from "@/components/reports/DifficultyBreakdownTable";
 
 interface SectionWithUnitsGradingProps {
   sectionNumber: 2 | 3;
@@ -31,7 +37,9 @@ export function SectionWithUnitsGrading({
   onNext,
 }: SectionWithUnitsGradingProps) {
   const { section2, section3, setSectionAnswer } = useAdtmGradingStore();
-  const [openUnits, setOpenUnits] = useState<Set<string>>(new Set([questions[0]?.unitName || '']));
+  const [openUnits, setOpenUnits] = useState<Set<string>>(
+    new Set([questions[0]?.unitName || ""])
+  );
 
   const sectionData = sectionNumber === 2 ? section2 : section3;
 
@@ -50,7 +58,7 @@ export function SectionWithUnitsGrading({
   const units = useMemo(() => {
     const unitMap: Record<string, ITestQuestion[]> = {};
     questions.forEach((q) => {
-      const unitName = q.unitName || 'No Unit';
+      const unitName = q.unitName || "No Unit";
       if (!unitMap[unitName]) {
         unitMap[unitName] = [];
       }
@@ -59,12 +67,17 @@ export function SectionWithUnitsGrading({
 
     return Object.entries(unitMap).map(([name, unitQuestions]) => {
       const maxScore = unitQuestions.reduce((sum, q) => sum + q.score, 0);
-      const rawScore = unitQuestions.reduce((sum, q) => sum + (sectionData.answers[q.id] ?? 0), 0);
+      const rawScore = unitQuestions.reduce(
+        (sum, q) => sum + (sectionData.answers[q.id] ?? 0),
+        0
+      );
       const standardScore = maxScore > 0 ? (rawScore / maxScore) * 100 : 0;
 
       return {
         name,
-        questions: unitQuestions.sort((a, b) => a.questionNumber - b.questionNumber),
+        questions: unitQuestions.sort(
+          (a, b) => a.questionNumber - b.questionNumber
+        ),
         maxScore,
         rawScore,
         standardScore: Math.round(standardScore * 100) / 100,
@@ -99,14 +112,18 @@ export function SectionWithUnitsGrading({
     return unit.questions.every((q) => sectionData.answers[q.id] !== undefined);
   };
 
-  const canProceed = questions.every((q) => sectionData.answers[q.id] !== undefined);
+  const canProceed = questions.every(
+    (q) => sectionData.answers[q.id] !== undefined
+  );
 
   return (
     <div className="space-y-6 max-w-6xl">
       {/* Section Header */}
       <div>
         <div className="flex items-center gap-3 mb-4">
-          <h2 className="text-2xl font-bold text-secondary-900">Section {sectionNumber}</h2>
+          <h2 className="text-2xl font-bold text-secondary-900">
+            Section {sectionNumber}
+          </h2>
           <h3 className="text-xl text-secondary-600">{sectionName}</h3>
         </div>
 
@@ -130,10 +147,7 @@ export function SectionWithUnitsGrading({
 
           return (
             <Card key={unit.name}>
-              <button
-                onClick={() => toggleUnit(unit.name)}
-                className="w-full"
-              >
+              <button onClick={() => toggleUnit(unit.name)} className="w-full">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -145,7 +159,8 @@ export function SectionWithUnitsGrading({
                       <div className="text-left">
                         <CardTitle className="text-lg">{unit.name}</CardTitle>
                         <p className="text-sm text-secondary-500 mt-1">
-                          {unit.questions.length} questions • Max {unit.maxScore} pts
+                          {unit.questions.length} questions • Max{" "}
+                          {unit.maxScore} pts
                         </p>
                       </div>
                     </div>
@@ -180,19 +195,26 @@ export function SectionWithUnitsGrading({
                           className="p-3 border border-secondary-200 rounded-lg bg-white"
                         >
                           <div className="flex items-center justify-between mb-2">
-                            <span className="font-medium text-sm">Q{question.questionNumber}</span>
-                            <span className="text-xs text-secondary-500">{question.score}pts</span>
+                            <span className="font-medium text-sm">
+                              Q{question.questionNumber}
+                            </span>
+                            <span className="text-xs text-secondary-500">
+                              {question.score}pts
+                            </span>
                             <Badge
                               variant={
-                                question.difficulty === 'HIGH'
-                                  ? 'danger'
-                                  : question.difficulty === 'MEDIUM'
-                                    ? 'warning'
-                                    : 'default'
+                                question.difficulty === 4 ||
+                                question.difficulty === 3
+                                  ? "danger"
+                                  : question.difficulty === 2
+                                  ? "warning"
+                                  : "default"
                               }
                               className="text-xs"
                             >
-                              {question.difficulty || 'MEDIUM'}
+                              {question.difficulty
+                                ? `Level ${question.difficulty}`
+                                : "N/A"}
                             </Badge>
                           </div>
 
@@ -200,8 +222,10 @@ export function SectionWithUnitsGrading({
                             type="number"
                             min="0"
                             max={question.score}
-                            value={score || ''}
-                            onChange={(e) => handleScoreChange(question.id, e.target.value)}
+                            value={score || ""}
+                            onChange={(e) =>
+                              handleScoreChange(question.id, e.target.value)
+                            }
                             className="w-full mb-2"
                             placeholder="0"
                           />
@@ -211,7 +235,9 @@ export function SectionWithUnitsGrading({
                               variant="ghost"
                               size="sm"
                               className="flex-1 text-xs"
-                              onClick={() => setSectionAnswer(sectionNumber, question.id, 0)}
+                              onClick={() =>
+                                setSectionAnswer(sectionNumber, question.id, 0)
+                              }
                             >
                               0
                             </Button>
@@ -220,7 +246,11 @@ export function SectionWithUnitsGrading({
                               size="sm"
                               className="flex-1 text-xs"
                               onClick={() =>
-                                setSectionAnswer(sectionNumber, question.id, question.score)
+                                setSectionAnswer(
+                                  sectionNumber,
+                                  question.id,
+                                  question.score
+                                )
                               }
                             >
                               {question.score}
@@ -234,7 +264,9 @@ export function SectionWithUnitsGrading({
                   {/* Unit Summary */}
                   <div className="pt-4 border-t border-secondary-200 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-secondary-600">Raw Score</span>
+                      <span className="text-sm text-secondary-600">
+                        Raw Score
+                      </span>
                       <span className="font-semibold">
                         {unit.rawScore} / {unit.maxScore}
                       </span>
@@ -242,12 +274,16 @@ export function SectionWithUnitsGrading({
                     <div className="w-full h-2 bg-secondary-200 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-primary-600 transition-all"
-                        style={{ width: `${(unit.rawScore / unit.maxScore) * 100}%` }}
+                        style={{
+                          width: `${(unit.rawScore / unit.maxScore) * 100}%`,
+                        }}
                       />
                     </div>
 
                     <div className="flex items-center justify-between pt-2">
-                      <span className="text-sm text-secondary-600">Standard Score</span>
+                      <span className="text-sm text-secondary-600">
+                        Standard Score
+                      </span>
                       <span className="font-semibold text-primary-600">
                         {unit.standardScore.toFixed(1)}%
                       </span>
@@ -277,13 +313,18 @@ export function SectionWithUnitsGrading({
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm text-secondary-600">Raw Score</span>
                 <span className="text-2xl font-bold">
-                  {scores.rawScore} <span className="text-lg text-secondary-500">/ {scores.maxScore}</span>
+                  {scores.rawScore}{" "}
+                  <span className="text-lg text-secondary-500">
+                    / {scores.maxScore}
+                  </span>
                 </span>
               </div>
               <div className="w-full h-3 bg-secondary-200 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-primary-600 transition-all"
-                  style={{ width: `${(scores.rawScore / scores.maxScore) * 100}%` }}
+                  style={{
+                    width: `${(scores.rawScore / scores.maxScore) * 100}%`,
+                  }}
                 />
               </div>
               <div className="text-xs text-secondary-500 mt-1 text-right">
@@ -293,7 +334,9 @@ export function SectionWithUnitsGrading({
 
             <div className="pt-4 border-t border-secondary-200">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-secondary-600">Standard Score</span>
+                <span className="text-sm text-secondary-600">
+                  Standard Score
+                </span>
                 <span className="text-2xl font-bold text-primary-600">
                   {scores.standardScore.toFixed(1)}%
                 </span>
@@ -319,8 +362,8 @@ export function SectionWithUnitsGrading({
               <Activity className="w-5 h-5 text-primary-600" />
             )}
             {sectionNumber === 2
-              ? 'Concept Understanding - Difficulty Analysis'
-              : 'Concept Application - Difficulty Analysis'}
+              ? "Concept Understanding - Difficulty Analysis"
+              : "Concept Application - Difficulty Analysis"}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -347,4 +390,3 @@ export function SectionWithUnitsGrading({
     </div>
   );
 }
-

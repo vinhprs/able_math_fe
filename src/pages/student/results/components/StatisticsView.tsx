@@ -1,5 +1,5 @@
-import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
+import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
 
 interface StatisticsViewProps {
   questions: any[];
@@ -14,9 +14,10 @@ interface StatisticsViewProps {
 
 export function StatisticsView({ questions, unitScores }: StatisticsViewProps) {
   const byDifficulty = {
-    HIGH: questions.filter((q) => q.difficulty === 'HIGH'),
-    MEDIUM: questions.filter((q) => q.difficulty === 'MEDIUM'),
-    LOW: questions.filter((q) => q.difficulty === 'LOW'),
+    1: questions.filter((q) => q.difficulty === 1),
+    2: questions.filter((q) => q.difficulty === 2),
+    3: questions.filter((q) => q.difficulty === 3),
+    4: questions.filter((q) => q.difficulty === 4),
   };
 
   return (
@@ -30,18 +31,21 @@ export function StatisticsView({ questions, unitScores }: StatisticsViewProps) {
             const accuracy = qs.length > 0 ? (correct / qs.length) * 100 : 0;
 
             return (
-              <div key={level} className="p-4 border border-secondary-200 rounded-lg">
+              <div
+                key={level}
+                className="p-4 border border-secondary-200 rounded-lg"
+              >
                 <Badge
                   variant={
-                    level === 'HIGH'
-                      ? 'danger'
-                      : level === 'MEDIUM'
-                        ? 'warning'
-                        : 'success'
+                    level === "4" || level === "3"
+                      ? "danger"
+                      : level === "2"
+                      ? "warning"
+                      : "default"
                   }
                   className="mb-3"
                 >
-                  {level}
+                  Level {level}
                 </Badge>
                 <p className="text-3xl font-bold">{Math.round(accuracy)}%</p>
                 <p className="text-sm text-secondary-500 mt-1">
@@ -80,4 +84,3 @@ export function StatisticsView({ questions, unitScores }: StatisticsViewProps) {
     </div>
   );
 }
-
