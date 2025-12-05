@@ -1,15 +1,22 @@
-import { Download, Printer, Share2 } from "lucide-react";
+import { Download, Printer, Share2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { toast, toastError, toastSuccess } from "@/lib/toast";
 import api from "@/lib/api";
+import { useState } from "react";
 
 interface ReportActionsProps {
   submissionId: string;
 }
 
 export function ReportActions({ submissionId }: ReportActionsProps) {
+  const [isDownloading, setIsDownloading] = useState(false);
+
   const handleDownloadPdf = async () => {
+    if (isDownloading) return;
+
     try {
+      setIsDownloading(true);
+
       // Generate PDF first
       await api.post(`/reports/${submissionId}/generate-pdf`);
 
@@ -32,6 +39,8 @@ export function ReportActions({ submissionId }: ReportActionsProps) {
     } catch (error) {
       console.error("Download PDF error:", error);
       toastError("Failed to download PDF");
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -72,10 +81,20 @@ export function ReportActions({ submissionId }: ReportActionsProps) {
       <Button
         onClick={handleDownloadPdf}
         variant="primary"
-        className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+        disabled={isDownloading}
+        className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-70 disabled:cursor-not-allowed"
       >
-        <Download className="w-4 h-4 mr-2" />
-        Download PDF
+        {isDownloading ? (
+          <>
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            Generating PDF...
+          </>
+        ) : (
+          <>
+            <Download className="w-4 h-4 mr-2" />
+            Download PDF
+          </>
+        )}
       </Button>
 
       <Button onClick={handlePrint} variant="outline" className="border-2">
