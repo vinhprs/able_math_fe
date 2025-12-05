@@ -1,11 +1,10 @@
 import {
-  TestType,
-  TestStatus,
-  SubmissionStatus,
-  GradeLevel,
-  Term,
-  AdtmAnswerType,
   DifficultyLevel,
+  GradeLevel,
+  SubmissionStatus,
+  Term,
+  TestStatus,
+  TestType,
 } from "./enum";
 
 /**
