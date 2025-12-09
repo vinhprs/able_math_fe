@@ -8,7 +8,14 @@ import {
   UserPlus,
   BarChart3,
 } from "lucide-react";
-import { DashboardCard, Button, Card, CardContent, CardHeader, CardTitle } from "@/components/ui";
+import {
+  DashboardCard,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui";
 import {
   RecentTestsList,
   RecentSubmissionsList,
@@ -21,7 +28,8 @@ import { Loader2 } from "lucide-react";
 export function AdminDashboard() {
   const navigate = useNavigate();
   const { data: stats, isLoading: statsLoading } = useAdminStats();
-  const { data: recentActivity, isLoading: activityLoading } = useRecentActivity();
+  const { data: recentActivity, isLoading: activityLoading } =
+    useRecentActivity();
 
   if (statsLoading || activityLoading) {
     return (
@@ -35,8 +43,12 @@ export function AdminDashboard() {
     <div className="space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-bold text-secondary-900">Admin Dashboard</h1>
-        <p className="text-secondary-500 mt-1">Welcome back! Here's what's happening.</p>
+        <h1 className="text-3xl font-bold text-secondary-900">
+          Admin Dashboard
+        </h1>
+        <p className="text-secondary-500 mt-1">
+          Welcome back! Here's what's happening.
+        </p>
       </div>
 
       {/* Statistics Cards */}
@@ -58,7 +70,7 @@ export function AdminDashboard() {
           title="Total Tests"
           value={stats?.totalTests || 0}
           icon={FileText}
-          onClick={() => navigate("/admin/tests/achievement")}
+          onClick={() => navigate("/admin/achievement-tests")}
         />
         <DashboardCard
           title="Active Submissions"
@@ -75,7 +87,7 @@ export function AdminDashboard() {
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Button
-              onClick={() => navigate("/admin/tests/achievement/create")}
+              onClick={() => navigate("/admin/achievement-tests/create")}
               className="w-full"
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -125,7 +137,9 @@ export function AdminDashboard() {
             <CardTitle>Recent Submissions</CardTitle>
           </CardHeader>
           <CardContent>
-            <RecentSubmissionsList submissions={recentActivity?.submissions || []} />
+            <RecentSubmissionsList
+              submissions={recentActivity?.submissions || []}
+            />
           </CardContent>
         </Card>
       </div>
@@ -153,4 +167,3 @@ export function AdminDashboard() {
     </div>
   );
 }
-

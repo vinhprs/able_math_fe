@@ -9,14 +9,13 @@ import { NotFound } from "@/pages/NotFound";
 
 // Admin Pages
 import { AdminDashboard } from "@/pages/admin/Dashboard";
-import { TestList } from "@/pages/admin/tests/TestList";
-import { TestCreate } from "@/pages/admin/tests/TestCreate";
-import { TestEdit } from "@/pages/admin/tests/TestEdit";
-import { TestDetail } from "@/pages/admin/tests/TestDetail";
 import { AdtmTemplatesPage } from "@/pages/admin/adtm/AdtmTemplatesPage";
 import { TeachersPage } from "@/pages/admin/TeachersPage";
 import { TeacherDetail } from "@/pages/admin/TeacherDetail";
 import { StudentsPage } from "@/pages/admin/StudentsPage";
+import { AchievementTestList } from "@/pages/admin/achievement-tests/AchievementTestList";
+import { AchievementTestDetail } from "@/pages/admin/achievement-tests/AchievementTestDetail";
+import { AchievementTestSetup } from "@/features/admin/achievement-tests/AchievementTestSetup/AchievementTestSetup";
 
 // Teacher Pages
 import { TeacherDashboard } from "@/pages/teacher/Dashboard";
@@ -123,16 +122,16 @@ export default function createRoutes() {
                   element: <StudentsPage />,
                 },
                 {
-                  path: "admin/tests/achievement",
-                  element: <TestList />,
+                  path: "admin/achievement-tests",
+                  element: <AchievementTestList />,
                 },
                 {
-                  path: "admin/tests/achievement/create",
-                  element: <TestCreate />,
+                  path: "admin/achievement-tests/create",
+                  element: <AchievementTestSetup />,
                 },
                 {
-                  path: "admin/tests/achievement/:id/edit",
-                  element: <TestEdit />,
+                  path: "admin/achievement-tests/:id",
+                  element: <AchievementTestDetail />,
                 },
                 {
                   path: "admin/adtm/templates",
@@ -311,8 +310,8 @@ export default function createRoutes() {
               ),
               children: [
                 {
-                  path: "admin/tests/achievement/:id",
-                  element: <TestDetail />,
+                  path: "admin/achievement-tests/:id",
+                  element: <AchievementTestDetail />,
                 },
               ],
             },

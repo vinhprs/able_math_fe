@@ -26,7 +26,7 @@ const menuItems: MenuItem[] = [
   {
     label: "Achievement Tests",
     icon: FileText,
-    path: "/admin/tests/achievement",
+    path: "/admin/achievement-tests",
   },
   {
     label: "A-DTM Templates",

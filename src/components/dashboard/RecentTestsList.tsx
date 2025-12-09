@@ -30,7 +30,7 @@ export function RecentTestsList({ tests }: RecentTestsListProps) {
         <div
           key={test.id}
           className="flex items-center gap-3 p-3 rounded-lg hover:bg-secondary-50 cursor-pointer transition-colors"
-          onClick={() => navigate(`/admin/tests/achievement/${test.id}`)}
+          onClick={() => navigate(`/admin/achievement-tests/${test.id}`)}
         >
           <div className="bg-primary-100 p-2 rounded-lg">
             <FileText className="w-4 h-4 text-primary-600" />
@@ -51,4 +51,3 @@ export function RecentTestsList({ tests }: RecentTestsListProps) {
     </div>
   );
 }
-
