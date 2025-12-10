@@ -1,6 +1,7 @@
-import { Card, CardContent } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { AnswerInput } from './AnswerInput';
+import { Card, CardContent } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { AnswerInput } from "./AnswerInput";
+import { MultipleChoiceAnswer } from "@/components/student/MultipleChoiceAnswer";
 
 interface QuestionCardProps {
   question: {
@@ -8,6 +9,14 @@ interface QuestionCardProps {
     questionNumber: number;
     questionText: string;
     questionImage?: string;
+    questionType?: "TEXT" | "MULTIPLE_CHOICE" | "TRUE_FALSE";
+    options?: {
+      A?: string;
+      B?: string;
+      C?: string;
+      D?: string;
+      E?: string;
+    } | null;
     score: number;
     unitName?: string;
     difficulty?: string;
@@ -34,7 +43,9 @@ export function QuestionCard({
             <div>
               <h2 className="text-2xl font-bold text-gray-900">
                 Question {questionNumber}
-                <span className="text-gray-400 text-lg ml-2">/ {totalQuestions}</span>
+                <span className="text-gray-400 text-lg ml-2">
+                  / {totalQuestions}
+                </span>
               </h2>
               <div className="flex items-center gap-2 mt-2">
                 {question.unitName && (
@@ -59,22 +70,31 @@ export function QuestionCard({
                 src={question.questionImage}
                 alt={`Question ${questionNumber} illustration`}
                 className="max-w-full h-auto mx-auto"
-                style={{ maxHeight: '400px' }}
+                style={{ maxHeight: "400px" }}
               />
             </div>
           )}
 
-          {/* Answer Input */}
+          {/* Answer Input - Conditional Rendering */}
           <div>
-            <AnswerInput
-              value={answer}
-              onChange={onAnswerChange}
-              placeholder="Type your answer here..."
-            />
+            {question.questionType === "MULTIPLE_CHOICE" && question.options ? (
+              <MultipleChoiceAnswer
+                questionId={question.id}
+                questionNumber={question.questionNumber}
+                options={question.options}
+                value={answer}
+                onChange={onAnswerChange}
+              />
+            ) : (
+              <AnswerInput
+                value={answer}
+                onChange={onAnswerChange}
+                placeholder="Type your answer here..."
+              />
+            )}
           </div>
         </div>
       </CardContent>
     </Card>
   );
 }
-

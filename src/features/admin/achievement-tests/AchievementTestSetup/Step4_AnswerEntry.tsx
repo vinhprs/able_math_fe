@@ -4,6 +4,7 @@ import { achievementTestsApi } from "@/shared/api/achievement-tests.api";
 import type { AnswerEntry } from "@/shared/types/achievement-test.types";
 import { useState } from "react";
 import type { TestSetupData as LocalTestSetupData } from "./types";
+import { cn } from "@/lib/cn";
 
 interface Props {
   onNext: (data: Partial<LocalTestSetupData>) => void;
@@ -27,6 +28,30 @@ export function Step4_AnswerEntry({ onNext, onBack, initialData }: Props) {
         a.questionNo === questionNo ? { ...a, correctAnswer: value } : a
       )
     );
+  };
+
+  const handleMultipleChoiceToggle = (
+    questionNo: number,
+    option: string,
+    currentAnswer: string
+  ) => {
+    // Parse current answer consistently (trim, filter)
+    const selectedOptions = currentAnswer
+      ? currentAnswer
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [];
+
+    // Toggle option
+    const isSelected = selectedOptions.includes(option);
+    const newOptions = isSelected
+      ? selectedOptions.filter((o) => o !== option)
+      : [...selectedOptions, option].sort((a, b) => parseInt(a) - parseInt(b));
+
+    // Join back to string (comma-separated)
+    const newAnswer = newOptions.join(",");
+    handleAnswerChange(questionNo, newAnswer);
   };
 
   const handleSubmit = async () => {
@@ -70,8 +95,9 @@ export function Step4_AnswerEntry({ onNext, onBack, initialData }: Props) {
     <div className="space-y-6">
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <p className="text-sm text-blue-800">
-          Enter the correct answer for each question. For multiple choice, use
-          format: ①, ②, ③, ④, ⑤
+          Enter the correct answer for each question. For multiple choice
+          questions, you can select one or more correct options (1, 2, 3, 4, or
+          5) by clicking on them. Selected options will be highlighted.
         </p>
       </div>
 
@@ -97,18 +123,81 @@ export function Step4_AnswerEntry({ onNext, onBack, initialData }: Props) {
                 )}
               </div>
 
-              <Input
-                label="Correct Answer *"
-                placeholder={
-                  isMultipleChoice
-                    ? "Enter answer (e.g., ①, ②, ③)"
-                    : "Enter answer"
-                }
-                value={answer.correctAnswer}
-                onChange={(e) =>
-                  handleAnswerChange(answer.questionNo, e.target.value)
-                }
-              />
+              {/* Multiple Choice: Show Checkboxes for Multiple Selection */}
+              {isMultipleChoice ? (
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Select Correct Answer(s) * (You can select multiple)
+                  </label>
+                  <div className="grid grid-cols-5 gap-3">
+                    {["1", "2", "3", "4", "5"].map((option) => {
+                      // Parse selected options consistently
+                      const selectedOptions = answer.correctAnswer
+                        ? answer.correctAnswer
+                            .split(",")
+                            .map((s) => s.trim())
+                            .filter(Boolean)
+                        : [];
+                      const isSelected = selectedOptions.includes(option);
+
+                      return (
+                        <label
+                          key={option}
+                          className={cn(
+                            "relative flex items-center justify-center p-4 rounded-lg border-2 cursor-pointer transition-all",
+                            "hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2",
+                            isSelected
+                              ? "border-blue-500 bg-blue-500 text-white"
+                              : "border-gray-200 bg-white text-gray-700"
+                          )}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() =>
+                              handleMultipleChoiceToggle(
+                                answer.questionNo,
+                                option,
+                                answer.correctAnswer
+                              )
+                            }
+                            className="sr-only"
+                          />
+                          <span className="text-lg font-semibold">
+                            {option}
+                          </span>
+                          {isSelected && (
+                            <span className="absolute top-1 right-1 text-white text-sm font-bold">
+                              ✓
+                            </span>
+                          )}
+                        </label>
+                      );
+                    })}
+                  </div>
+                  {answer.correctAnswer && (
+                    <p className="text-sm text-gray-600 mt-2">
+                      Selected:{" "}
+                      <span className="font-semibold">
+                        {answer.correctAnswer
+                          .split(",")
+                          .map((s) => s.trim())
+                          .filter(Boolean)
+                          .join(", ") || "None"}
+                      </span>
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <Input
+                  label="Correct Answer *"
+                  placeholder="Enter answer"
+                  value={answer.correctAnswer}
+                  onChange={(e) =>
+                    handleAnswerChange(answer.questionNo, e.target.value)
+                  }
+                />
+              )}
             </div>
           );
         })}

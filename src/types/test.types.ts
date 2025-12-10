@@ -37,6 +37,14 @@ export interface ITestQuestion {
   unitName: string | null;
   questionText: string;
   questionImage: string | null;
+  questionType?: "TEXT" | "MULTIPLE_CHOICE" | "TRUE_FALSE";
+  options?: {
+    A?: string;
+    B?: string;
+    C?: string;
+    D?: string;
+    E?: string;
+  } | null;
   correctAnswer: string;
   score: number;
   difficulty: number | null; // 1-4: 1=Easy, 2=Medium, 3=Hard, 4=Very Hard
@@ -92,6 +100,14 @@ export interface IUpdateTestDto {
 export interface ICreateQuestionDto {
   questionNumber: number;
   unitName: string;
+  questionType?: "TEXT" | "MULTIPLE_CHOICE" | "TRUE_FALSE";
+  options?: {
+    A?: string;
+    B?: string;
+    C?: string;
+    D?: string;
+    E?: string;
+  } | null;
   correctAnswer: string;
   score: number;
   difficulty: number; // 1-4: 1=Easy, 2=Medium, 3=Hard, 4=Very Hard

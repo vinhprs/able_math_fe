@@ -1,6 +1,7 @@
-import { CheckCircle, XCircle } from 'lucide-react';
-import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
+import { CheckCircle, XCircle } from "lucide-react";
+import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { MultipleChoiceAnswer } from "@/components/student/MultipleChoiceAnswer";
 
 interface QuestionBreakdownProps {
   questions: any[];
@@ -22,8 +23,8 @@ export function QuestionBreakdown({ questions }: QuestionBreakdownProps) {
                 <div
                   className={`w-10 h-10 rounded-full flex items-center justify-center ${
                     question.isCorrect
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-red-100 text-red-700'
+                      ? "bg-green-100 text-green-700"
+                      : "bg-red-100 text-red-700"
                   }`}
                 >
                   {question.isCorrect ? (
@@ -33,7 +34,9 @@ export function QuestionBreakdown({ questions }: QuestionBreakdownProps) {
                   )}
                 </div>
                 <div>
-                  <h3 className="font-bold">Question {question.questionNumber}</h3>
+                  <h3 className="font-bold">
+                    Question {question.questionNumber}
+                  </h3>
                   <div className="flex items-center gap-2 mt-1">
                     <Badge variant="default" className="text-xs">
                       {question.unitName}
@@ -68,38 +71,59 @@ export function QuestionBreakdown({ questions }: QuestionBreakdownProps) {
               </div>
             )}
 
-            {/* Answers */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-secondary-50 p-4 rounded-lg">
-              {/* Your Answer */}
-              <div>
-                <p className="text-sm font-medium text-secondary-600 mb-2">Your Answer</p>
-                <div
-                  className={`p-3 rounded border-2 ${
-                    question.isCorrect
-                      ? 'border-green-500 bg-green-50'
-                      : 'border-red-500 bg-red-50'
-                  }`}
-                >
-                  <p className="font-medium">
-                    {question.studentAnswer || (
-                      <span className="text-secondary-400 italic">No answer</span>
-                    )}
+            {/* Answers - Conditional Rendering */}
+            {question.questionType === "MULTIPLE_CHOICE" && question.options ? (
+              <div className="bg-secondary-50 p-4 rounded-lg">
+                <MultipleChoiceAnswer
+                  questionId={question.id || `q-${question.questionNumber}`}
+                  questionNumber={question.questionNumber}
+                  options={question.options}
+                  value={question.studentAnswer}
+                  correctAnswer={question.correctAnswer}
+                  showCorrect={true}
+                  disabled={true}
+                />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-secondary-50 p-4 rounded-lg">
+                {/* Your Answer */}
+                <div>
+                  <p className="text-sm font-medium text-secondary-600 mb-2">
+                    Your Answer
                   </p>
+                  <div
+                    className={`p-3 rounded border-2 ${
+                      question.isCorrect
+                        ? "border-green-500 bg-green-50"
+                        : "border-red-500 bg-red-50"
+                    }`}
+                  >
+                    <p className="font-medium">
+                      {question.studentAnswer || (
+                        <span className="text-secondary-400 italic">
+                          No answer
+                        </span>
+                      )}
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              {/* Correct Answer */}
-              <div>
-                <p className="text-sm font-medium text-secondary-600 mb-2">Correct Answer</p>
-                <div className="p-3 rounded border-2 border-green-500 bg-green-50">
-                  <p className="font-medium text-green-700">{question.correctAnswer}</p>
+                {/* Correct Answer */}
+                <div>
+                  <p className="text-sm font-medium text-secondary-600 mb-2">
+                    Correct Answer
+                  </p>
+                  <div className="p-3 rounded border-2 border-green-500 bg-green-50">
+                    <p className="font-medium text-green-700">
+                      {question.correctAnswer}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         ))}
       </div>
     </Card>
   );
 }
-

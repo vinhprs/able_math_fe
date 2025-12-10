@@ -30,6 +30,14 @@ interface TestQuestion {
   questionNumber: number;
   questionText: string;
   questionImage: string | null;
+  questionType?: "TEXT" | "MULTIPLE_CHOICE" | "TRUE_FALSE";
+  options?: {
+    A?: string;
+    B?: string;
+    C?: string;
+    D?: string;
+    E?: string;
+  } | null;
   score: number;
   unitName: string | null;
   difficulty: string | null;
@@ -452,6 +460,8 @@ export function TakeTest() {
               question={{
                 ...currentQuestion,
                 questionImage: currentQuestion.questionImage ?? undefined,
+                questionType: currentQuestion.questionType ?? "TEXT",
+                options: currentQuestion.options ?? null,
                 unitName: currentQuestion.unitName ?? undefined,
                 difficulty: currentQuestion.difficulty ?? undefined,
               }}
