@@ -1,15 +1,15 @@
-import { Button, Input, Select, Textarea } from "@/components/ui";
-import type { ICreateQuestionDto } from "@/types/test.types";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Trash2, AlertCircle } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
-import { z } from "zod";
+import { MultipleChoiceEditor } from "@/components/admin/MultipleChoiceEditor";
+import { QuestionTypeSelector } from "@/components/admin/QuestionTypeSelector";
 import { ScoreSummary } from "@/components/tests/ScoreSummary";
 import { ScoreValidationAlert } from "@/components/tests/ScoreValidationAlert";
+import { Button, Input, Select, Textarea } from "@/components/ui";
 import { cn } from "@/lib/cn";
-import { QuestionTypeSelector } from "@/components/admin/QuestionTypeSelector";
-import { MultipleChoiceEditor } from "@/components/admin/MultipleChoiceEditor";
+import type { ICreateQuestionDto } from "@/types/test.types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AlertCircle, Plus, Trash2 } from "lucide-react";
+import { useEffect } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
+import { z } from "zod";
 
 const questionSchema = z.object({
   questionNumber: z.number().positive(),
@@ -130,7 +130,6 @@ export function QuestionArrayForm({
       watchedQuestions
         ?.filter((_, idx) => idx !== currentQuestionIndex)
         .reduce((sum, q) => sum + (q.score || 0), 0) || 0;
-    const currentScore = watchedQuestions?.[currentQuestionIndex]?.score || 0;
     return targetScore - otherQuestionsTotal;
   };
 

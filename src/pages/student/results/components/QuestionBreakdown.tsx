@@ -79,6 +79,7 @@ export function QuestionBreakdown({ questions }: QuestionBreakdownProps) {
                   questionNumber={question.questionNumber}
                   options={question.options}
                   value={question.studentAnswer}
+                  onChange={() => {}} // No-op since disabled
                   correctAnswer={question.correctAnswer}
                   showCorrect={true}
                   disabled={true}
