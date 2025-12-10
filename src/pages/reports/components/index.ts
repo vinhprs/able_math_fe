@@ -10,3 +10,4 @@ export { RecommendationsList } from "./RecommendationsList";
 export { ReportActions } from "./ReportActions";
 export { ReportCoverPage } from "./ReportCoverPage";
 export { ReportAnalysisPage } from "./ReportAnalysisPage";
+export { DomainSummaryPage } from "./DomainSummaryPage";

@@ -176,3 +176,59 @@ export function useGradeAdtmSubmission() {
     },
   });
 }
+
+/**
+ * Finalize A-DTM grading and generate report
+ */
+export function useFinalizeAdtmGrading() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (submissionId: string) => {
+      const response = await api.post<{
+        success: boolean;
+        message: string;
+        result: {
+          submissionId: string;
+          section1: any;
+          section2: any;
+          section3: any;
+          section4: any;
+          section5: any;
+          domains: {
+            basicLearningAbility: {
+              averageScore: number;
+              standardScore: number;
+              evaluation: "high" | "medium" | "low";
+              evaluationColor: string;
+            };
+            creativeThinkingAbility: {
+              averageScore: number;
+              standardScore: number;
+              evaluation: "high" | "medium" | "low";
+              evaluationColor: string;
+            };
+          };
+          overallStandardScore: number;
+          totalRawScore: number;
+          totalMaxScore: number;
+        };
+        report: {
+          id: string;
+          url: string;
+        };
+        timestamp: string;
+      }>(`/teacher/adtm/submissions/${submissionId}/finalize`);
+      return response.data;
+    },
+    onSuccess: (_, submissionId) => {
+      queryClient.invalidateQueries({
+        queryKey: ["adtm-submission", submissionId],
+      });
+      queryClient.invalidateQueries({ queryKey: ["adtm-submissions"] });
+      queryClient.invalidateQueries({
+        queryKey: ["adtm-report", submissionId],
+      });
+    },
+  });
+}

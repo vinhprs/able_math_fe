@@ -1,7 +1,11 @@
-import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAvailableStudents, useAdtmTemplatesForAssignment, useAssignStudents } from '@/hooks/useAdtmAssignment';
-import { useClasses } from '@/hooks/useClasses';
+import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  useAvailableStudents,
+  useAdtmTemplatesForAssignment,
+  useAssignStudents,
+} from "@/hooks/useAdtmAssignment";
+import { useClasses } from "@/hooks/useClasses";
 import {
   Button,
   Card,
@@ -15,21 +19,34 @@ import {
   Stepper,
   Textarea,
   Modal,
-} from '@/components/ui';
-import { Search, Loader2, X, CheckCircle2, Users, Calendar } from 'lucide-react';
-import { format } from 'date-fns';
-import type { AvailableStudent, AdtmTemplateForAssignment } from '@/types/adtm-assignment.types';
+} from "@/components/ui";
+import {
+  Search,
+  Loader2,
+  X,
+  CheckCircle2,
+  Users,
+  Calendar,
+} from "lucide-react";
+import { format } from "date-fns";
+import type {
+  AvailableStudent,
+  AdtmTemplateForAssignment,
+} from "@/types/adtm-assignment.types";
 
-const STEPS = ['Select Students', 'Choose Template', 'Confirm & Assign'];
+const STEPS = ["Select Students", "Choose Template", "Confirm & Assign"];
 
 export function AssignStudentsPage() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
-  const [selectedStudentIds, setSelectedStudentIds] = useState<Set<string>>(new Set());
-  const [selectedTemplate, setSelectedTemplate] = useState<AdtmTemplateForAssignment | null>(null);
-  const [testDate, setTestDate] = useState('');
-  const [gradingDueDate, setGradingDueDate] = useState('');
-  const [notes, setNotes] = useState('');
+  const [selectedStudentIds, setSelectedStudentIds] = useState<Set<string>>(
+    new Set()
+  );
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<AdtmTemplateForAssignment | null>(null);
+  const [testDate, setTestDate] = useState("");
+  const [gradingDueDate, setGradingDueDate] = useState("");
+  const [notes, setNotes] = useState("");
   const [notifyStudents, setNotifyStudents] = useState(false);
   const [notifyParents, setNotifyParents] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -37,19 +54,21 @@ export function AssignStudentsPage() {
 
   // Filters for step 1
   const [filters, setFilters] = useState({
-    grade: '',
-    classId: '',
-    search: '',
+    grade: "",
+    classId: "",
+    search: "",
     page: 1,
     limit: 50,
   });
 
   // Template filter
-  const [templateLevel, setTemplateLevel] = useState<string>('');
+  const [templateLevel, setTemplateLevel] = useState<string>("");
 
-  const { data: studentsData, isLoading: studentsLoading } = useAvailableStudents(filters);
+  const { data: studentsData, isLoading: studentsLoading } =
+    useAvailableStudents(filters);
   const { data: classesData } = useClasses({ page: 1, limit: 100 });
-  const { data: templatesData, isLoading: templatesLoading } = useAdtmTemplatesForAssignment(templateLevel);
+  const { data: templatesData, isLoading: templatesLoading } =
+    useAdtmTemplatesForAssignment(templateLevel);
   const assignMutation = useAssignStudents();
 
   const selectedStudents = useMemo(() => {
@@ -80,7 +99,9 @@ export function AssignStudentsPage() {
     if (!studentsData) return;
 
     const availableStudents = studentsData.students.filter(canAssignStudent);
-    const allSelected = availableStudents.every((s) => selectedStudentIds.has(s.id));
+    const allSelected = availableStudents.every((s) =>
+      selectedStudentIds.has(s.id)
+    );
 
     if (allSelected) {
       setSelectedStudentIds(new Set());
@@ -113,7 +134,7 @@ export function AssignStudentsPage() {
       setAssignedCount(result.assignedCount);
       setShowSuccessModal(true);
     } catch (error: any) {
-      alert(error.message || 'Failed to assign students');
+      alert(error.message || "Failed to assign students");
     }
   };
 
@@ -121,24 +142,26 @@ export function AssignStudentsPage() {
     setCurrentStep(1);
     setSelectedStudentIds(new Set());
     setSelectedTemplate(null);
-    setTestDate('');
-    setGradingDueDate('');
-    setNotes('');
+    setTestDate("");
+    setGradingDueDate("");
+    setNotes("");
     setNotifyStudents(false);
     setNotifyParents(false);
   };
 
   const gradeOptions = useMemo(() => {
-    const grades = new Set(studentsData?.students.map((s) => s.grade).filter(Boolean) || []);
+    const grades = new Set(
+      studentsData?.students.map((s) => s.grade).filter(Boolean) || []
+    );
     return [
-      { value: '', label: 'All Grades' },
+      { value: "", label: "All Grades" },
       ...Array.from(grades).map((g) => ({ value: g, label: g })),
     ];
   }, [studentsData]);
 
   const classOptions = useMemo(() => {
     return [
-      { value: '', label: 'All Classes' },
+      { value: "", label: "All Classes" },
       ...(classesData?.data.map((c) => ({ value: c.id, label: c.name })) || []),
     ];
   }, [classesData]);
@@ -146,15 +169,22 @@ export function AssignStudentsPage() {
   const allSelected = useMemo(() => {
     if (!studentsData) return false;
     const availableStudents = studentsData.students.filter(canAssignStudent);
-    return availableStudents.length > 0 && availableStudents.every((s) => selectedStudentIds.has(s.id));
+    return (
+      availableStudents.length > 0 &&
+      availableStudents.every((s) => selectedStudentIds.has(s.id))
+    );
   }, [studentsData, selectedStudentIds]);
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-bold text-secondary-900">Assign Students to A-DTM Test</h1>
-        <p className="text-secondary-500 mt-1">Select students and assign them to an A-DTM template</p>
+        <h1 className="text-3xl font-bold text-secondary-900">
+          Assign Students to A-DTM Test
+        </h1>
+        <p className="text-secondary-500 mt-1">
+          Select students and assign them to an A-DTM template
+        </p>
       </div>
 
       {/* Step Indicator */}
@@ -185,19 +215,37 @@ export function AssignStudentsPage() {
                 <Input
                   placeholder="Search students..."
                   value={filters.search}
-                  onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value, page: 1 }))}
+                  onChange={(e) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      search: e.target.value,
+                      page: 1,
+                    }))
+                  }
                   className="pl-10"
                 />
               </div>
               <Select
                 options={gradeOptions}
                 value={filters.grade}
-                onChange={(e) => setFilters((prev) => ({ ...prev, grade: e.target.value, page: 1 }))}
+                onChange={(e) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    grade: e.target.value,
+                    page: 1,
+                  }))
+                }
               />
               <Select
                 options={classOptions}
                 value={filters.classId}
-                onChange={(e) => setFilters((prev) => ({ ...prev, classId: e.target.value, page: 1 }))}
+                onChange={(e) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    classId: e.target.value,
+                    page: 1,
+                  }))
+                }
               />
             </div>
 
@@ -212,7 +260,10 @@ export function AssignStudentsPage() {
                   <thead className="bg-secondary-50">
                     <tr>
                       <th className="px-4 py-3 text-left">
-                        <Checkbox checked={allSelected} onChange={toggleSelectAll} />
+                        <Checkbox
+                          checked={allSelected}
+                          onChange={toggleSelectAll}
+                        />
                       </th>
                       <th className="px-4 py-3 text-left text-sm font-medium text-secondary-700">
                         Student Name
@@ -220,12 +271,18 @@ export function AssignStudentsPage() {
                       <th className="px-4 py-3 text-left text-sm font-medium text-secondary-700">
                         Student ID
                       </th>
-                      <th className="px-4 py-3 text-left text-sm font-medium text-secondary-700">Grade</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium text-secondary-700">Class</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-secondary-700">
+                        Grade
+                      </th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-secondary-700">
+                        Class
+                      </th>
                       <th className="px-4 py-3 text-left text-sm font-medium text-secondary-700">
                         Last A-DTM Test
                       </th>
-                      <th className="px-4 py-3 text-left text-sm font-medium text-secondary-700">Status</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-secondary-700">
+                        Status
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-secondary-200">
@@ -234,7 +291,11 @@ export function AssignStudentsPage() {
                       return (
                         <tr
                           key={student.id}
-                          className={!canAssign ? 'opacity-50 bg-secondary-50' : 'hover:bg-secondary-50'}
+                          className={
+                            !canAssign
+                              ? "opacity-50 bg-secondary-50"
+                              : "hover:bg-secondary-50"
+                          }
                         >
                           <td className="px-4 py-3">
                             <Checkbox
@@ -248,10 +309,14 @@ export function AssignStudentsPage() {
                               <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-medium text-sm">
                                 {student.name.charAt(0).toUpperCase()}
                               </div>
-                              <span className="font-medium">{student.name}</span>
+                              <span className="font-medium">
+                                {student.name}
+                              </span>
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-sm text-secondary-600">{student.studentId}</td>
+                          <td className="px-4 py-3 text-sm text-secondary-600">
+                            {student.studentId}
+                          </td>
                           <td className="px-4 py-3">
                             <Badge variant="info">{student.grade}</Badge>
                           </td>
@@ -259,13 +324,20 @@ export function AssignStudentsPage() {
                           <td className="px-4 py-3 text-sm">
                             {student.lastAdtmTest ? (
                               <div>
-                                <div className="font-medium">{student.lastAdtmTest.testCode}</div>
+                                <div className="font-medium">
+                                  {student.lastAdtmTest.testCode}
+                                </div>
                                 <div className="text-secondary-500">
-                                  {format(new Date(student.lastAdtmTest.date), 'MMM d, yyyy')}
+                                  {format(
+                                    new Date(student.lastAdtmTest.date),
+                                    "MMM d, yyyy"
+                                  )}
                                 </div>
                               </div>
                             ) : (
-                              <span className="text-secondary-400">Never taken</span>
+                              <span className="text-secondary-400">
+                                Never taken
+                              </span>
                             )}
                           </td>
                           <td className="px-4 py-3">
@@ -282,7 +354,9 @@ export function AssignStudentsPage() {
                 </table>
               </div>
             ) : (
-              <div className="text-center py-12 text-secondary-500">No students found</div>
+              <div className="text-center py-12 text-secondary-500">
+                No students found
+              </div>
             )}
 
             {/* Pagination */}
@@ -295,7 +369,9 @@ export function AssignStudentsPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setFilters((prev) => ({ ...prev, page: prev.page - 1 }))}
+                    onClick={() =>
+                      setFilters((prev) => ({ ...prev, page: prev.page - 1 }))
+                    }
                     disabled={studentsData.page === 1}
                   >
                     Previous
@@ -303,7 +379,9 @@ export function AssignStudentsPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setFilters((prev) => ({ ...prev, page: prev.page + 1 }))}
+                    onClick={() =>
+                      setFilters((prev) => ({ ...prev, page: prev.page + 1 }))
+                    }
                     disabled={studentsData.page >= studentsData.totalPages}
                   >
                     Next
@@ -341,10 +419,10 @@ export function AssignStudentsPage() {
             <div className="flex items-center gap-4">
               <Select
                 options={[
-                  { value: '', label: 'All Levels' },
-                  { value: 'Elementary', label: 'Elementary' },
-                  { value: 'Middle School', label: 'Middle School' },
-                  { value: 'High School', label: 'High School' },
+                  { value: "", label: "All Levels" },
+                  { value: "Elementary", label: "Elementary" },
+                  { value: "Middle School", label: "Middle School" },
+                  { value: "High School", label: "High School" },
                 ]}
                 value={templateLevel}
                 onChange={(e) => setTemplateLevel(e.target.value)}
@@ -365,14 +443,18 @@ export function AssignStudentsPage() {
                     <Card
                       key={template.id}
                       className={`cursor-pointer transition-all ${
-                        isSelected ? 'ring-2 ring-primary-600 border-primary-600' : ''
-                      } ${isRecommended ? 'border-green-300' : ''}`}
+                        isSelected
+                          ? "ring-2 ring-primary-600 border-primary-600"
+                          : ""
+                      } ${isRecommended ? "border-green-300" : ""}`}
                       onClick={() => setSelectedTemplate(template)}
                     >
                       <CardHeader>
                         <div className="flex items-center justify-between">
                           <div>
-                            <CardTitle className="text-lg">{template.testCode}</CardTitle>
+                            <CardTitle className="text-lg">
+                              {template.testCode}
+                            </CardTitle>
                             {isRecommended && (
                               <Badge variant="success" className="mt-1">
                                 Recommended
@@ -412,7 +494,9 @@ export function AssignStudentsPage() {
                 })}
               </div>
             ) : (
-              <div className="text-center py-12 text-secondary-500">No templates found</div>
+              <div className="text-center py-12 text-secondary-500">
+                No templates found
+              </div>
             )}
 
             {/* Actions */}
@@ -420,7 +504,10 @@ export function AssignStudentsPage() {
               <Button variant="outline" onClick={() => setCurrentStep(1)}>
                 Back
               </Button>
-              <Button onClick={() => setCurrentStep(3)} disabled={!selectedTemplate}>
+              <Button
+                onClick={() => setCurrentStep(3)}
+                disabled={!selectedTemplate}
+              >
                 Next: Confirm Assignment
               </Button>
             </div>
@@ -440,9 +527,15 @@ export function AssignStudentsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-secondary-500">Students</p>
-                  <p className="font-medium">{selectedStudentIds.size} student(s)</p>
+                  <p className="font-medium">
+                    {selectedStudentIds.size} student(s)
+                  </p>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => setCurrentStep(1)}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setCurrentStep(1)}
+                >
                   Change
                 </Button>
               </div>
@@ -454,7 +547,11 @@ export function AssignStudentsPage() {
                     {selectedTemplate?.testCode} - {selectedTemplate?.title}
                   </p>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => setCurrentStep(2)}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setCurrentStep(2)}
+                >
                   Change
                 </Button>
               </div>
@@ -475,7 +572,7 @@ export function AssignStudentsPage() {
                   type="date"
                   value={testDate}
                   onChange={(e) => setTestDate(e.target.value)}
-                  min={new Date().toISOString().split('T')[0]}
+                  min={new Date().toISOString().split("T")[0]}
                   required
                 />
                 <p className="mt-1.5 text-sm text-secondary-500">
@@ -491,7 +588,7 @@ export function AssignStudentsPage() {
                   type="date"
                   value={gradingDueDate}
                   onChange={(e) => setGradingDueDate(e.target.value)}
-                  min={testDate || new Date().toISOString().split('T')[0]}
+                  min={testDate || new Date().toISOString().split("T")[0]}
                 />
                 <p className="mt-1.5 text-sm text-secondary-500">
                   Deadline for you to complete grading
@@ -533,7 +630,9 @@ export function AssignStudentsPage() {
           {/* Selected Students Review */}
           <Card>
             <CardHeader>
-              <CardTitle>Selected Students ({selectedStudentIds.size})</CardTitle>
+              <CardTitle>
+                Selected Students ({selectedStudentIds.size})
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2 max-h-64 overflow-y-auto">
@@ -549,7 +648,8 @@ export function AssignStudentsPage() {
                       <div>
                         <p className="font-medium text-sm">{student.name}</p>
                         <p className="text-xs text-secondary-500">
-                          {student.studentId} • {student.grade} • {student.class}
+                          {student.studentId} • {student.grade} •{" "}
+                          {student.class}
                         </p>
                       </div>
                     </div>
@@ -583,7 +683,12 @@ export function AssignStudentsPage() {
               </Button>
               <Button
                 onClick={handleAssign}
-                disabled={!selectedTemplate || selectedStudentIds.size === 0 || !testDate || assignMutation.isPending}
+                disabled={
+                  !selectedTemplate ||
+                  selectedStudentIds.size === 0 ||
+                  !testDate ||
+                  assignMutation.isPending
+                }
               >
                 {assignMutation.isPending ? (
                   <>
@@ -604,7 +709,7 @@ export function AssignStudentsPage() {
         isOpen={showSuccessModal}
         onClose={() => {
           setShowSuccessModal(false);
-          navigate('/teacher/adtm/students');
+          navigate("/teacher/adtm/students");
         }}
         title="Assignment Successful!"
       >
@@ -613,7 +718,8 @@ export function AssignStudentsPage() {
             <CheckCircle2 className="w-16 h-16 text-green-600" />
           </div>
           <p className="text-center text-lg font-medium">
-            Successfully assigned {assignedCount} student(s) to {selectedTemplate?.testCode}
+            Successfully assigned {assignedCount} student(s) to{" "}
+            {selectedTemplate?.testCode}
           </p>
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2">
@@ -622,7 +728,12 @@ export function AssignStudentsPage() {
             </div>
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-secondary-400" />
-              <span>Test date: {testDate ? format(new Date(testDate), 'MMM d, yyyy') : 'Not set'}</span>
+              <span>
+                Test date:{" "}
+                {testDate
+                  ? format(new Date(testDate), "MMM d, yyyy")
+                  : "Not set"}
+              </span>
             </div>
           </div>
           <div className="flex gap-2 pt-4">
@@ -632,7 +743,7 @@ export function AssignStudentsPage() {
             <Button
               onClick={() => {
                 setShowSuccessModal(false);
-                navigate('/teacher/adtm/students');
+                navigate("/teacher/grading");
               }}
               className="flex-1"
             >
@@ -651,6 +762,7 @@ function getMostCommon<T>(arr: T[]): T {
   arr.forEach((item) => {
     counts.set(item, (counts.get(item) || 0) + 1);
   });
-  return Array.from(counts.entries()).sort((a, b) => b[1] - a[1])[0]?.[0] || arr[0];
+  return (
+    Array.from(counts.entries()).sort((a, b) => b[1] - a[1])[0]?.[0] || arr[0]
+  );
 }
-

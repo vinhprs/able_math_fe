@@ -2,7 +2,7 @@
  * Chart data structure for report visualizations
  */
 export interface ChartData {
-  type: 'bar' | 'radar' | 'pie';
+  type: "bar" | "radar" | "pie";
   labels: string[];
   datasets: {
     label: string;
@@ -112,6 +112,26 @@ export interface AdtmSectionData {
 }
 
 /**
+ * Domain data for A-DTM report
+ */
+export interface AdtmDomainData {
+  basicLearningAbility: {
+    averageScore: number;
+    standardScore: number;
+    evaluation: "high" | "medium" | "low";
+    evaluationColor: string;
+    sections: AdtmSectionData[]; // Sections 1-3
+  };
+  creativeThinkingAbility: {
+    averageScore: number;
+    standardScore: number;
+    evaluation: "high" | "medium" | "low";
+    evaluationColor: string;
+    sections: AdtmSectionData[]; // Sections 4-5
+  };
+}
+
+/**
  * A-DTM Test Report Data
  */
 export interface AdtmReportData {
@@ -127,10 +147,10 @@ export interface AdtmReportData {
   };
   overallScore: number;
   sections: AdtmSectionData[];
+  domains: AdtmDomainData;
   charts: {
     sectionBar: ChartData;
     unitRadar: ChartData;
   };
   recommendations: string[];
 }
-

@@ -9,6 +9,7 @@ import { useParams } from "react-router-dom";
 import { ReportActions } from "./components/ReportActions";
 import { ReportAnalysisPage } from "./components/ReportAnalysisPage";
 import { ReportCoverPage } from "./components/ReportCoverPage";
+import { DomainSummaryPage } from "./components/DomainSummaryPage";
 
 export function AdtmReportPage() {
   const { submissionId } = useParams<{ submissionId: string }>();
@@ -26,7 +27,7 @@ export function AdtmReportPage() {
         success: boolean;
         data: AdtmReportData;
         timestamp: string;
-      }>(`/reports/adtm/${submissionId}`);
+      }>(`/teacher/adtm/submissions/${submissionId}/report`);
       return response.data.data;
     },
     enabled: !!submissionId,
@@ -82,7 +83,14 @@ export function AdtmReportPage() {
             variant={currentPage === 2 ? "primary" : "outline"}
             size="sm"
           >
-            Page 2: Analysis
+            Page 2: Domains
+          </Button>
+          <Button
+            onClick={() => setCurrentPage(3)}
+            variant={currentPage === 3 ? "primary" : "outline"}
+            size="sm"
+          >
+            Page 3: Analysis
           </Button>
         </div>
 
@@ -102,6 +110,11 @@ export function AdtmReportPage() {
             sections={report.sections}
             overallScore={report.overallScore}
           />
+        ) : currentPage === 2 ? (
+          <DomainSummaryPage
+            basicLearning={report.domains.basicLearningAbility}
+            creativeThinking={report.domains.creativeThinkingAbility}
+          />
         ) : (
           <ReportAnalysisPage reportData={report} />
         )}
@@ -110,7 +123,7 @@ export function AdtmReportPage() {
       {/* Page Navigation (hidden on print) */}
       <div className="fixed bottom-8 right-8 flex gap-2 print:hidden z-10">
         <Button
-          onClick={() => setCurrentPage(1)}
+          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
           variant="outline"
           size="lg"
@@ -119,8 +132,8 @@ export function AdtmReportPage() {
           <ChevronLeft className="w-5 h-5" />
         </Button>
         <Button
-          onClick={() => setCurrentPage(2)}
-          disabled={currentPage === 2}
+          onClick={() => setCurrentPage(Math.min(3, currentPage + 1))}
+          disabled={currentPage === 3}
           variant="outline"
           size="lg"
           className="rounded-full w-12 h-12 p-0"
