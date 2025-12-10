@@ -67,80 +67,105 @@ export function AdtmReportPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 print:bg-white">
-      {/* Navigation Bar (hidden on print) */}
-      <div className="sticky top-0 bg-white shadow-md p-4 flex items-center justify-between print:hidden z-10">
-        <div className="flex items-center gap-4">
-          <Button
-            onClick={() => setCurrentPage(1)}
-            variant={currentPage === 1 ? "primary" : "outline"}
-            size="sm"
-          >
-            Page 1: Report
-          </Button>
-          <Button
-            onClick={() => setCurrentPage(2)}
-            variant={currentPage === 2 ? "primary" : "outline"}
-            size="sm"
-          >
-            Page 2: Domains
-          </Button>
-          <Button
-            onClick={() => setCurrentPage(3)}
-            variant={currentPage === 3 ? "primary" : "outline"}
-            size="sm"
-          >
-            Page 3: Analysis
-          </Button>
+    <>
+      <style>{`
+        @media print {
+          body {
+            -webkit-print-color-adjust: exact;
+          }
+        }
+        .adtm-table > tbody > tr > td {
+          padding: 0px;
+        }
+        .border-b-3 {
+          border-bottom-width: 3px;
+        }
+        .table-bordered {
+          border: 1px solid #ddd;
+        }
+        .table-bordered td,
+        .table-bordered th {
+          border: 1px solid #ddd;
+        }
+      `}</style>
+      <div className="min-h-screen bg-gray-100 print:bg-white">
+        {/* Navigation Bar (hidden on print) */}
+        <div className="sticky top-0 bg-white shadow-md p-4 flex items-center justify-between print:hidden z-10">
+          <div className="flex items-center gap-4">
+            <Button
+              onClick={() => setCurrentPage(1)}
+              variant={currentPage === 1 ? "primary" : "outline"}
+              size="sm"
+            >
+              Page 1: Report
+            </Button>
+            <Button
+              onClick={() => setCurrentPage(2)}
+              variant={currentPage === 2 ? "primary" : "outline"}
+              size="sm"
+            >
+              Page 2: Domains
+            </Button>
+            <Button
+              onClick={() => setCurrentPage(3)}
+              variant={currentPage === 3 ? "primary" : "outline"}
+              size="sm"
+            >
+              Page 3: Analysis
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <ReportActions submissionId={submissionId!} />
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <ReportActions submissionId={submissionId!} />
+        {/* Report Content - Match original width */}
+        <div
+          style={{ width: "900px", margin: "auto" }}
+          className="print:w-full"
+        >
+          {currentPage === 1 ? (
+            <ReportCoverPage
+              studentName={report.student.name}
+              testCode={
+                report.test.testCode || `A-DTM Level ${report.test.level}`
+              }
+              sections={report.sections}
+              overallScore={report.overallScore}
+            />
+          ) : currentPage === 2 ? (
+            <DomainSummaryPage
+              basicLearning={report.domains.basicLearningAbility}
+              creativeThinking={report.domains.creativeThinkingAbility}
+            />
+          ) : (
+            <ReportAnalysisPage reportData={report} />
+          )}
+        </div>
+
+        {/* Page Navigation (hidden on print) */}
+        <div className="fixed bottom-8 right-8 flex gap-2 print:hidden z-10">
+          <Button
+            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
+            variant="outline"
+            size="lg"
+            className="rounded-full w-12 h-12 p-0"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </Button>
+          <Button
+            onClick={() => setCurrentPage(Math.min(3, currentPage + 1))}
+            disabled={currentPage === 3}
+            variant="outline"
+            size="lg"
+            className="rounded-full w-12 h-12 p-0"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </Button>
         </div>
       </div>
-
-      {/* Report Content */}
-      <div className="max-w-[1200px] mx-auto print:max-w-full">
-        {currentPage === 1 ? (
-          <ReportCoverPage
-            studentName={report.student.name}
-            testCode={
-              report.test.testCode || `A-DTM Level ${report.test.level}`
-            }
-            sections={report.sections}
-            overallScore={report.overallScore}
-          />
-        ) : currentPage === 2 ? (
-          <DomainSummaryPage
-            basicLearning={report.domains.basicLearningAbility}
-            creativeThinking={report.domains.creativeThinkingAbility}
-          />
-        ) : (
-          <ReportAnalysisPage reportData={report} />
-        )}
-      </div>
-
-      {/* Page Navigation (hidden on print) */}
-      <div className="fixed bottom-8 right-8 flex gap-2 print:hidden z-10">
-        <Button
-          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-          disabled={currentPage === 1}
-          variant="outline"
-          size="lg"
-          className="rounded-full w-12 h-12 p-0"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </Button>
-        <Button
-          onClick={() => setCurrentPage(Math.min(3, currentPage + 1))}
-          disabled={currentPage === 3}
-          variant="outline"
-          size="lg"
-          className="rounded-full w-12 h-12 p-0"
-        >
-          <ChevronRight className="w-5 h-5" />
-        </Button>
-      </div>
-    </div>
+    </>
   );
 }

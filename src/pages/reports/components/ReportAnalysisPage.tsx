@@ -3,6 +3,7 @@ import {
   Bar,
   CartesianGrid,
   Cell,
+  LabelList,
   Legend,
   Line,
   LineChart,
@@ -17,6 +18,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { CheckCircle2, AlertCircle, XCircle } from "lucide-react";
 
 interface ReportAnalysisPageProps {
   reportData: AdtmReportData;
@@ -34,21 +36,32 @@ export function ReportAnalysisPage({ reportData }: ReportAnalysisPageProps) {
       className="bg-white p-8 min-h-screen print:p-8 report-page-2"
       style={{ fontFamily: "Times New Roman, serif" }}
     >
-      {/* Header */}
-      <div className="flex items-center border-b-2 border-black pb-4 mb-6">
-        <div className="text-red-600 text-4xl font-bold mr-4">able</div>
-        <div className="text-sm">
-          <div>Diagnostic</div>
-          <div>Test of</div>
-          <div>Mathematics</div>
-        </div>
-        <div className="text-6xl font-serif ml-8">Analysis</div>
+      {/* Header - Match original */}
+      <div className="flex items-center justify-center border-b-3 border-black pb-4 mb-6">
+        <table style={{ width: "100%" }}>
+          <tbody>
+            <tr>
+              <td
+                className="text-right pr-4"
+                style={{ verticalAlign: "middle" }}
+              >
+                <div className="text-red-600 text-4xl font-bold">able</div>
+              </td>
+              <td style={{ verticalAlign: "middle", textAlign: "left" }}>
+                <span className="text-5xl font-serif font-bold">Analysis</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
-        {/* LEFT COLUMN - Takes 2 columns */}
-        <div className="col-span-2 space-y-6">
-          {/* 1. Score by Section */}
+      {/* Row 1: Score by area (9 cols) + Student name (3 cols) */}
+      <div
+        className="row"
+        style={{ display: "flex", flexWrap: "wrap", margin: "0" }}
+      >
+        <div className="col-xs-9" style={{ width: "75%", padding: "0 15px" }}>
+          {/* 1. Score by area */}
           <Section1ScoreTable
             sections={sections}
             totalRawScore={totalRawScore}
@@ -56,55 +69,114 @@ export function ReportAnalysisPage({ reportData }: ReportAnalysisPageProps) {
             overallScore={overallScore}
             testCode={reportData.test.testCode}
           />
+        </div>
+        <div className="col-xs-3" style={{ width: "25%", padding: "0 15px" }}>
+          <table className="table table-bordered table-condensed w-full">
+            <tbody>
+              <tr style={{ textAlign: "center", fontSize: "20px" }}>
+                <td>Student name</td>
+                <td style={{ fontWeight: "bold" }}>
+                  {reportData.student.name}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-          {/* 2. Score by Unit */}
+      {/* Row 2: Unit scores (6 cols) + Calculation (3 cols) + Difficulty (3 cols) */}
+      <div
+        className="row"
+        style={{ display: "flex", flexWrap: "wrap", margin: "0" }}
+      >
+        <div className="col-xs-6" style={{ width: "50%", padding: "0 15px" }}>
+          {/* 2. Unit-by-unit scores */}
           {sections[1]?.unitScores && sections[1].unitScores.length > 0 && (
-            <Section2UnitTable units={sections[1].unitScores} />
+            <Section2UnitTable
+              units={sections[1].unitScores}
+              section2Score={sections[1]?.standardScore}
+              section3Score={sections[2]?.standardScore}
+            />
           )}
-
-          {/* 3. Calculation Ability Score */}
+        </div>
+        <div className="col-xs-3" style={{ width: "25%", padding: "0 15px" }}>
+          {/* 3. Calculation Competency Score */}
           {sections[0] && (
             <CalculationAbilityBreakdown section1={sections[0]} />
           )}
-
-          {/* 4. Difficulty-Based Score */}
+        </div>
+        <div className="col-xs-3" style={{ width: "25%", padding: "0 15px" }}>
+          {/* 4. Score by difficulty level */}
           {sections[0]?.difficultyBreakdown &&
             sections[0].difficultyBreakdown.length > 0 && (
               <DifficultyScoreTable
                 difficulties={sections[0].difficultyBreakdown}
+                section1Score={sections[0]?.standardScore}
+                section2Score={sections[1]?.standardScore}
+                section3Score={sections[2]?.standardScore}
               />
             )}
+        </div>
+      </div>
 
+      {/* Row 3: Left charts (5 cols) + Right charts (7 cols) */}
+      <div
+        className="row"
+        style={{ display: "flex", flexWrap: "wrap", margin: "0" }}
+      >
+        <div
+          className="col-xs-5"
+          style={{ width: "41.666%", padding: "0 15px" }}
+        >
           {/* 5. Condition & Concentration Chart */}
+          <div className="text-center mb-2">
+            <span className="text-lg">Condition concentration</span>
+          </div>
           <ConditionConcentrationChart sections={sections} />
 
           {/* 6. Calculation Ability Distribution */}
+          <div className="text-center mb-2 mt-4">
+            <span className="text-lg">Computational ability</span>
+          </div>
           {sections[0] && (
             <CalculationDistributionChart section1={sections[0]} />
           )}
 
           {/* 7. Unit Balance Radar */}
+          <div className="text-center mb-2 mt-4">
+            <span className="text-lg">Balance by unit</span>
+          </div>
           {charts?.unitRadar && (
             <UnitBalanceRadar chartData={charts.unitRadar} />
           )}
         </div>
-
-        {/* RIGHT COLUMN - Takes 1 column */}
-        <div className="col-span-1 space-y-6">
+        <div
+          className="col-xs-7"
+          style={{ width: "58.333%", padding: "0 15px" }}
+        >
           {/* Scoring Guide Info Box */}
           <ScoringGuideBox />
 
           {/* 8. Domain Scores (Section Bar Chart) */}
+          <div className="text-center mb-2 mt-4">
+            <span className="text-lg">Score by area</span>
+          </div>
           {charts?.sectionBar && (
             <DomainScoresChart chartData={charts.sectionBar} />
           )}
 
           {/* 9. Domain-Unit Scores */}
+          <div className="text-center mb-2 mt-4">
+            <span className="text-lg">Score by area and unit</span>
+          </div>
           {sections[1]?.unitScores && sections[1].unitScores.length > 0 && (
             <DomainUnitChart units={sections[1].unitScores} />
           )}
 
           {/* 10. Domain-Difficulty Scores */}
+          <div className="text-center mb-2 mt-4">
+            <span className="text-lg">Score by Area - Difficulty</span>
+          </div>
           {sections[0]?.difficultyBreakdown &&
             sections[0].difficultyBreakdown.length > 0 && (
               <DomainDifficultyChart
@@ -113,6 +185,9 @@ export function ReportAnalysisPage({ reportData }: ReportAnalysisPageProps) {
             )}
         </div>
       </div>
+
+      {/* Spacer for print */}
+      <div className="col-xs-12" style={{ height: "95px" }}></div>
     </div>
   );
 }
@@ -134,170 +209,199 @@ function Section1ScoreTable({
   overallScore: number;
   testCode?: string;
 }) {
-  console.log(totalMaxScore);
-  const getCategory = (score: number) => {
-    if (score >= 80) return "상";
-    if (score >= 60) return "중";
-    return "하";
-  };
-
-  const getEvaluation = (score: number) => {
-    if (score >= 80) return "상";
-    if (score >= 60) return "중";
-    return "하";
-  };
-
-  const getScoreBadgeColor = (score: number) => {
-    if (score >= 80) return "bg-green-500";
-    if (score >= 60) return "bg-orange-500";
-    return "bg-red-500";
-  };
-
   // Calculate expected scores (placeholder - should come from backend)
   const expectedScores = [80, 65, 55, 40, 0];
 
   return (
     <div className="border border-gray-300 p-4">
-      <div className="flex items-center mb-3">
-        <div className="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center mr-2 text-sm font-bold">
-          1
-        </div>
-        <h3 className="font-bold text-sm">Overall Score</h3>
-        <span className="ml-auto text-xs text-gray-500">Score by Section</span>
+      <div className="mb-3" style={{ margin: "20px 0px", padding: "0px" }}>
+        <span className="text-xl">1. Score by area</span>
       </div>
 
-      <table className="w-full text-xs border-collapse">
-        <thead>
-          <tr className="bg-gray-50">
-            <th
-              rowSpan={2}
-              className="border border-gray-300 p-2 text-center align-middle"
-            >
-              Section
-            </th>
-            <th
-              rowSpan={2}
-              className="border border-gray-300 p-2 text-center align-middle"
-            >
-              Full
-              <br />
-              Score
-            </th>
-            <th
-              rowSpan={2}
-              className="border border-gray-300 p-2 text-center align-middle"
-            >
-              Obtained
-              <br />
-              Score
-            </th>
-            <th
-              colSpan={2}
-              className="border border-gray-300 p-1 text-center text-red-500"
-            >
-              <div className="flex items-center justify-center">
-                <span className="text-xs">
-                  Change the test to "{testCode || "E3-M"}"
-                </span>
-              </div>
-            </th>
-            <th
-              rowSpan={2}
-              className="border border-gray-300 p-2 text-center align-middle"
-            >
-              Category
-            </th>
-            <th
-              rowSpan={2}
-              className="border border-gray-300 p-2 text-center align-middle"
-            >
-              Evaluation
-            </th>
-            <th
-              rowSpan={2}
-              className="border border-gray-300 p-2 text-center align-middle"
-            >
-              Condition
-            </th>
-          </tr>
-          <tr className="bg-gray-50">
-            <th className="border border-gray-300 p-2 text-center">
-              Standard-
-              <br />
-              ized Score
-            </th>
-            <th className="border border-gray-300 p-2 text-center">
-              Expected
-              <br />
-              Score
-            </th>
-          </tr>
-        </thead>
+      <table className="table table-bordered adtm-table w-full text-xs">
         <tbody>
+          <tr>
+            <td
+              className="text-center border border-gray-300"
+              style={{
+                fontWeight: "bold",
+                height: "33px",
+                backgroundColor: "rgb(245, 245, 246)",
+                verticalAlign: "middle",
+              }}
+            >
+              area
+            </td>
+            <td
+              className="text-center border border-gray-300"
+              style={{
+                fontWeight: "bold",
+                height: "33px",
+                backgroundColor: "rgb(245, 245, 246)",
+                verticalAlign: "middle",
+              }}
+            >
+              Full marks
+            </td>
+            <td
+              className="text-center border border-gray-300"
+              style={{
+                fontWeight: "bold",
+                height: "33px",
+                backgroundColor: "rgb(245, 245, 246)",
+                verticalAlign: "middle",
+              }}
+            >
+              Raw score
+            </td>
+            <td
+              className="text-center border border-gray-300"
+              style={{
+                fontWeight: "bold",
+                height: "33px",
+                backgroundColor: "rgb(245, 245, 246)",
+                verticalAlign: "middle",
+              }}
+            >
+              standard score
+            </td>
+            <td
+              className="text-center border border-gray-300"
+              style={{
+                fontWeight: "bold",
+                height: "33px",
+                backgroundColor: "rgb(245, 245, 246)",
+                verticalAlign: "middle",
+              }}
+            >
+              Expected score
+            </td>
+            <td
+              className="text-center border border-gray-300"
+              style={{
+                fontWeight: "bold",
+                height: "33px",
+                backgroundColor: "rgb(245, 245, 246)",
+                verticalAlign: "middle",
+              }}
+            >
+              evaluation
+            </td>
+            <td
+              className="text-center border border-gray-300"
+              style={{
+                fontWeight: "bold",
+                height: "33px",
+                backgroundColor: "rgb(245, 245, 246)",
+                verticalAlign: "middle",
+              }}
+            >
+              concentration
+            </td>
+            <td
+              className="text-center border border-gray-300"
+              style={{
+                fontWeight: "bold",
+                height: "33px",
+                backgroundColor: "rgb(245, 245, 246)",
+                verticalAlign: "middle",
+              }}
+            >
+              condition
+            </td>
+          </tr>
           {sections.map((section, idx) => {
-            const category = getCategory(section.standardScore);
-            const evaluation = getEvaluation(section.standardScore);
-            const badgeColor = getScoreBadgeColor(section.standardScore);
             const isSection4Or5 = idx >= 3;
-            // Full Score display: Sections 1-3 = 100, Sections 4-5 = 40
-            const displayFullScore = isSection4Or5 ? 40 : 100;
+            const displayFullScore = isSection4Or5 ? 40 : idx === 0 ? 103 : 100;
+            const sectionNames = [
+              "Computational ability",
+              "Conceptual understanding ability",
+              "Concept application ability",
+              "Reasoning ability",
+              "problem-solving skills",
+            ];
+            const sectionName = sectionNames[idx] || section.name;
+            const evaluation =
+              section.standardScore >= 80
+                ? "award"
+                : section.standardScore >= 60
+                ? "award"
+                : "award";
 
             return (
               <tr key={idx}>
-                <td className="border border-gray-300 p-2">
-                  {idx + 1}. {section.name}
+                <td className="text-center border border-gray-300 p-2">
+                  {sectionName}
                 </td>
-                <td
-                  className={`border border-gray-300 p-2 text-center ${
-                    isSection4Or5 ? "bg-yellow-50" : ""
-                  }`}
-                >
+                <td className="text-center border border-gray-300 p-2">
                   {displayFullScore}
                 </td>
-                <td className="border border-gray-300 p-2 text-center">
+                <td className="text-center border border-gray-300 p-2">
                   {section.rawScore}
                 </td>
-                <td className="border border-gray-300 p-2 text-center">
-                  <span
-                    className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${badgeColor} text-white font-bold text-xs`}
-                  >
-                    {section.standardScore.toFixed(0)}
-                  </span>
+                <td className="text-center border border-gray-300 p-2">
+                  {section.standardScore >= 80 ? (
+                    <CheckCircle2
+                      className="inline-block w-4 h-4 mr-1"
+                      style={{ color: "#0f9d58" }}
+                    />
+                  ) : section.standardScore >= 60 ? (
+                    <AlertCircle
+                      className="inline-block w-4 h-4 mr-1"
+                      style={{ color: "#f4b400" }}
+                    />
+                  ) : (
+                    <XCircle
+                      className="inline-block w-4 h-4 mr-1"
+                      style={{ color: "#ed5a4e" }}
+                    />
+                  )}
+                  {section.standardScore.toFixed(0)}
                 </td>
-                <td className="border border-gray-300 p-2 text-center">
+                <td className="text-center border border-gray-300 p-2">
                   {expectedScores[idx] || 0}
                 </td>
-                <td className="border border-gray-300 p-2 text-center">
-                  {category}
-                </td>
-                <td className="border border-gray-300 p-2 text-center">
+                <td className="text-center border border-gray-300 p-2">
                   {evaluation}
                 </td>
-                <td className="border border-gray-300 p-2 text-center">
-                  {idx < 3 ? idx + 3 : idx === 3 ? 2 : 1}
-                </td>
+                <td className="text-center border border-gray-300 p-2">0</td>
+                <td className="text-center border border-gray-300 p-2">0</td>
               </tr>
             );
           })}
-          <tr className="bg-gray-50 font-bold">
-            <td className="border border-gray-300 p-2">
-              Overall Math Learning
+          <tr>
+            <td className="text-center border border-gray-300 p-2">
+              Math learning skills
             </td>
-            <td className="border border-gray-300 p-2 text-center bg-yellow-50">
-              380
+            <td className="text-center border border-gray-300 p-2">
+              {totalMaxScore}
             </td>
-            <td className="border border-gray-300 p-2 text-center">
+            <td className="text-center border border-gray-300 p-2">
               {totalRawScore}
             </td>
-            <td className="border border-gray-300 p-2 text-center">
-              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-500 text-white font-bold text-xs">
-                {overallScore.toFixed(0)}
-              </span>
+            <td className="text-center border border-gray-300 p-2">
+              {overallScore >= 80 ? (
+                <CheckCircle2
+                  className="inline-block w-4 h-4 mr-1"
+                  style={{ color: "#0f9d58" }}
+                />
+              ) : overallScore >= 60 ? (
+                <AlertCircle
+                  className="inline-block w-4 h-4 mr-1"
+                  style={{ color: "#f4b400" }}
+                />
+              ) : (
+                <XCircle
+                  className="inline-block w-4 h-4 mr-1"
+                  style={{ color: "#ed5a4e" }}
+                />
+              )}
+              {overallScore.toFixed(0)}
             </td>
-            <td className="border border-gray-300 p-2 text-center">48</td>
-            <td className="border border-gray-300 p-2 text-center">하</td>
-            <td className="border border-gray-300 p-2 text-center">3</td>
-            <td className="border border-gray-300 p-2 text-center">2</td>
+            <td className="text-center border border-gray-300 p-2">0</td>
+            <td className="text-center border border-gray-300 p-2">award</td>
+            <td className="text-center border border-gray-300 p-2">0</td>
+            <td className="text-center border border-gray-300 p-2">0</td>
           </tr>
         </tbody>
       </table>
@@ -332,6 +436,8 @@ function Section1ScoreTable({
 
 function Section2UnitTable({
   units,
+  section2Score,
+  section3Score,
 }: {
   units: Array<{
     unitName: string;
@@ -339,92 +445,161 @@ function Section2UnitTable({
     maxScore: number;
     standardScore: number;
   }>;
+  section2Score?: number;
+  section3Score?: number;
 }) {
-  const totalRaw = units.reduce((sum, u) => sum + u.rawScore, 0);
+  // Calculate understanding and application scores per unit
+  // For now, we'll use standardScore for both (should come from backend)
+  const totalUnderstanding = units.reduce(
+    (sum, u) => sum + (u.standardScore * u.maxScore) / 100,
+    0
+  );
+  const totalApplication = units.reduce(
+    (sum, u) => sum + (u.standardScore * u.maxScore) / 100,
+    0
+  );
   const totalMax = units.reduce((sum, u) => sum + u.maxScore, 0);
-  const totalStandard = totalMax > 0 ? (totalRaw / totalMax) * 100 : 0;
-
-  const getCategory = (score: number) => {
-    if (score >= 80) return "상";
-    if (score >= 60) return "중";
-    return "하";
-  };
-
-  const getScoreBadgeColor = (score: number) => {
-    if (score >= 80) return "bg-green-500";
-    if (score >= 60) return "bg-orange-500";
-    return "bg-red-500";
-  };
+  const totalStandard =
+    totalMax > 0
+      ? ((totalUnderstanding + totalApplication) / (totalMax * 2)) * 100
+      : 0;
 
   return (
     <div className="border border-gray-300 p-4">
-      <div className="flex items-center mb-3">
-        <div className="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center mr-2 text-sm font-bold">
-          2
-        </div>
-        <h3 className="font-bold text-sm">Score by Unit</h3>
-        <span className="ml-auto text-xs text-gray-500">Score by Unit</span>
+      <div className="mb-3" style={{ margin: "20px 0px", padding: "0px" }}>
+        <span className="text-xl">2. Unit-by-unit scores</span>
       </div>
 
-      <table className="w-full text-xs border-collapse">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="border border-gray-300 p-2 text-left">Unit</th>
-            <th className="border border-gray-300 p-2 text-center">
-              Full Score
-            </th>
-            <th className="border border-gray-300 p-2 text-center">
-              Obtained Score
-            </th>
-            <th className="border border-gray-300 p-2 text-center">
-              Standardized Score
-            </th>
-            <th className="border border-gray-300 p-2 text-center">Category</th>
-          </tr>
-        </thead>
+      <table className="table table-bordered adtm-table w-full text-xs">
         <tbody>
+          <tr>
+            <td
+              className="text-center border border-gray-300"
+              style={{
+                fontWeight: "bold",
+                height: "33px",
+                backgroundColor: "rgb(245, 245, 246)",
+                verticalAlign: "middle",
+              }}
+            >
+              Unit
+            </td>
+            <td
+              className="text-center border border-gray-300"
+              style={{
+                fontWeight: "bold",
+                height: "33px",
+                backgroundColor: "rgb(245, 245, 246)",
+                verticalAlign: "middle",
+              }}
+            >
+              Understanding the concept
+            </td>
+            <td
+              className="text-center border border-gray-300"
+              style={{
+                fontWeight: "bold",
+                height: "33px",
+                backgroundColor: "rgb(245, 245, 246)",
+                verticalAlign: "middle",
+              }}
+            >
+              Concept application
+            </td>
+            <td
+              className="text-center border border-gray-300"
+              style={{
+                fontWeight: "bold",
+                height: "33px",
+                backgroundColor: "rgb(245, 245, 246)",
+                verticalAlign: "middle",
+              }}
+            >
+              standard score
+            </td>
+            <td
+              className="text-center border border-gray-300"
+              style={{
+                fontWeight: "bold",
+                height: "33px",
+                backgroundColor: "rgb(245, 245, 246)",
+                verticalAlign: "middle",
+              }}
+            >
+              evaluation
+            </td>
+          </tr>
           {units.map((unit, idx) => {
-            const badgeColor = getScoreBadgeColor(unit.standardScore);
+            // For each unit, we need understanding and application scores
+            // Using standardScore as approximation (should come from backend)
+            const understandingScore = unit.standardScore;
+            const applicationScore = unit.standardScore;
+            const avgScore = (understandingScore + applicationScore) / 2;
+
             return (
               <tr key={idx}>
-                <td className="border border-gray-300 p-2">
+                <td className="text-center border border-gray-300 p-2">
                   {idx + 1}. {unit.unitName}
                 </td>
-                <td className="border border-gray-300 p-2 text-center">
-                  {unit.maxScore.toFixed(2)}
+                <td className="text-center border border-gray-300 p-2">
+                  {understandingScore.toFixed(2)}
                 </td>
-                <td className="border border-gray-300 p-2 text-center">
-                  {unit.rawScore.toFixed(2)}
+                <td className="text-center border border-gray-300 p-2">
+                  {applicationScore.toFixed(2)}
                 </td>
-                <td className="border border-gray-300 p-2 text-center">
-                  <span
-                    className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${badgeColor} text-white font-bold text-xs`}
-                  >
-                    {unit.standardScore.toFixed(0)}
-                  </span>
+                <td className="text-center border border-gray-300 p-2">
+                  {avgScore >= 80 ? (
+                    <CheckCircle2
+                      className="inline-block w-4 h-4 mr-1"
+                      style={{ color: "#0f9d58" }}
+                    />
+                  ) : avgScore >= 60 ? (
+                    <AlertCircle
+                      className="inline-block w-4 h-4 mr-1"
+                      style={{ color: "#f4b400" }}
+                    />
+                  ) : (
+                    <XCircle
+                      className="inline-block w-4 h-4 mr-1"
+                      style={{ color: "#ed5a4e" }}
+                    />
+                  )}
+                  {avgScore.toFixed(0)}
                 </td>
-                <td className="border border-gray-300 p-2 text-center">
-                  {getCategory(unit.standardScore)}
+                <td className="text-center border border-gray-300 p-2">
+                  award
                 </td>
               </tr>
             );
           })}
-          <tr className="bg-gray-50 font-bold">
-            <td className="border border-gray-300 p-2">합계 Sum</td>
-            <td className="border border-gray-300 p-2 text-center">
-              {totalMax.toFixed(0)}
+          <tr>
+            <td className="text-center border border-gray-300 p-2">total</td>
+            <td className="text-center border border-gray-300 p-2">
+              {section2Score?.toFixed(0) || totalUnderstanding.toFixed(0)}
             </td>
-            <td className="border border-gray-300 p-2 text-center">
-              {totalRaw.toFixed(0)}
+            <td className="text-center border border-gray-300 p-2">
+              {section3Score?.toFixed(0) || totalApplication.toFixed(0)}
             </td>
-            <td className="border border-gray-300 p-2 text-center">
-              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-500 text-white font-bold text-xs">
-                {totalStandard.toFixed(0)}
-              </span>
+            <td className="text-center border border-gray-300 p-2">
+              {totalStandard >= 80 ? (
+                <CheckCircle2
+                  className="inline-block w-4 h-4 mr-1"
+                  style={{ color: "#0f9d58" }}
+                />
+              ) : totalStandard >= 60 ? (
+                <AlertCircle
+                  className="inline-block w-4 h-4 mr-1"
+                  style={{ color: "#f4b400" }}
+                />
+              ) : (
+                <XCircle
+                  className="inline-block w-4 h-4 mr-1"
+                  style={{ color: "#ed5a4e" }}
+                />
+              )}
+              {totalStandard.toFixed(0)}
             </td>
-            <td className="border border-gray-300 p-2 text-center">
-              {getCategory(totalStandard)}
-            </td>
+            <td className="text-center border border-gray-300 p-2">award</td>
           </tr>
         </tbody>
       </table>
@@ -437,111 +612,131 @@ function CalculationAbilityBreakdown({
 }: {
   section1: AdtmReportData["sections"][0];
 }) {
+  // Calculate scores: speed (unsolved), Accuracy (correct), Error rate (mistake)
+  // These are percentages
   const totalQuestions =
     (section1.correctCount || 0) +
     (section1.mistakeCount || 0) +
     (section1.unsolvedCount || 0);
 
-  // Points from the example: Correct=90, Wrong=73, Blank=100
-  // These might be based on question scores, but for display we use example values
-  const correctPoints = 90;
-  const wrongPoints = 73;
-  const blankPoints = 100;
-
-  const correctPercent =
-    totalQuestions > 0
-      ? ((section1.correctCount || 0) / totalQuestions) * 100
-      : 0;
-  const wrongPercent =
-    totalQuestions > 0
-      ? ((section1.mistakeCount || 0) / totalQuestions) * 100
-      : 0;
-  const blankPercent =
+  const speedScore =
     totalQuestions > 0
       ? ((section1.unsolvedCount || 0) / totalQuestions) * 100
       : 0;
-
-  const getPercentBadgeColor = (percent: number) => {
-    if (percent >= 80) return "bg-green-500";
-    if (percent >= 60) return "bg-orange-500";
-    return "bg-yellow-500";
-  };
+  const accuracyScore =
+    totalQuestions > 0
+      ? ((section1.correctCount || 0) / totalQuestions) * 100
+      : 0;
+  const errorRate =
+    totalQuestions > 0
+      ? ((section1.mistakeCount || 0) / totalQuestions) * 100
+      : 0;
 
   return (
     <div className="border border-gray-300 p-4">
-      <div className="flex items-center mb-3">
-        <div className="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center mr-2 text-sm font-bold">
-          3
-        </div>
-        <h3 className="font-bold text-sm">Calculation Ability Score</h3>
+      <div className="mb-3" style={{ margin: "20px 0px", padding: "0px" }}>
+        <span className="text-xl">3. Calculation Competency Score</span>
       </div>
 
-      <table className="w-full text-xs border-collapse">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="border border-gray-300 p-2 text-left">Category</th>
-            <th className="border border-gray-300 p-2 text-center">Count</th>
-            <th className="border border-gray-300 p-2 text-center">Points</th>
-            <th className="border border-gray-300 p-2 text-center">%</th>
-          </tr>
-        </thead>
+      <table className="table table-bordered adtm-table w-full text-xs">
         <tbody>
-          {/* Correct - Light orange background */}
-          <tr className="bg-orange-50">
-            <td className="border border-gray-300 p-2">실수를 (Correct)</td>
-            <td className="border border-gray-300 p-2 text-center">
-              {section1.correctCount || 0}
+          <tr>
+            <td
+              className="text-center border border-gray-300"
+              style={{
+                fontWeight: "bold",
+                height: "33px",
+                backgroundColor: "rgb(245, 245, 246)",
+                verticalAlign: "middle",
+              }}
+            >
+              division
             </td>
-            <td className="border border-gray-300 p-2 text-center">
-              {correctPoints}
-            </td>
-            <td className="border border-gray-300 p-2 text-center">
-              <span
-                className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${getPercentBadgeColor(
-                  correctPercent
-                )} text-white font-bold text-xs`}
-              >
-                {correctPercent.toFixed(0)}
-              </span>
-            </td>
-          </tr>
-          {/* Wrong - Light blue background */}
-          <tr className="bg-blue-50">
-            <td className="border border-gray-300 p-2">정확도 (Wrong)</td>
-            <td className="border border-gray-300 p-2 text-center">
-              {section1.mistakeCount || 0}
-            </td>
-            <td className="border border-gray-300 p-2 text-center">
-              {wrongPoints}
-            </td>
-            <td className="border border-gray-300 p-2 text-center">
-              <span
-                className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${getPercentBadgeColor(
-                  wrongPercent
-                )} text-white font-bold text-xs`}
-              >
-                {wrongPercent.toFixed(0)}
-              </span>
+            <td
+              className="text-center border border-gray-300"
+              style={{
+                fontWeight: "bold",
+                height: "33px",
+                backgroundColor: "rgb(245, 245, 246)",
+                verticalAlign: "middle",
+              }}
+            >
+              score
             </td>
           </tr>
-          {/* Blank - Light green background */}
-          <tr className="bg-green-50">
-            <td className="border border-gray-300 p-2">속도 (Blank)</td>
-            <td className="border border-gray-300 p-2 text-center">
-              {section1.unsolvedCount || 0}
+          <tr>
+            <td className="text-center border border-gray-300 p-2">speed</td>
+            <td className="text-center border border-gray-300 p-2">
+              {speedScore >= 80 ? (
+                <CheckCircle2
+                  className="inline-block w-4 h-4 mr-1"
+                  style={{ color: "#0f9d58" }}
+                />
+              ) : speedScore >= 60 ? (
+                <AlertCircle
+                  className="inline-block w-4 h-4 mr-1"
+                  style={{ color: "#f4b400" }}
+                />
+              ) : (
+                <XCircle
+                  className="inline-block w-4 h-4 mr-1"
+                  style={{ color: "#ed5a4e" }}
+                />
+              )}
+              {speedScore.toFixed(0)}
             </td>
-            <td className="border border-gray-300 p-2 text-center">
-              {blankPoints}
+          </tr>
+          <tr>
+            <td className="text-center border border-gray-300 p-2">Accuracy</td>
+            <td className="text-center border border-gray-300 p-2">
+              {accuracyScore >= 80 ? (
+                <CheckCircle2
+                  className="inline-block w-4 h-4 mr-1"
+                  style={{ color: "#0f9d58" }}
+                />
+              ) : accuracyScore >= 60 ? (
+                <AlertCircle
+                  className="inline-block w-4 h-4 mr-1"
+                  style={{ color: "#f4b400" }}
+                />
+              ) : (
+                <XCircle
+                  className="inline-block w-4 h-4 mr-1"
+                  style={{ color: "#ed5a4e" }}
+                />
+              )}
+              {accuracyScore.toFixed(0)}
             </td>
-            <td className="border border-gray-300 p-2 text-center">
-              <span
-                className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${getPercentBadgeColor(
-                  blankPercent
-                )} text-white font-bold text-xs`}
-              >
-                {blankPercent.toFixed(0)}
-              </span>
+          </tr>
+          <tr>
+            <td className="text-center border border-gray-300 p-2">
+              Error rate
             </td>
+            <td className="text-center border border-gray-300 p-2">
+              {errorRate < 10 ? (
+                <CheckCircle2
+                  className="inline-block w-4 h-4 mr-1"
+                  style={{ color: "#0f9d58" }}
+                />
+              ) : errorRate < 30 ? (
+                <AlertCircle
+                  className="inline-block w-4 h-4 mr-1"
+                  style={{ color: "#f4b400" }}
+                />
+              ) : (
+                <XCircle
+                  className="inline-block w-4 h-4 mr-1"
+                  style={{ color: "#ed5a4e" }}
+                />
+              )}
+              {errorRate.toFixed(0)}
+            </td>
+          </tr>
+          <tr>
+            <td className="text-center border border-gray-300 p-2">
+              evaluation
+            </td>
+            <td className="text-center border border-gray-300 p-2">award</td>
           </tr>
         </tbody>
       </table>
@@ -558,11 +753,13 @@ function DifficultyScoreTable({
     rawScore: number;
     standardScore: number;
   }>;
+  section1Score?: number;
+  section2Score?: number;
+  section3Score?: number;
 }) {
-  // Extend to 7 levels as per design (levels 5-7 may have empty points)
+  // Extend to 7 levels as per design
   const allLevels = [
     ...difficulties,
-    // Add placeholder levels 5-7 if not present
     ...Array.from({ length: Math.max(0, 7 - difficulties.length) }, (_, i) => ({
       difficulty: (difficulties.length + i + 1) as 1 | 2 | 3 | 4,
       fullMarks: 0,
@@ -573,56 +770,92 @@ function DifficultyScoreTable({
 
   return (
     <div className="border border-gray-300 p-4">
-      <div className="flex items-center mb-3">
-        <div className="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center mr-2 text-sm font-bold">
-          4
-        </div>
-        <h3 className="font-bold text-sm">Difficulty-Based Score</h3>
+      <div className="mb-3" style={{ margin: "20px 0px", padding: "0px" }}>
+        <span className="text-xl">4. Score by difficulty level</span>
       </div>
 
-      <table className="w-full text-xs border-collapse">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="border border-gray-300 p-2 text-center">
-              Difficulty Level
-            </th>
-            <th className="border border-gray-300 p-2 text-center">Points</th>
-            <th className="border border-gray-300 p-2 text-center">Earned</th>
-            <th className="border border-gray-300 p-2 text-center">
-              Percentage
-            </th>
-          </tr>
-        </thead>
+      <table className="table table-bordered adtm-table w-full text-xs">
         <tbody>
+          <tr>
+            <td
+              className="text-center border border-gray-300"
+              style={{
+                fontWeight: "bold",
+                height: "33px",
+                backgroundColor: "rgb(245, 245, 246)",
+                verticalAlign: "middle",
+              }}
+            >
+              Difficulty
+            </td>
+            <td
+              className="text-center border border-gray-300"
+              style={{
+                fontWeight: "bold",
+                height: "33px",
+                backgroundColor: "rgb(245, 245, 246)",
+                verticalAlign: "middle",
+              }}
+            >
+              calculate
+            </td>
+            <td
+              className="text-center border border-gray-300"
+              style={{
+                fontWeight: "bold",
+                height: "33px",
+                backgroundColor: "rgb(245, 245, 246)",
+                verticalAlign: "middle",
+              }}
+            >
+              concept
+            </td>
+            <td
+              className="text-center border border-gray-300"
+              style={{
+                fontWeight: "bold",
+                height: "33px",
+                backgroundColor: "rgb(245, 245, 246)",
+                verticalAlign: "middle",
+              }}
+            >
+              apply
+            </td>
+          </tr>
           {allLevels.map((diff, idx) => {
             const level = idx + 1;
-            const percent = diff.fullMarks > 0 ? diff.standardScore : 0;
-            const colorClass =
-              percent >= 80
-                ? "text-green-600"
-                : percent >= 60
-                ? "text-blue-600"
-                : "text-red-600";
+            // Calculate scores: calculate (section 1), concept (section 2), apply (section 3)
+            // For levels 1-3: show in calculate column
+            // For level 3: show in concept column
+            // For levels 4-5: show in concept column
+            // For levels 5-7: show in apply column
+            const calculateScore = level <= 3 ? diff.standardScore : 0;
+            const conceptScore =
+              level === 3
+                ? 0
+                : level >= 2 && level <= 5
+                ? diff.standardScore
+                : 0;
+            const applyScore =
+              level >= 5
+                ? diff.standardScore
+                : level === 3
+                ? diff.standardScore
+                : 0;
 
             return (
               <tr key={idx}>
-                <td className="border border-gray-300 p-2 text-center">
+                <td className="text-center border border-gray-300 p-2">
                   {level}
                 </td>
-                <td className="border border-gray-300 p-2 text-center">
-                  {diff.fullMarks > 0 ? diff.fullMarks : ""}
+                <td className="text-center border border-gray-300 p-2">
+                  {calculateScore > 0 ? calculateScore.toFixed(0) : ""}
                 </td>
-                <td className="border border-gray-300 p-2 text-center">
-                  {diff.rawScore}
+                <td className="text-center border border-gray-300 p-2">
+                  {conceptScore > 0 ? conceptScore.toFixed(0) : ""}
                 </td>
-                <td className="border border-gray-300 p-2 text-center">
-                  {diff.fullMarks > 0 && percent > 0 ? (
-                    <span className={`font-bold ${colorClass}`}>
-                      {percent.toFixed(0)}
-                    </span>
-                  ) : (
-                    ""
-                  )}
+                <td className="text-center border border-gray-300 p-2">
+                  {applyScore > 0 ? applyScore.toFixed(0) : ""}
                 </td>
               </tr>
             );
@@ -852,39 +1085,54 @@ function DomainScoresChart({
 }: {
   chartData: AdtmReportData["charts"]["sectionBar"];
 }) {
+  // Map section labels to match original chart order and colors
+  const sectionLabels = [
+    "Calculation\nAbility",
+    "Conceptual\nUnderstanding",
+    "Conceptual\nApplication",
+    "Reasoning\nAbility",
+    "Problem-Solving\nAbility",
+  ];
+
   const barData = chartData.labels.map((label, index) => ({
-    name: label,
+    name: sectionLabels[index] || label,
     value: chartData.datasets[0]?.data[index] || 0,
   }));
 
+  // Exact colors from original chart reference
   const colors = [
-    "rgba(59, 130, 246, 0.8)", // Blue - Section 1
-    "rgba(6, 182, 212, 0.8)", // Cyan - Section 2
-    "rgba(34, 197, 94, 0.8)", // Green - Section 3
-    "rgba(251, 146, 60, 0.8)", // Orange - Section 4
-    "rgba(234, 179, 8, 0.8)", // Yellow - Section 5
+    "#4674B9", // Dark blue - Calculation Ability
+    "#62B8D2", // Teal/light blue - Conceptual Understanding
+    "#96BFEF", // Lighter blue/periwinkle - Conceptual Application
+    "#7C699E", // Dark purple/gray - Reasoning Ability
+    "#95D16F", // Light green - Problem-Solving Ability
   ];
 
   return (
     <div className="border border-gray-300 p-4">
-      <h4 className="font-bold mb-2 text-sm">Domain Scores</h4>
+      <h4 className="font-bold mb-2 text-sm">Score by area</h4>
       <div style={{ height: "200px", minHeight: "200px", width: "100%" }}>
         <ResponsiveContainer width="100%" height="100%" minHeight={200}>
           <RechartsBarChart
             data={barData}
             margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis
               dataKey="name"
-              tick={{ fontSize: 9 }}
+              tick={{ fontSize: 10 }}
               angle={-45}
               textAnchor="end"
               height={60}
             />
-            <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
+            <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} tickCount={6} />
             <Tooltip
-              formatter={(value: number) => [`${value.toFixed(1)}%`, "Score"]}
+              formatter={(value: number) => [`${value.toFixed(1)}`, "Score"]}
+              contentStyle={{
+                backgroundColor: "white",
+                border: "1px solid #e5e7eb",
+                borderRadius: "4px",
+              }}
             />
             <Bar dataKey="value" radius={[4, 4, 0, 0]}>
               {barData.map((_, index) => (
@@ -893,6 +1141,12 @@ function DomainScoresChart({
                   fill={colors[index % colors.length]}
                 />
               ))}
+              <LabelList
+                dataKey="value"
+                position="top"
+                style={{ fill: "#fff", fontSize: "11px", fontWeight: "normal" }}
+                formatter={(value: any) => `${Number(value).toFixed(0)}`}
+              />
             </Bar>
           </RechartsBarChart>
         </ResponsiveContainer>

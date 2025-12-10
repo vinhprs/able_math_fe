@@ -3,6 +3,7 @@ import {
   Bar,
   CartesianGrid,
   Cell,
+  LabelList,
   BarChart as RechartsBarChart,
   ResponsiveContainer,
   Tooltip,
@@ -18,42 +19,41 @@ interface ReportCoverPageProps {
 }
 
 export function ReportCoverPage({
-  studentName,
   testCode,
   sections,
   overallScore,
 }: ReportCoverPageProps) {
-  // Prepare chart data matching original design
+  // Prepare chart data matching original design with exact colors from reference
   const chartData = [
     {
       name: "Calculation\nAbility",
       value: sections[0]?.standardScore || 0,
-      color: "rgba(59, 130, 246, 0.8)", // Blue
+      color: "#4674B9", // Dark blue - matches original
     },
     {
       name: "Conceptual\nUnderstanding",
       value: sections[1]?.standardScore || 0,
-      color: "rgba(6, 182, 212, 0.8)", // Cyan
+      color: "#62B8D2", // Teal/light blue - matches original
     },
     {
       name: "Conceptual\nApplication",
       value: sections[2]?.standardScore || 0,
-      color: "rgba(156, 163, 175, 0.8)", // Gray
+      color: "#96BFEF", // Lighter blue/periwinkle - matches original
     },
     {
       name: "Reasoning\nAbility",
       value: sections[3]?.standardScore || 0,
-      color: "rgba(229, 231, 235, 0.8)", // Light Gray
+      color: "#7C699E", // Dark purple/gray - matches original
     },
     {
       name: "Problem-Solving\nAbility",
       value: sections[4]?.standardScore || 0,
-      color: "rgba(229, 231, 235, 0.8)", // Light Gray
+      color: "#95D16F", // Light green - matches original
     },
     {
       name: "Mathematics\nLearning Competency",
       value: overallScore,
-      color: "rgba(234, 179, 8, 0.8)", // Yellow
+      color: "#F8C857", // Yellow/orange - matches original
     },
   ];
 
@@ -62,112 +62,146 @@ export function ReportCoverPage({
       className="bg-white p-8 min-h-screen print:p-8 report-page-1"
       style={{ fontFamily: "Times New Roman, serif" }}
     >
-      {/* Header */}
-      <div className="flex items-center mb-8 border-b-2 border-black pb-4">
-        <div className="text-red-600 text-4xl font-bold mr-4">able</div>
-        <div className="text-sm">
-          <div>Diagnostic</div>
-          <div>Test of</div>
-          <div>Mathematics</div>
-        </div>
-        <div className="text-6xl font-serif ml-8">Report</div>
+      {/* Header - Match original layout */}
+      <div className="flex items-center justify-center mb-8 border-b-3 border-black pb-4">
+        <table style={{ width: "100%" }}>
+          <tbody>
+            <tr>
+              <td
+                className="text-right pr-4"
+                style={{ verticalAlign: "middle" }}
+              >
+                {/* Logo placeholder - should use actual logo image */}
+                <div className="text-red-600 text-4xl font-bold">able</div>
+              </td>
+              <td style={{ verticalAlign: "middle", textAlign: "left" }}>
+                <span className="text-7xl font-serif font-bold">Report</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
-      {/* Introductory text */}
-      <div className="mb-8 text-sm leading-relaxed">
-        <p className="mb-4">
-          This report is designed to help students identify their mathematical
-          strengths and areas for improvement. The assessment evaluates five key
-          competencies that are essential for mathematical proficiency and
-          problem-solving skills.
-        </p>
-        <p className="mb-4">
-          The scores in this report represent the student's performance across
-          different mathematical domains. By analyzing these results, educators
-          and parents can provide targeted support to enhance the student's
-          mathematical abilities and build a strong foundation for future
-          learning.
+      {/* Introductory text - Match original */}
+      <div
+        className="mb-8 text-sm leading-relaxed"
+        style={{ padding: "15px 10px", fontSize: "13px" }}
+      >
+        <p>
+          This diagnostic test is designed to diagnose students' learning status
+          and learning methods in mathematics.
         </p>
         <p>
-          This report is divided into two sections: first, a summary of scores
-          by mathematical competency area, and second, a detailed analysis that
-          identifies specific strengths and weaknesses to guide personalized
-          instruction and practice.
+          It was jointly developed by Able Edutech Co., Ltd., the Mathematics
+          Island Mathematics Research Institute, Professor Jeong Cheol-hee's
+          Daechi-dong Research Institute, and the Cognitive Science Research
+          Institute of Seoul National University.
+        </p>
+        <br />
+        <p>
+          This assessment consists of five areas designed to more accurately
+          assess a learner's mathematical thinking skills. It assesses the
+          learner's readiness for learning and determines the starting point for
+          future teaching strategies and progress.
         </p>
       </div>
 
-      {/* Section Descriptions */}
+      {/* Section Descriptions - Match original table format */}
       <div className="mb-8">
-        <h2 className="text-xl font-bold mb-4">
-          1. Overall Summary by Section
-        </h2>
-
-        <div className="space-y-3">
-          <div className="border border-gray-300 p-3">
-            <div className="font-bold mb-1">
-              SECTION 1 - Calculation Ability
-            </div>
-            <div className="text-sm">
-              Assesses computational skills including arithmetic operations,
-              mental math, and calculation accuracy. Measures speed and
-              precision in mathematical computations.
-            </div>
-          </div>
-
-          <div className="border border-gray-300 p-3">
-            <div className="font-bold mb-1">
-              SECTION 2 - Conceptual Understanding
-            </div>
-            <div className="text-sm">
-              Evaluates understanding of fundamental mathematical concepts
-              including numbers, operations, shapes, and patterns. Tests the
-              ability to explain and apply basic principles.
-            </div>
-          </div>
-
-          <div className="border border-gray-300 p-3">
-            <div className="font-bold mb-1">
-              SECTION 3 - Conceptual Application
-            </div>
-            <div className="text-sm">
-              Measures the ability to apply mathematical concepts to various
-              situations and contexts. Assesses flexibility in using
-              mathematical knowledge across different problem types.
-            </div>
-          </div>
-
-          <div className="border border-gray-300 p-3">
-            <div className="font-bold mb-1">SECTION 4 - Reasoning Ability</div>
-            <div className="text-sm">
-              Tests logical thinking, pattern recognition, and deductive
-              reasoning skills. Evaluates the ability to analyze relationships
-              and draw mathematical conclusions.
-            </div>
-          </div>
-
-          <div className="border border-gray-300 p-3">
-            <div className="font-bold mb-1">
-              SECTION 5 - Problem Solving Ability
-            </div>
-            <div className="text-sm">
-              Assesses complex problem-solving skills including multi-step
-              problems, real-world applications, and critical thinking. Measures
-              creativity and strategic thinking in mathematics.
-            </div>
-          </div>
+        <div className="mb-4">
+          <span className="text-xl font-bold">
+            1. Comprehensive Mathematical Thinking Ability Diagnostic Test
+          </span>
         </div>
+
+        <table className="table table-bordered w-full">
+          <tbody>
+            <tr>
+              <td style={{ verticalAlign: "middle", fontSize: "17px" }}>
+                <span style={{ whiteSpace: "nowrap" }}>
+                  SECTION 1 - COMPUTATIONAL ABILITY
+                </span>
+              </td>
+              <td style={{ verticalAlign: "middle", fontSize: "13px" }}>
+                It assesses the ability to simplify a given equation by applying
+                the basic laws or properties of operations, and the ability to
+                apply basic formulas or calculation methods.
+              </td>
+            </tr>
+            <tr>
+              <td style={{ verticalAlign: "middle", fontSize: "17px" }}>
+                <span style={{ whiteSpace: "nowrap" }}>
+                  SECTION 2 - Conceptual Understanding Ability
+                </span>
+              </td>
+              <td style={{ verticalAlign: "middle", fontSize: "13px" }}>
+                Assess the level of understanding of the meaning and properties
+                of mathematical terms, symbols, formulas, graphs, and tables
+                given in the problem.
+              </td>
+            </tr>
+            <tr>
+              <td style={{ verticalAlign: "middle", fontSize: "17px" }}>
+                <span style={{ whiteSpace: "nowrap" }}>
+                  SECTION 3 - Concept Application Ability
+                </span>
+              </td>
+              <td style={{ verticalAlign: "middle", fontSize: "13px" }}>
+                It assesses the ability to understand and apply mathematical
+                concepts related to a given problem, the ability to express a
+                given problem situation mathematically, and the ability to
+                rephrase a mathematical expression into another expression.
+              </td>
+            </tr>
+            <tr>
+              <td style={{ verticalAlign: "middle", fontSize: "17px" }}>
+                <span style={{ whiteSpace: "nowrap" }}>
+                  SECTION 4 - Reasoning Abilities
+                </span>
+              </td>
+              <td style={{ verticalAlign: "middle", fontSize: "13px" }}>
+                It assesses the ability to discover the core principles of
+                problem solving through listing, counting, and observation; the
+                ability to discover the core principles of problem solving
+                through analogy; the ability to derive true properties or
+                determine the truth or falsity of a given proposition using
+                mathematical concepts, principles, and laws; the ability to
+                understand a given definition and derive true properties; the
+                ability to understand proofs and the ability to read proofs and
+                draw conclusions.
+              </td>
+            </tr>
+            <tr>
+              <td style={{ verticalAlign: "middle", fontSize: "17px" }}>
+                <span style={{ whiteSpace: "nowrap" }}>
+                  SECTION 5 - PROBLEM-SOLVING SKILLS
+                </span>
+              </td>
+              <td style={{ verticalAlign: "middle", fontSize: "13px" }}>
+                It assesses the ability to solve problems by understanding and
+                synthesizing the relationship between two or more mathematical
+                concepts, principles, and laws, the ability to solve problems
+                through a two-step or more thought process, and the ability to
+                solve problems by applying related mathematical concepts in
+                real-life situations.
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
-      {/* Overall Evaluation Chart */}
+      {/* Overall Evaluation Chart - Match original format */}
       <div className="mb-8">
-        <h2 className="text-xl font-bold mb-2">
-          2. Overall Evaluation - [{testCode}]
-        </h2>
-        <div className="text-sm text-gray-600 mb-1">
-          [Student Name: {studentName}]
+        <div className="mb-4">
+          <span className="text-xl font-bold">2. </span>
+          <span className="text-2xl font-bold">{testCode} </span>
+          <span className="text-xl">Student's diagnostic test results - </span>
+          <span className="text-2xl font-bold text-red-600">[]</span>
         </div>
-        <div className="text-sm mb-4">
-          Test Score: Overall Mathematics Learning Evaluation
+        <div className="text-center mb-4">
+          <span className="text-xl">
+            Able Math Ability Diagnostic Test Results
+          </span>
         </div>
 
         {/* Horizontal Bar Chart */}
@@ -213,6 +247,16 @@ export function ReportCoverPage({
                 {chartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
+                <LabelList
+                  dataKey="value"
+                  position="right"
+                  style={{
+                    fill: "#000",
+                    fontSize: "12px",
+                    fontWeight: "normal",
+                  }}
+                  formatter={(value: any) => `${Number(value).toFixed(0)}`}
+                />
               </Bar>
             </RechartsBarChart>
           </ResponsiveContainer>

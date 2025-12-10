@@ -2,6 +2,7 @@ import { useEffect, useMemo } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useAdtmSubmission } from "@/hooks/useAdtmGradingWorkflow";
 import { useAutoSave } from "@/hooks/useAutoSave";
+import { adtmService } from "@/services/adtmService";
 import {
   useCalculateSection1Scores,
   useCalculateSectionScores,
@@ -161,12 +162,28 @@ export function GradeAdtm() {
     return { answers: section.answers };
   }, [currentStep, section1, section2, section3, section4, section5]);
 
-  const { isSaving } = useAutoSave({
-    submissionId: submissionId || null,
-    sectionNumber: currentStep as 1 | 2 | 3 | 4 | 5,
-    data: currentSectionData,
+  const autoSave = useAutoSave({
+    onSave: async (data: typeof currentSectionData) => {
+      if (!submissionId) return;
+      await adtmService.saveProgress(
+        submissionId,
+        currentStep as 1 | 2 | 3 | 4 | 5,
+        data
+      );
+    },
     enabled: !!submissionId && currentStep <= 5,
   });
+
+  // Auto-save when section data changes
+  useEffect(() => {
+    if (
+      submissionId &&
+      currentStep <= 5 &&
+      Object.keys(currentSectionData).length > 0
+    ) {
+      autoSave.save(currentSectionData);
+    }
+  }, [currentSectionData, submissionId, currentStep, autoSave.save]);
 
   // Calculate Section 1 scores
   const section1Scores = useCalculateSection1Scores({
@@ -306,7 +323,7 @@ export function GradeAdtm() {
             {submission.student?.fullName} - {submission.test.testCode}
           </p>
         </div>
-        {isSaving && (
+        {autoSave.isSaving && (
           <div className="flex items-center gap-2 text-sm text-secondary-600">
             <Save className="w-4 h-4 animate-pulse" />
             <span>Saving...</span>
