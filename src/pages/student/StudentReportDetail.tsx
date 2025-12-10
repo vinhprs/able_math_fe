@@ -9,6 +9,7 @@ import type {
   AchievementReportData,
   AdtmReportData,
 } from "@/types/reports.types";
+import { printReport } from "@/utils/printReport";
 
 export default function StudentReportDetail() {
   const { reportId } = useParams<{ reportId: string }>();
@@ -76,7 +77,19 @@ export default function StudentReportDetail() {
   };
 
   const handlePrint = () => {
-    window.print();
+    // Find the report content container
+    const reportContainer = document.querySelector(".bg-white.rounded-lg");
+    if (reportContainer) {
+      // Temporarily add class for print function
+      reportContainer.classList.add("report-container");
+      printReport(".report-container");
+      // Remove class after a delay
+      setTimeout(() => {
+        reportContainer.classList.remove("report-container");
+      }, 1000);
+    } else {
+      printReport();
+    }
   };
 
   const handleDownloadPdf = async () => {

@@ -23,6 +23,7 @@ import {
 import { reportService } from "@/services/reportService";
 import { toastSuccess, toastError } from "@/lib/toast";
 import { ReportStatus } from "@/types/report";
+import { printReport } from "@/utils/printReport";
 
 export function ResultReview() {
   const params = useParams<{ submissionId?: string; reportId?: string }>();
@@ -164,7 +165,7 @@ export function ResultReview() {
   }, [routeReportId, routeSubmissionId]);
 
   const handlePrint = () => {
-    window.print();
+    printReport(".report-container");
   };
 
   const handleDownloadPdf = async () => {

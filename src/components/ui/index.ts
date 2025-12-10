@@ -18,6 +18,7 @@ export { Badge, type BadgeProps } from "./Badge";
 export { Modal, type ModalProps } from "./Modal";
 export { Tabs, TabsList, TabsTrigger, TabsContent } from "./Tabs";
 export { Spinner } from "./Spinner";
+export { Pagination, type PaginationProps } from "./Pagination";
 export {
   DashboardCard,
   type DashboardCardProps,

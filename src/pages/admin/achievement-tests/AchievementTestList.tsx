@@ -7,6 +7,7 @@ import {
   CardTitle,
   Select,
   Spinner,
+  Pagination,
 } from "@/components/ui";
 import { toastError } from "@/lib/toast";
 import { achievementTestsApi } from "@/shared/api/achievement-tests.api";
@@ -34,6 +35,12 @@ export function AchievementTestList() {
   const navigate = useNavigate();
   const [tests, setTests] = useState<AchievementTest[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [pagination, setPagination] = useState({
+    total: 0,
+    page: 1,
+    limit: 20,
+    totalPages: 0,
+  });
   const [filters, setFilters] = useState({
     page: 1,
     limit: 20,
@@ -55,11 +62,30 @@ export function AchievementTestList() {
         status: filters.status || undefined,
       });
       setTests(result.tests || []);
+
+      // Calculate totalPages from total and limit
+      const totalPages = result.total
+        ? Math.ceil(result.total / result.limit)
+        : 0;
+
+      setPagination({
+        total: result.total || 0,
+        page: result.page || 1,
+        limit: result.limit || 20,
+        totalPages,
+      });
     } catch (error: any) {
       toastError(error.response?.data?.message || "Failed to fetch tests");
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handlePageChange = (page: number) => {
+    setFilters((prev) => ({
+      ...prev,
+      page,
+    }));
   };
 
   const getStatusBadge = (status: string) => {
@@ -181,6 +207,19 @@ export function AchievementTestList() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {/* Pagination */}
+          {!isLoading && tests.length > 0 && (
+            <div className="mt-6 pt-6 border-t">
+              <Pagination
+                currentPage={pagination.page}
+                totalPages={pagination.totalPages}
+                totalItems={pagination.total}
+                itemsPerPage={pagination.limit}
+                onPageChange={handlePageChange}
+              />
             </div>
           )}
         </CardContent>
