@@ -1,13 +1,24 @@
-export { Button, type ButtonProps } from './Button';
-export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from './Card';
-export { Checkbox, type CheckboxProps } from './Checkbox';
-export { Alert, type AlertProps } from './Alert';
-export { Input, type InputProps } from './Input';
-export { Stepper, type StepperProps } from './Stepper';
-export { Select, type SelectProps } from './Select';
-export { Textarea, type TextareaProps } from './Textarea';
-export { Badge, type BadgeProps } from './Badge';
-export { Modal, type ModalProps } from './Modal';
-export { Tabs, TabsList, TabsTrigger, TabsContent } from './Tabs';
-export { Spinner } from './Spinner';
-export { DashboardCard, type DashboardCardProps } from '../layout/DashboardCard';
+export { Button, type ButtonProps } from "./Button";
+export {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "./Card";
+export { Checkbox, type CheckboxProps } from "./Checkbox";
+export { Alert, type AlertProps } from "./Alert";
+export { Input, type InputProps } from "./Input";
+export { Label, type LabelProps } from "./Label";
+export { Stepper, type StepperProps } from "./Stepper";
+export { Select, type SelectProps } from "./Select";
+export { Textarea, type TextareaProps } from "./Textarea";
+export { Badge, type BadgeProps } from "./Badge";
+export { Modal, type ModalProps } from "./Modal";
+export { Tabs, TabsList, TabsTrigger, TabsContent } from "./Tabs";
+export { Spinner } from "./Spinner";
+export {
+  DashboardCard,
+  type DashboardCardProps,
+} from "../layout/DashboardCard";

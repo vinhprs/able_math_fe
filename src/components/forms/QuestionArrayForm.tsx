@@ -1,14 +1,30 @@
 import { Button, Input, Select, Textarea } from "@/components/ui";
 import type { ICreateQuestionDto } from "@/types/test.types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Trash2 } from "lucide-react";
-import { useEffect } from "react";
+import { Plus, Trash2, AlertCircle } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
+import { ScoreSummary } from "@/components/tests/ScoreSummary";
+import { ScoreValidationAlert } from "@/components/tests/ScoreValidationAlert";
+import { cn } from "@/lib/cn";
+import { QuestionTypeSelector } from "@/components/admin/QuestionTypeSelector";
+import { MultipleChoiceEditor } from "@/components/admin/MultipleChoiceEditor";
 
 const questionSchema = z.object({
   questionNumber: z.number().positive(),
   unitName: z.string().min(1, "Unit name is required"),
+  questionType: z.enum(["TEXT", "MULTIPLE_CHOICE", "TRUE_FALSE"]).optional(),
+  options: z
+    .object({
+      A: z.string().optional(),
+      B: z.string().optional(),
+      C: z.string().optional(),
+      D: z.string().optional(),
+      E: z.string().optional(),
+    })
+    .nullable()
+    .optional(),
   correctAnswer: z.string().min(1, "Correct answer is required"),
   score: z.number().positive("Score must be positive"),
   difficulty: z.number().int().min(1).max(4, {
@@ -29,6 +45,8 @@ type QuestionArrayFormData = z.infer<typeof questionArraySchema>;
 interface QuestionArrayFormProps {
   initialQuestions?: ICreateQuestionDto[];
   onChange?: (questions: ICreateQuestionDto[], totalScore: number) => void;
+  targetScore?: number;
+  showValidation?: boolean;
 }
 
 const DIFFICULTY_OPTIONS = [
@@ -41,21 +59,30 @@ const DIFFICULTY_OPTIONS = [
 export function QuestionArrayForm({
   initialQuestions,
   onChange,
+  targetScore = 100,
+  showValidation = true,
 }: QuestionArrayFormProps) {
   const {
     control,
     register,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<QuestionArrayFormData>({
     resolver: zodResolver(questionArraySchema),
     defaultValues: {
       questions: initialQuestions?.length
-        ? initialQuestions
+        ? initialQuestions.map((q) => ({
+            ...q,
+            questionType: q.questionType || "TEXT",
+            options: q.options || null,
+          }))
         : [
             {
               questionNumber: 1,
               unitName: "",
+              questionType: "TEXT" as const,
+              options: null,
               correctAnswer: "",
               score: 1,
               difficulty: 2, // Default to Medium (Level 2)
@@ -88,6 +115,8 @@ export function QuestionArrayForm({
     append({
       questionNumber: nextNumber,
       unitName: "",
+      questionType: "TEXT",
+      options: null,
       correctAnswer: "",
       score: 1,
       difficulty: 2, // Default to Medium (Level 2)
@@ -95,8 +124,34 @@ export function QuestionArrayForm({
     });
   };
 
+  // Calculate remaining score for each question
+  const getRemainingScore = (currentQuestionIndex: number) => {
+    const otherQuestionsTotal =
+      watchedQuestions
+        ?.filter((_, idx) => idx !== currentQuestionIndex)
+        .reduce((sum, q) => sum + (q.score || 0), 0) || 0;
+    const currentScore = watchedQuestions?.[currentQuestionIndex]?.score || 0;
+    return targetScore - otherQuestionsTotal;
+  };
+
   return (
     <div className="space-y-6">
+      {/* Score Summary - Always visible */}
+      {showValidation && (
+        <ScoreSummary
+          questions={watchedQuestions || []}
+          targetScore={targetScore}
+        />
+      )}
+
+      {/* Validation Alert */}
+      {showValidation && (
+        <ScoreValidationAlert
+          questions={watchedQuestions || []}
+          targetScore={targetScore}
+        />
+      )}
+
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-secondary-900">Questions</h3>
         <Button type="button" onClick={addQuestion} size="sm">
@@ -130,6 +185,26 @@ export function QuestionArrayForm({
               )}
             </div>
 
+            {/* Question Type Selector */}
+            <QuestionTypeSelector
+              value={watchedQuestions?.[index]?.questionType || "TEXT"}
+              onChange={(type) => {
+                setValue(`questions.${index}.questionType`, type);
+                if (type === "MULTIPLE_CHOICE") {
+                  setValue(`questions.${index}.options`, {
+                    A: "",
+                    B: "",
+                    C: "",
+                    D: "",
+                    E: "",
+                  });
+                  setValue(`questions.${index}.correctAnswer`, "");
+                } else {
+                  setValue(`questions.${index}.options`, null);
+                }
+              }}
+            />
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
                 label="Question Number"
@@ -146,22 +221,52 @@ export function QuestionArrayForm({
                 placeholder="e.g., Addition, Subtraction"
               />
 
-              <Input
-                label="Correct Answer"
-                error={questionErrors?.correctAnswer?.message}
-                {...register(`questions.${index}.correctAnswer`)}
-                placeholder="Enter correct answer"
-              />
-
-              <Input
-                label="Score"
-                type="number"
-                min="1"
-                error={questionErrors?.score?.message}
-                {...register(`questions.${index}.score`, {
-                  valueAsNumber: true,
-                })}
-              />
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <label
+                    htmlFor={`score-${index}`}
+                    className="block text-sm font-medium text-secondary-700"
+                  >
+                    Score *
+                  </label>
+                  {showValidation && (
+                    <span className="text-xs text-gray-500">
+                      (Remaining: {getRemainingScore(index).toFixed(1)} points)
+                    </span>
+                  )}
+                </div>
+                <div className="relative">
+                  <Input
+                    id={`score-${index}`}
+                    type="number"
+                    step="0.5"
+                    min="0"
+                    error={questionErrors?.score?.message}
+                    className={cn(
+                      showValidation &&
+                        getRemainingScore(index) < 0 &&
+                        "border-red-500 focus:ring-red-500"
+                    )}
+                    {...register(`questions.${index}.score`, {
+                      valueAsNumber: true,
+                    })}
+                  />
+                  {showValidation &&
+                    getRemainingScore(index) < 0 &&
+                    watchedQuestions?.[index]?.score &&
+                    watchedQuestions[index].score > 0 && (
+                      <AlertCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-red-500" />
+                    )}
+                </div>
+                {showValidation &&
+                  getRemainingScore(index) < 0 &&
+                  watchedQuestions?.[index]?.score &&
+                  watchedQuestions[index].score > 0 && (
+                    <p className="text-sm text-red-600 mt-1">
+                      This question's score exceeds remaining allocation
+                    </p>
+                  )}
+              </div>
 
               <Select
                 label="Difficulty"
@@ -181,6 +286,33 @@ export function QuestionArrayForm({
               rows={3}
             />
 
+            {/* Conditional: Multiple Choice Editor OR Text Answer */}
+            {watchedQuestions?.[index]?.questionType === "MULTIPLE_CHOICE" ? (
+              <MultipleChoiceEditor
+                options={
+                  watchedQuestions[index].options || {
+                    A: "",
+                    B: "",
+                    C: "",
+                    D: "",
+                    E: "",
+                  }
+                }
+                correctAnswer={watchedQuestions[index].correctAnswer || ""}
+                onChange={(options, correctAnswer) => {
+                  setValue(`questions.${index}.options`, options);
+                  setValue(`questions.${index}.correctAnswer`, correctAnswer);
+                }}
+              />
+            ) : (
+              <Input
+                label="Correct Answer"
+                error={questionErrors?.correctAnswer?.message}
+                {...register(`questions.${index}.correctAnswer`)}
+                placeholder="Enter correct answer"
+              />
+            )}
+
             <Input
               label="Question Image URL (Optional)"
               type="url"
@@ -195,17 +327,6 @@ export function QuestionArrayForm({
       {errors.questions?.root && (
         <p className="text-sm text-red-600">{errors.questions.root.message}</p>
       )}
-
-      <div className="p-4 bg-primary-50 border border-primary-200 rounded-lg">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-primary-900">
-            Total Score
-          </span>
-          <span className="text-2xl font-bold text-primary-700">
-            {totalScore}
-          </span>
-        </div>
-      </div>
     </div>
   );
 }
