@@ -7,7 +7,6 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
-  Cell,
   LabelList,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -175,19 +174,28 @@ export function ReportBarChart({
               iconSize={10}
               align="center"
             />
-            {datasets.map((dataset) => (
-              <Bar
-                key={dataset.label}
-                dataKey={dataset.label}
-                fill={dataset.backgroundColor}
-                name={dataset.label}
-                stroke={dataset.backgroundColor}
-                strokeWidth={0}
-                radius={0}
-              >
-                <LabelList content={<CustomBarLabel />} position="insideTop" />
-              </Bar>
-            ))}
+            {datasets.map((dataset) => {
+              // Ensure backgroundColor is a string (not an array)
+              const fillColor = Array.isArray(dataset.backgroundColor)
+                ? dataset.backgroundColor[0] || "#3b82f6"
+                : dataset.backgroundColor || "#3b82f6";
+              return (
+                <Bar
+                  key={dataset.label}
+                  dataKey={dataset.label}
+                  fill={fillColor}
+                  name={dataset.label}
+                  stroke={fillColor}
+                  strokeWidth={0}
+                  radius={0}
+                >
+                  <LabelList
+                    content={<CustomBarLabel />}
+                    position="insideTop"
+                  />
+                </Bar>
+              );
+            })}
           </RechartsBarChart>
         </ResponsiveContainer>
       </div>

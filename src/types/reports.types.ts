@@ -69,6 +69,7 @@ export interface AchievementReportData {
     semester?: string;
     level?: number;
     examType?: string;
+    testNumber?: string;
     nationalAverage?: number;
     maxScore?: number;
     totalApplicants?: number;
