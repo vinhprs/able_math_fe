@@ -1,10 +1,10 @@
 import type { AdtmReportData } from "@/types/reports.types";
+import { AlertCircle, CheckCircle2, XCircle } from "lucide-react";
 import {
   Bar,
   CartesianGrid,
   Cell,
   LabelList,
-  Legend,
   Line,
   LineChart,
   PolarAngleAxis,
@@ -18,7 +18,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { CheckCircle2, AlertCircle, XCircle } from "lucide-react";
 
 interface ReportAnalysisPageProps {
   reportData: AdtmReportData;
@@ -33,49 +32,53 @@ export function ReportAnalysisPage({ reportData }: ReportAnalysisPageProps) {
 
   return (
     <div
-      className="bg-white p-8 min-h-screen print:p-8 report-page-2"
-      style={{ fontFamily: "Times New Roman, serif" }}
+      className="bg-white p-8 print:p-8"
+      style={{ fontFamily: '"맑은 고딕", "Malgun Gothic", sans-serif' }}
     >
-      {/* Header - Match original */}
-      <div className="flex items-center justify-center border-b-3 border-black pb-4 mb-6">
-        <table style={{ width: "100%" }}>
-          <tbody>
-            <tr>
-              <td
-                className="text-right pr-4"
-                style={{ verticalAlign: "middle" }}
-              >
-                <div className="text-red-600 text-4xl font-bold">able</div>
-              </td>
-              <td style={{ verticalAlign: "middle", textAlign: "left" }}>
-                <span className="text-5xl font-serif font-bold">Analysis</span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
       {/* Row 1: Score by area (9 cols) + Student name (3 cols) */}
       <div
         className="row"
-        style={{ display: "flex", flexWrap: "wrap", margin: "0" }}
+        style={{
+          display: "flex",
+          flexWrap: "nowrap",
+          margin: "0",
+          alignItems: "flex-start",
+        }}
       >
-        <div className="col-xs-9" style={{ width: "75%", padding: "0 15px" }}>
+        <div
+          className="col-xs-9"
+          style={{ width: "75%", padding: "0 15px", flexShrink: 0 }}
+        >
           {/* 1. Score by area */}
           <Section1ScoreTable
             sections={sections}
             totalRawScore={totalRawScore}
             totalMaxScore={totalMaxScore}
             overallScore={overallScore}
-            testCode={reportData.test.testCode}
           />
         </div>
-        <div className="col-xs-3" style={{ width: "25%", padding: "0 15px" }}>
-          <table className="table table-bordered table-condensed w-full">
+        <div
+          className="col-xs-3"
+          style={{
+            width: "25%",
+            padding: "0 15px",
+            flexShrink: 0,
+            alignSelf: "flex-start",
+          }}
+        >
+          {/* Spacer to align with "1. Score by area" title */}
+          <div
+            className="col-xs-12"
+            style={{ margin: "20px 0px", padding: "0px", height: "20px" }}
+          ></div>
+          <table
+            className="table table-bordered table-condensed w-full"
+            style={{ border: "1px solid #000", marginTop: "0" }}
+          >
             <tbody>
-              <tr style={{ textAlign: "center", fontSize: "20px" }}>
-                <td>Student name</td>
-                <td style={{ fontWeight: "bold" }}>
+              <tr style={{ textAlign: "center", fontSize: "14px" }}>
+                <td style={{ border: "1px solid #000" }}>Student name</td>
+                <td style={{ fontWeight: "bold", border: "1px solid #000" }}>
                   {reportData.student.name}
                 </td>
               </tr>
@@ -87,9 +90,17 @@ export function ReportAnalysisPage({ reportData }: ReportAnalysisPageProps) {
       {/* Row 2: Unit scores (6 cols) + Calculation (3 cols) + Difficulty (3 cols) */}
       <div
         className="row"
-        style={{ display: "flex", flexWrap: "wrap", margin: "0" }}
+        style={{
+          display: "flex",
+          flexWrap: "nowrap",
+          margin: "0",
+          width: "100%",
+        }}
       >
-        <div className="col-xs-6" style={{ width: "50%", padding: "0 15px" }}>
+        <div
+          className="col-xs-6"
+          style={{ width: "50%", padding: "0 10px", flexShrink: 0 }}
+        >
           {/* 2. Unit-by-unit scores */}
           {sections[1]?.unitScores && sections[1].unitScores.length > 0 && (
             <Section2UnitTable
@@ -99,13 +110,19 @@ export function ReportAnalysisPage({ reportData }: ReportAnalysisPageProps) {
             />
           )}
         </div>
-        <div className="col-xs-3" style={{ width: "25%", padding: "0 15px" }}>
+        <div
+          className="col-xs-3"
+          style={{ width: "25%", padding: "0 10px", flexShrink: 0 }}
+        >
           {/* 3. Calculation Competency Score */}
           {sections[0] && (
             <CalculationAbilityBreakdown section1={sections[0]} />
           )}
         </div>
-        <div className="col-xs-3" style={{ width: "25%", padding: "0 15px" }}>
+        <div
+          className="col-xs-3"
+          style={{ width: "25%", padding: "0 10px", flexShrink: 0 }}
+        >
           {/* 4. Score by difficulty level */}
           {sections[0]?.difficultyBreakdown &&
             sections[0].difficultyBreakdown.length > 0 && (
@@ -130,13 +147,39 @@ export function ReportAnalysisPage({ reportData }: ReportAnalysisPageProps) {
         >
           {/* 5. Condition & Concentration Chart */}
           <div className="text-center mb-2">
-            <span className="text-lg">Condition concentration</span>
+            <span style={{ fontSize: "14px" }}>Condition concentration</span>
+          </div>
+          {/* Legend above chart */}
+          <div
+            className="text-center mb-2"
+            style={{ display: "flex", justifyContent: "center", gap: "15px" }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+              <div
+                style={{
+                  width: "30px",
+                  height: "3px",
+                  backgroundColor: "#f79646",
+                }}
+              />
+              <span style={{ fontSize: "12px" }}>집중도,</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+              <div
+                style={{
+                  width: "30px",
+                  height: "3px",
+                  backgroundColor: "#8064a2",
+                }}
+              />
+              <span style={{ fontSize: "12px" }}>컨디션,</span>
+            </div>
           </div>
           <ConditionConcentrationChart sections={sections} />
 
           {/* 6. Calculation Ability Distribution */}
           <div className="text-center mb-2 mt-4">
-            <span className="text-lg">Computational ability</span>
+            <span style={{ fontSize: "14px" }}>Computational ability</span>
           </div>
           {sections[0] && (
             <CalculationDistributionChart section1={sections[0]} />
@@ -144,7 +187,7 @@ export function ReportAnalysisPage({ reportData }: ReportAnalysisPageProps) {
 
           {/* 7. Unit Balance Radar */}
           <div className="text-center mb-2 mt-4">
-            <span className="text-lg">Balance by unit</span>
+            <span style={{ fontSize: "14px" }}>Balance by unit</span>
           </div>
           {charts?.unitRadar && (
             <UnitBalanceRadar chartData={charts.unitRadar} />
@@ -154,12 +197,9 @@ export function ReportAnalysisPage({ reportData }: ReportAnalysisPageProps) {
           className="col-xs-7"
           style={{ width: "58.333%", padding: "0 15px" }}
         >
-          {/* Scoring Guide Info Box */}
-          <ScoringGuideBox />
-
           {/* 8. Domain Scores (Section Bar Chart) */}
           <div className="text-center mb-2 mt-4">
-            <span className="text-lg">Score by area</span>
+            <span style={{ fontSize: "14px" }}>Score by area</span>
           </div>
           {charts?.sectionBar && (
             <DomainScoresChart chartData={charts.sectionBar} />
@@ -167,20 +207,23 @@ export function ReportAnalysisPage({ reportData }: ReportAnalysisPageProps) {
 
           {/* 9. Domain-Unit Scores */}
           <div className="text-center mb-2 mt-4">
-            <span className="text-lg">Score by area and unit</span>
+            <span style={{ fontSize: "14px" }}>Score by area and unit</span>
           </div>
           {sections[1]?.unitScores && sections[1].unitScores.length > 0 && (
-            <DomainUnitChart units={sections[1].unitScores} />
+            <DomainUnitChart
+              section2Units={sections[1].unitScores}
+              section3Units={sections[2]?.unitScores || []}
+            />
           )}
 
           {/* 10. Domain-Difficulty Scores */}
           <div className="text-center mb-2 mt-4">
-            <span className="text-lg">Score by Area - Difficulty</span>
+            <span style={{ fontSize: "14px" }}>Score by Area - Difficulty</span>
           </div>
-          {sections[0]?.difficultyBreakdown &&
-            sections[0].difficultyBreakdown.length > 0 && (
+          {reportData.areaDifficulty &&
+            reportData.areaDifficulty.length > 0 && (
               <DomainDifficultyChart
-                difficulties={sections[0].difficultyBreakdown}
+                areaDifficulty={reportData.areaDifficulty}
               />
             )}
         </div>
@@ -201,24 +244,25 @@ function Section1ScoreTable({
   totalRawScore,
   totalMaxScore,
   overallScore,
-  testCode,
 }: {
   sections: AdtmReportData["sections"];
   totalRawScore: number;
   totalMaxScore: number;
   overallScore: number;
-  testCode?: string;
 }) {
   // Calculate expected scores (placeholder - should come from backend)
   const expectedScores = [80, 65, 55, 40, 0];
 
   return (
-    <div className="border border-gray-300 p-4">
-      <div className="mb-3" style={{ margin: "20px 0px", padding: "0px" }}>
-        <span className="text-xl">1. Score by area</span>
+    <div>
+      <div className="col-xs-12" style={{ margin: "20px 0px", padding: "0px" }}>
+        <span style={{ fontSize: "14px" }}>1. Score by area</span>
       </div>
 
-      <table className="table table-bordered adtm-table w-full text-xs">
+      <table
+        className="table table-bordered adtm-table w-full"
+        style={{ margin: 0 }}
+      >
         <tbody>
           <tr>
             <td
@@ -325,8 +369,8 @@ function Section1ScoreTable({
               section.standardScore >= 80
                 ? "award"
                 : section.standardScore >= 60
-                ? "award"
-                : "award";
+                ? "middle"
+                : "under";
 
             return (
               <tr key={idx}>
@@ -405,31 +449,6 @@ function Section1ScoreTable({
           </tr>
         </tbody>
       </table>
-
-      {/* Notes */}
-      <div className="mt-2 flex items-start gap-4 text-xs">
-        <div className="flex items-start">
-          <div className="w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] mr-1 mt-0.5 flex-shrink-0">
-            1
-          </div>
-          <span className="text-gray-600">
-            Change the test to "{testCode || "E3-M"}"
-          </span>
-        </div>
-        <div className="flex items-start">
-          <div className="w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] mr-1 mt-0.5 flex-shrink-0">
-            2
-          </div>
-          <span className="text-gray-600">
-            Full score for each section = 100 points
-          </span>
-        </div>
-      </div>
-
-      {/* High/Medium/Low legend */}
-      <div className="mt-2 text-center text-xs text-gray-600 border-t pt-2">
-        <span className="font-medium">High / Medium / Low</span>
-      </div>
     </div>
   );
 }
@@ -465,12 +484,15 @@ function Section2UnitTable({
       : 0;
 
   return (
-    <div className="border border-gray-300 p-4">
-      <div className="mb-3" style={{ margin: "20px 0px", padding: "0px" }}>
-        <span className="text-xl">2. Unit-by-unit scores</span>
+    <div>
+      <div className="col-xs-12" style={{ margin: "20px 0px", padding: "0px" }}>
+        <span style={{ fontSize: "14px" }}>2. Unit-by-unit scores</span>
       </div>
 
-      <table className="table table-bordered adtm-table w-full text-xs">
+      <table
+        className="table table-bordered adtm-table w-full"
+        style={{ margin: 0 }}
+      >
         <tbody>
           <tr>
             <td
@@ -633,12 +655,17 @@ function CalculationAbilityBreakdown({
       : 0;
 
   return (
-    <div className="border border-gray-300 p-4">
-      <div className="mb-3" style={{ margin: "20px 0px", padding: "0px" }}>
-        <span className="text-xl">3. Calculation Competency Score</span>
+    <div>
+      <div className="col-xs-12" style={{ margin: "20px 0px", padding: "0px" }}>
+        <span style={{ fontSize: "14px" }}>
+          3. Calculation Competency Score
+        </span>
       </div>
 
-      <table className="table table-bordered adtm-table w-full text-xs">
+      <table
+        className="table table-bordered adtm-table w-full"
+        style={{ margin: 0 }}
+      >
         <tbody>
           <tr>
             <td
@@ -769,12 +796,15 @@ function DifficultyScoreTable({
   ].slice(0, 7);
 
   return (
-    <div className="border border-gray-300 p-4">
-      <div className="mb-3" style={{ margin: "20px 0px", padding: "0px" }}>
-        <span className="text-xl">4. Score by difficulty level</span>
+    <div>
+      <div className="col-xs-12" style={{ margin: "20px 0px", padding: "0px" }}>
+        <span style={{ fontSize: "14px" }}>4. Score by difficulty level</span>
       </div>
 
-      <table className="table table-bordered adtm-table w-full text-xs">
+      <table
+        className="table table-bordered adtm-table w-full"
+        style={{ margin: 0 }}
+      >
         <tbody>
           <tr>
             <td
@@ -904,8 +934,7 @@ function ConditionConcentrationChart({
   });
 
   return (
-    <div className="border border-gray-300 p-4">
-      <h4 className="font-bold mb-2 text-sm">Condition & Concentration</h4>
+    <div>
       <div style={{ height: "150px", minHeight: "150px", width: "100%" }}>
         <ResponsiveContainer width="100%" height="100%" minHeight={150}>
           <LineChart
@@ -914,24 +943,28 @@ function ConditionConcentrationChart({
           >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="section" tick={{ fontSize: 10 }} />
-            <YAxis domain={[0, 5]} tick={{ fontSize: 10 }} />
+            <YAxis
+              domain={[0, 5]}
+              tick={{ fontSize: 10 }}
+              tickCount={6}
+              ticks={[0, 1, 2, 3, 4, 5]}
+            />
             <Tooltip />
-            <Legend />
             <Line
               type="monotone"
               dataKey="condition"
-              stroke="rgba(234, 179, 8, 1)"
-              strokeWidth={2}
-              name="Condition"
-              dot={{ r: 4 }}
+              stroke="#8064a2"
+              strokeWidth={3}
+              name="컨디션,"
+              dot={false}
             />
             <Line
               type="monotone"
               dataKey="concentration"
-              stroke="rgba(59, 130, 246, 1)"
-              strokeWidth={2}
-              name="Concentration"
-              dot={{ r: 4 }}
+              stroke="#f79646"
+              strokeWidth={3}
+              name="집중도,"
+              dot={false}
             />
           </LineChart>
         </ResponsiveContainer>
@@ -945,53 +978,104 @@ function CalculationDistributionChart({
 }: {
   section1: AdtmReportData["sections"][0];
 }) {
+  // Calculate error rate, accuracy, and speed scores
+  const totalQuestions =
+    (section1.correctCount || 0) +
+    (section1.mistakeCount || 0) +
+    (section1.unsolvedCount || 0);
+
+  const errorRate =
+    totalQuestions > 0
+      ? ((section1.mistakeCount || 0) / totalQuestions) * 100
+      : 0;
+  const accuracy =
+    totalQuestions > 0
+      ? ((section1.correctCount || 0) / totalQuestions) * 100
+      : 0;
+  const speed =
+    totalQuestions > 0
+      ? ((section1.unsolvedCount || 0) / totalQuestions) * 100
+      : 0;
+
+  // Colors from original design
+  const errorRateColor = "rgb(247, 150, 70)"; // Orange - 실수율
+  const accuracyColor = "rgb(79, 129, 189)"; // Blue - 정확도
+  const speedColor = "rgb(155, 187, 89)"; // Green - 속도
+
   const chartData = [
     {
-      name: "실수를",
-      value: section1.correctCount || 0,
-      color: "rgba(251, 146, 60, 0.8)", // Orange
+      name: "실수율", // Error rate
+      value: errorRate,
+      color: errorRateColor,
     },
     {
-      name: "정확도",
-      value: section1.mistakeCount || 0,
-      color: "rgba(59, 130, 246, 0.8)", // Blue
+      name: "정확도", // Accuracy
+      value: accuracy,
+      color: accuracyColor,
     },
     {
-      name: "속도",
-      value: section1.unsolvedCount || 0,
-      color: "rgba(34, 197, 94, 0.8)", // Green
+      name: "속도", // Speed
+      value: speed,
+      color: speedColor,
     },
   ];
 
   return (
-    <div className="border border-gray-300 p-4">
-      <h4 className="font-bold mb-2 text-sm">
-        Calculation Ability Distribution
-      </h4>
-      <div style={{ height: "120px", minHeight: "120px", width: "100%" }}>
-        <ResponsiveContainer width="100%" height="100%" minHeight={120}>
+    <div>
+      <div style={{ height: "150px", minHeight: "150px", width: "100%" }}>
+        <ResponsiveContainer width="100%" height="100%" minHeight={150}>
           <RechartsBarChart
             data={chartData}
             layout="vertical"
-            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            margin={{ top: 5, right: 30, left: 80, bottom: 5 }}
+            barCategoryGap="20%"
           >
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis
               type="number"
               tick={{ fontSize: 10 }}
-              domain={[0, "dataMax"]}
+              domain={[0, 100]}
+              ticks={[0, 20, 40, 60, 80, 100]}
             />
             <YAxis
               type="category"
               dataKey="name"
-              tick={{ fontSize: 10 }}
-              width={60}
+              tick={{ fontSize: 16 }}
+              width={80}
             />
-            <Tooltip />
-            <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+            <Tooltip
+              formatter={(value: number) => [`${value.toFixed(0)}`, "Score"]}
+              contentStyle={{
+                backgroundColor: "white",
+                border: "1px solid #e5e7eb",
+                borderRadius: "4px",
+              }}
+            />
+            <Bar dataKey="value" radius={[0, 0, 0, 0]} barSize={40}>
               {chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
+              <LabelList
+                dataKey="value"
+                position="inside"
+                content={(props: any) => {
+                  const { x, y, width, height, value } = props;
+                  if (!value || value === 0) return null;
+                  return (
+                    <text
+                      x={x + width / 2}
+                      y={y + height / 2}
+                      fill="#fff"
+                      fontSize="13px"
+                      fontWeight="normal"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                    >
+                      {Number(value).toFixed(0)}
+                    </text>
+                  );
+                }}
+              />
             </Bar>
           </RechartsBarChart>
         </ResponsiveContainer>
@@ -1010,71 +1094,58 @@ function UnitBalanceRadar({
     value: chartData.datasets[0]?.data[index] || 0,
   }));
 
+  // Colors from original design - blue radar chart
+  const radarFillColor = "rgba(79, 129, 189, 0.2)"; // Light blue fill
+  const radarStrokeColor = "rgb(79, 129, 189)"; // Darker blue stroke
+
   return (
-    <div className="border border-gray-300 p-4">
-      <h4 className="font-bold mb-2 text-sm">Unit Balance</h4>
-      <div style={{ height: "200px", minHeight: "200px", width: "100%" }}>
-        <ResponsiveContainer width="100%" height="100%" minHeight={200}>
-          <RadarChart data={radarData}>
-            <PolarGrid />
-            <PolarAngleAxis dataKey="label" tick={{ fontSize: 10 }} />
+    <div>
+      <div style={{ height: "250px", minHeight: "250px", width: "100%" }}>
+        <ResponsiveContainer width="100%" height="100%" minHeight={250}>
+          <RadarChart
+            data={radarData}
+            margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+          >
+            <PolarGrid stroke="#e5e7eb" />
+            <PolarAngleAxis
+              dataKey="label"
+              tick={{ fontSize: 11, fill: "#000" }}
+              tickFormatter={(value: string) => {
+                // Format label: if it's a number, show as "1.분수의 나눗셈" format
+                return value;
+              }}
+            />
             <PolarRadiusAxis
               angle={90}
               domain={[0, 100]}
-              tick={{ fontSize: 10 }}
+              tick={{ fontSize: 10, fill: "#666" }}
+              tickCount={5}
+              tickFormatter={(value: number) => {
+                // Show specific ticks: 0, 25, 50, 75, 100
+                if ([0, 25, 50, 75, 100].includes(value)) {
+                  return value.toString();
+                }
+                return "";
+              }}
             />
             <Radar
               name="Score"
               dataKey="value"
-              stroke="rgba(59, 130, 246, 1)"
-              fill="rgba(59, 130, 246, 0.2)"
-              strokeWidth={2}
+              stroke={radarStrokeColor}
+              fill={radarFillColor}
+              strokeWidth={3}
+              dot={{ fill: radarStrokeColor, r: 4 }}
             />
-            <Tooltip />
+            <Tooltip
+              formatter={(value: number) => [`${value.toFixed(1)}`, "Score"]}
+              contentStyle={{
+                backgroundColor: "white",
+                border: "1px solid #e5e7eb",
+                borderRadius: "4px",
+              }}
+            />
           </RadarChart>
         </ResponsiveContainer>
-      </div>
-    </div>
-  );
-}
-
-function ScoringGuideBox() {
-  return (
-    <div className="border-2 border-orange-400 bg-orange-50 p-4 rounded">
-      <div className="flex items-center mb-2">
-        <div className="w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs mr-2 font-bold">
-          i
-        </div>
-        <h4 className="font-bold">Scoring Guide</h4>
-      </div>
-
-      <div className="text-xs space-y-2">
-        <div>
-          <div className="font-semibold mb-1">1. Score by Domain</div>
-          <p>
-            The full score for each section is fixed at 100 points, and the
-            combined total at the bottom will differ.
-          </p>
-        </div>
-
-        <div>
-          <div className="font-semibold mb-1">2. Score Items</div>
-          <p>
-            These are the "Score" and "Standardized Score" items. Since the
-            calculation is based on a 100-point full score, the scores and the
-            standardized score will be the same. Only the overall evaluation at
-            the bottom will differ.
-          </p>
-        </div>
-
-        <div>
-          <div className="font-semibold mb-1">3. Score-Based Evaluation</div>
-          <ul className="list-disc list-inside">
-            <li>high (상-89): 80 points or higher → Green</li>
-            <li>medium (중 60-79): 60 points or higher → Orange</li>
-            <li>low (하 &lt;59): Below 60 points → Red</li>
-          </ul>
-        </div>
       </div>
     </div>
   );
@@ -1085,44 +1156,83 @@ function DomainScoresChart({
 }: {
   chartData: AdtmReportData["charts"]["sectionBar"];
 }) {
-  // Map section labels to match original chart order and colors
+  // Map section labels to match original chart - Korean labels, horizontal
   const sectionLabels = [
-    "Calculation\nAbility",
-    "Conceptual\nUnderstanding",
-    "Conceptual\nApplication",
-    "Reasoning\nAbility",
-    "Problem-Solving\nAbility",
+    "계산 능력",
+    "개념 이해 능력",
+    "개념 적용 능력",
+    "추론 능력",
+    "문제 해결 능력",
+    "수학 학습 역량",
   ];
 
   const barData = chartData.labels.map((label, index) => ({
     name: sectionLabels[index] || label,
     value: chartData.datasets[0]?.data[index] || 0,
+    textColor: index === chartData.labels.length - 1 ? "#000" : "#fff", // Black for last bar (yellow), white for others (blue)
   }));
 
-  // Exact colors from original chart reference
-  const colors = [
-    "#4674B9", // Dark blue - Calculation Ability
-    "#62B8D2", // Teal/light blue - Conceptual Understanding
-    "#96BFEF", // Lighter blue/periwinkle - Conceptual Application
-    "#7C699E", // Dark purple/gray - Reasoning Ability
-    "#95D16F", // Light green - Problem-Solving Ability
-  ];
+  // Two colors from original design: blue and yellow
+  const blueColor = "rgb(79, 129, 189)"; // #4f81bd
+  const yellowColor = "rgb(255, 192, 0)"; // #ffc000
+
+  // First 5 bars are blue, last bar (Mathematics Learning Competency) is yellow
+  const getBarColor = (index: number, total: number) => {
+    if (index === total - 1) {
+      return yellowColor; // Last bar is yellow
+    }
+    return blueColor; // All other bars are blue
+  };
 
   return (
-    <div className="border border-gray-300 p-4">
-      <h4 className="font-bold mb-2 text-sm">Score by area</h4>
-      <div style={{ height: "200px", minHeight: "200px", width: "100%" }}>
+    <div>
+      {/* Legend */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          gap: "20px",
+          marginBottom: "10px",
+          paddingRight: "30px",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+          <div
+            style={{
+              width: "20px",
+              height: "3px",
+              backgroundColor: "rgb(161, 197, 102)",
+            }}
+          />
+          <span style={{ fontSize: "12px" }}>예상점수</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+          <div
+            style={{
+              width: "20px",
+              height: "3px",
+              backgroundColor: "rgb(79, 129, 189)",
+            }}
+          />
+          <span style={{ fontSize: "12px" }}>학생점수</span>
+        </div>
+      </div>
+
+      <div style={{ height: "150px", minHeight: "150px", width: "100%" }}>
         <ResponsiveContainer width="100%" height="100%" minHeight={200}>
           <RechartsBarChart
             data={barData}
-            margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
+            margin={{ top: 5, right: 30, left: 0, bottom: 40 }}
+            barCategoryGap="20%"
+            barGap={10}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis
               dataKey="name"
               tick={{ fontSize: 10 }}
-              angle={-45}
-              textAnchor="end"
+              angle={0}
+              textAnchor="middle"
               height={60}
             />
             <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} tickCount={6} />
@@ -1134,18 +1244,33 @@ function DomainScoresChart({
                 borderRadius: "4px",
               }}
             />
-            <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+            <Bar dataKey="value" radius={[0, 0, 0, 0]} barSize={20}>
               {barData.map((_, index) => (
                 <Cell
                   key={`cell-${index}`}
-                  fill={colors[index % colors.length]}
+                  fill={getBarColor(index, barData.length)}
                 />
               ))}
               <LabelList
                 dataKey="value"
-                position="top"
-                style={{ fill: "#fff", fontSize: "11px", fontWeight: "normal" }}
-                formatter={(value: any) => `${Number(value).toFixed(0)}`}
+                position="inside"
+                content={(props: any) => {
+                  const { x, y, width, height, value, index } = props;
+                  const dataPoint = barData[index];
+                  return (
+                    <text
+                      x={x + width / 2}
+                      y={y + height / 2}
+                      fill={dataPoint?.textColor || "#fff"}
+                      fontSize="11px"
+                      fontWeight="normal"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                    >
+                      {Number(value).toFixed(0)}
+                    </text>
+                  );
+                }}
               />
             </Bar>
           </RechartsBarChart>
@@ -1156,49 +1281,189 @@ function DomainScoresChart({
 }
 
 function DomainUnitChart({
-  units,
+  section2Units,
+  section3Units,
 }: {
-  units: Array<{
+  section2Units: Array<{
+    unitName: string;
+    rawScore: number;
+    maxScore: number;
+    standardScore: number;
+  }>;
+  section3Units: Array<{
     unitName: string;
     rawScore: number;
     maxScore: number;
     standardScore: number;
   }>;
 }) {
-  const chartData = units.map((unit) => ({
-    name:
-      unit.unitName.length > 10
-        ? unit.unitName.substring(0, 10) + "..."
-        : unit.unitName,
-    value: unit.standardScore,
-  }));
+  // Create a map of all unique unit names
+  const allUnitNames = new Set<string>();
+  section2Units.forEach((unit) => allUnitNames.add(unit.unitName));
+  section3Units.forEach((unit) => allUnitNames.add(unit.unitName));
+
+  // Create a map for quick lookup
+  const section2Map = new Map(
+    section2Units.map((unit) => [unit.unitName, unit])
+  );
+  const section3Map = new Map(
+    section3Units.map((unit) => [unit.unitName, unit])
+  );
+
+  // Build chart data with both scores for each unit
+  const chartData = Array.from(allUnitNames).map((unitName) => {
+    const section2Unit = section2Map.get(unitName);
+    const section3Unit = section3Map.get(unitName);
+
+    return {
+      name: unitName.length > 15 ? unitName.substring(0, 15) + "..." : unitName,
+      fullName: unitName,
+      개념이해: section2Unit?.standardScore || 0,
+      개념응용: section3Unit?.standardScore || 0,
+    };
+  });
+
+  // Colors from original design
+  const understandingColor = "rgb(255, 192, 0)"; // Yellow/Orange
+  const applicationColor = "rgb(75, 172, 198)"; // Teal-blue
 
   return (
-    <div className="border border-gray-300 p-4">
-      <h4 className="font-bold mb-2 text-sm">Domain - Unit Score</h4>
-      <div style={{ height: "200px", minHeight: "200px", width: "100%" }}>
-        <ResponsiveContainer width="100%" height="100%" minHeight={200}>
+    <div>
+      {/* Legend */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          gap: "20px",
+          marginBottom: "10px",
+          paddingRight: "30px",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+          <div
+            style={{
+              width: "20px",
+              height: "3px",
+              backgroundColor: applicationColor,
+            }}
+          />
+          <span style={{ fontSize: "12px" }}>개념응용</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+          <div
+            style={{
+              width: "20px",
+              height: "3px",
+              backgroundColor: understandingColor,
+            }}
+          />
+          <span style={{ fontSize: "12px" }}>개념이해</span>
+        </div>
+      </div>
+
+      <div style={{ height: "250px", minHeight: "250px", width: "100%" }}>
+        <ResponsiveContainer width="100%" height="100%" minHeight={250}>
           <RechartsBarChart
             data={chartData}
-            margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
+            margin={{ top: 5, right: 30, left: 0, bottom: 40 }}
+            barCategoryGap="20%"
+            barGap={0}
           >
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis
               dataKey="name"
               tick={{ fontSize: 9 }}
-              angle={-45}
-              textAnchor="end"
+              angle={0}
+              textAnchor="middle"
               height={60}
             />
-            <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
+            <YAxis
+              domain={[0, 100]}
+              tick={{ fontSize: 10 }}
+              ticks={[0, 20, 40, 60, 80, 100]}
+            />
             <Tooltip
-              formatter={(value: number) => [`${value.toFixed(1)}%`, "Score"]}
+              formatter={(value: number, name: string) => [
+                `${value.toFixed(1)}`,
+                name === "개념이해"
+                  ? "Concept Understanding"
+                  : "Concept Application",
+              ]}
+              contentStyle={{
+                backgroundColor: "white",
+                border: "1px solid #e5e7eb",
+                borderRadius: "4px",
+              }}
             />
             <Bar
-              dataKey="value"
-              radius={[4, 4, 0, 0]}
-              fill="rgba(59, 130, 246, 0.8)"
-            />
+              dataKey="개념응용"
+              radius={[0, 0, 0, 0]}
+              barSize={20}
+              fill={applicationColor}
+            >
+              {chartData.map((_, index) => (
+                <Cell
+                  key={`cell-application-${index}`}
+                  fill={applicationColor}
+                />
+              ))}
+              <LabelList
+                dataKey="개념응용"
+                position="inside"
+                content={(props: any) => {
+                  const { x, y, width, height, value } = props;
+                  if (!value || value === 0) return null;
+                  return (
+                    <text
+                      x={x + width / 2}
+                      y={y + height / 2}
+                      fill="#fff"
+                      fontSize="11px"
+                      fontWeight="normal"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                    >
+                      {Number(value).toFixed(0)}
+                    </text>
+                  );
+                }}
+              />
+            </Bar>
+            <Bar
+              dataKey="개념이해"
+              radius={[0, 0, 0, 0]}
+              barSize={20}
+              fill={understandingColor}
+            >
+              {chartData.map((_, index) => (
+                <Cell
+                  key={`cell-understanding-${index}`}
+                  fill={understandingColor}
+                />
+              ))}
+              <LabelList
+                dataKey="개념이해"
+                position="inside"
+                content={(props: any) => {
+                  const { x, y, width, height, value } = props;
+                  if (!value || value === 0) return null;
+                  return (
+                    <text
+                      x={x + width / 2}
+                      y={y + height / 2}
+                      fill="#000"
+                      fontSize="11px"
+                      fontWeight="normal"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                    >
+                      {Number(value).toFixed(0)}
+                    </text>
+                  );
+                }}
+              />
+            </Bar>
           </RechartsBarChart>
         </ResponsiveContainer>
       </div>
@@ -1207,47 +1472,210 @@ function DomainUnitChart({
 }
 
 function DomainDifficultyChart({
-  difficulties,
+  areaDifficulty,
 }: {
-  difficulties: Array<{
-    difficulty: 1 | 2 | 3 | 4;
-    fullMarks: number;
-    rawScore: number;
-    standardScore: number;
+  areaDifficulty: Array<{
+    area: string;
+    적용: number;
+    개념: number;
+    계산: number;
   }>;
 }) {
-  const chartData = difficulties.map((diff) => ({
-    name: `Level ${diff.difficulty}`,
-    value: diff.standardScore,
+  // Colors from original design
+  const applicationColor = "rgb(79, 129, 189)"; // Dark blue - 적용
+  const calculationColor = "rgb(147, 205, 221)"; // Light blue - 계산
+  const conceptColor = "rgb(247, 150, 70)"; // Orange - 개념
+
+  // Use data directly from backend
+  const chartData = areaDifficulty.map((data) => ({
+    name: data.area,
+    적용: data.적용,
+    개념: data.개념,
+    계산: data.계산,
   }));
 
   return (
-    <div className="border border-gray-300 p-4">
-      <h4 className="font-bold mb-2 text-sm">Domain - Difficulty Score</h4>
-      <div style={{ height: "200px", minHeight: "200px", width: "100%" }}>
-        <ResponsiveContainer width="100%" height="100%" minHeight={200}>
+    <div>
+      {/* Legend */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "20px",
+          marginBottom: "10px",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+          <div
+            style={{
+              width: "20px",
+              height: "3px",
+              backgroundColor: applicationColor,
+            }}
+          />
+          <span style={{ fontSize: "12px" }}>적용</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+          <div
+            style={{
+              width: "20px",
+              height: "3px",
+              backgroundColor: conceptColor,
+            }}
+          />
+          <span style={{ fontSize: "12px" }}>개념</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+          <div
+            style={{
+              width: "20px",
+              height: "3px",
+              backgroundColor: calculationColor,
+            }}
+          />
+          <span style={{ fontSize: "12px" }}>계산</span>
+        </div>
+      </div>
+
+      <div style={{ height: "250px", minHeight: "250px", width: "100%" }}>
+        <ResponsiveContainer width="100%" height="100%" minHeight={250}>
           <RechartsBarChart
             data={chartData}
-            margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
+            margin={{ top: 5, right: 30, left: 0, bottom: 40 }}
+            barCategoryGap="20%"
+            barGap={0}
           >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-            <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis
+              dataKey="name"
+              tick={{ fontSize: 10 }}
+              angle={0}
+              textAnchor="middle"
+              height={60}
+            />
+            <YAxis
+              domain={[0, 100]}
+              tick={{ fontSize: 10 }}
+              ticks={[0, 20, 40, 60, 80, 100]}
+            />
             <Tooltip
-              formatter={(value: number) => [`${value.toFixed(1)}%`, "Score"]}
+              formatter={(value: number, name: string) => [
+                `${value.toFixed(1)}`,
+                name === "적용"
+                  ? "Application"
+                  : name === "개념"
+                  ? "Concept"
+                  : "Calculation",
+              ]}
+              contentStyle={{
+                backgroundColor: "white",
+                border: "1px solid #e5e7eb",
+                borderRadius: "4px",
+              }}
             />
             <Bar
-              dataKey="value"
-              radius={[4, 4, 0, 0]}
-              fill="rgba(234, 179, 8, 0.8)"
-            />
+              dataKey="적용"
+              radius={[0, 0, 0, 0]}
+              barSize={20}
+              fill={applicationColor}
+            >
+              {chartData.map((_, index) => (
+                <Cell
+                  key={`cell-application-${index}`}
+                  fill={applicationColor}
+                />
+              ))}
+              <LabelList
+                dataKey="적용"
+                position="inside"
+                content={(props: any) => {
+                  const { x, y, width, height, value } = props;
+                  if (!value || value === 0) return null;
+                  return (
+                    <text
+                      x={x + width / 2}
+                      y={y + height / 2}
+                      fill="#fff"
+                      fontSize="11px"
+                      fontWeight="normal"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                    >
+                      {Number(value).toFixed(0)}
+                    </text>
+                  );
+                }}
+              />
+            </Bar>
+            <Bar
+              dataKey="개념"
+              radius={[0, 0, 0, 0]}
+              barSize={20}
+              fill={conceptColor}
+            >
+              {chartData.map((_, index) => (
+                <Cell key={`cell-concept-${index}`} fill={conceptColor} />
+              ))}
+              <LabelList
+                dataKey="개념"
+                position="inside"
+                content={(props: any) => {
+                  const { x, y, width, height, value } = props;
+                  if (!value || value === 0) return null;
+                  return (
+                    <text
+                      x={x + width / 2}
+                      y={y + height / 2}
+                      fill="#fff"
+                      fontSize="11px"
+                      fontWeight="normal"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                    >
+                      {Number(value).toFixed(0)}
+                    </text>
+                  );
+                }}
+              />
+            </Bar>
+            <Bar
+              dataKey="계산"
+              radius={[0, 0, 0, 0]}
+              barSize={20}
+              fill={calculationColor}
+            >
+              {chartData.map((_, index) => (
+                <Cell
+                  key={`cell-calculation-${index}`}
+                  fill={calculationColor}
+                />
+              ))}
+              <LabelList
+                dataKey="계산"
+                position="inside"
+                content={(props: any) => {
+                  const { x, y, width, height, value } = props;
+                  if (!value || value === 0) return null;
+                  return (
+                    <text
+                      x={x + width / 2}
+                      y={y + height / 2}
+                      fill="#fff"
+                      fontSize="11px"
+                      fontWeight="normal"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                    >
+                      {Number(value).toFixed(0)}
+                    </text>
+                  );
+                }}
+              />
+            </Bar>
           </RechartsBarChart>
         </ResponsiveContainer>
       </div>
-      <p className="text-xs text-gray-500 mt-2">
-        Other graphs are generated by retrieving the scores directly, not by
-        calculation formulas.
-      </p>
     </div>
   );
 }

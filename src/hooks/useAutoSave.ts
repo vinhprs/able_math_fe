@@ -35,8 +35,8 @@ export function useAutoSave<T>({
       setStatus("error");
       setError(err?.message || "Failed to save");
       console.error("Auto-save error:", err);
-    },
-  });
+            },
+          });
 
   // Debounced save function
   const debouncedSave = useRef(

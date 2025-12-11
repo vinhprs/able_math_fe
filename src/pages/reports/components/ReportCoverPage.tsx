@@ -19,39 +19,41 @@ interface ReportCoverPageProps {
 }
 
 export function ReportCoverPage({
+  studentName,
   testCode,
   sections,
   overallScore,
 }: ReportCoverPageProps) {
   // Prepare chart data matching original design with exact colors from reference
+  // Note: For vertical bars, names should be shorter or use Korean labels
   const chartData = [
     {
-      name: "Calculation\nAbility",
+      name: "계산능력", // Calculation Ability
       value: sections[0]?.standardScore || 0,
       color: "#4674B9", // Dark blue - matches original
     },
     {
-      name: "Conceptual\nUnderstanding",
+      name: "개념이해능력", // Conceptual Understanding
       value: sections[1]?.standardScore || 0,
       color: "#62B8D2", // Teal/light blue - matches original
     },
     {
-      name: "Conceptual\nApplication",
+      name: "개념적용능력", // Conceptual Application
       value: sections[2]?.standardScore || 0,
       color: "#96BFEF", // Lighter blue/periwinkle - matches original
     },
     {
-      name: "Reasoning\nAbility",
+      name: "추론능력", // Reasoning Ability
       value: sections[3]?.standardScore || 0,
       color: "#7C699E", // Dark purple/gray - matches original
     },
     {
-      name: "Problem-Solving\nAbility",
+      name: "문제해결능력", // Problem-Solving Ability
       value: sections[4]?.standardScore || 0,
       color: "#95D16F", // Light green - matches original
     },
     {
-      name: "Mathematics\nLearning Competency",
+      name: "수학학습역량", // Mathematics Learning Competency
       value: overallScore,
       color: "#F8C857", // Yellow/orange - matches original
     },
@@ -60,22 +62,61 @@ export function ReportCoverPage({
   return (
     <div
       className="bg-white p-8 min-h-screen print:p-8 report-page-1"
-      style={{ fontFamily: "Times New Roman, serif" }}
+      style={{ fontFamily: '"맑은 고딕", "Malgun Gothic", sans-serif' }}
     >
       {/* Header - Match original layout */}
-      <div className="flex items-center justify-center mb-8 border-b-3 border-black pb-4">
-        <table style={{ width: "100%" }}>
+      <div
+        className="col-xs-12 text-center mb-8"
+        style={{ padding: "20px 0px", borderBottom: "3px solid" }}
+      >
+        <table style={{ width: "50%", margin: "0 auto" }}>
           <tbody>
             <tr>
               <td
-                className="text-right pr-4"
-                style={{ verticalAlign: "middle" }}
+                className="col-xs-6"
+                style={{
+                  verticalAlign: "middle",
+                  textAlign: "right",
+                  width: "auto",
+                  paddingRight: "4px",
+                }}
               >
-                {/* Logo placeholder - should use actual logo image */}
-                <div className="text-red-600 text-4xl font-bold">able</div>
+                {/* Logo only - no text next to it */}
+                <img
+                  src="/able_adtm_logo.png"
+                  alt="Able Logo"
+                  style={{ width: "300px" }}
+                  onError={(e) => {
+                    // Fallback to text if image not found
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = "none";
+                    const parent = target.parentElement;
+                    if (parent && !parent.querySelector(".logo-fallback")) {
+                      const fallback = document.createElement("div");
+                      fallback.className =
+                        "logo-fallback text-red-600 text-4xl font-bold";
+                      fallback.textContent = "able";
+                      parent.appendChild(fallback);
+                    }
+                  }}
+                />
               </td>
-              <td style={{ verticalAlign: "middle", textAlign: "left" }}>
-                <span className="text-7xl font-serif font-bold">Report</span>
+              <td
+                style={{
+                  verticalAlign: "middle",
+                  textAlign: "left",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "70px",
+                    fontFamily: "serif",
+                    fontWeight: "bold",
+                    color: "rgb(103, 106, 108)",
+                  }}
+                >
+                  Report
+                </span>
               </td>
             </tr>
           </tbody>
@@ -107,46 +148,91 @@ export function ReportCoverPage({
       </div>
 
       {/* Section Descriptions - Match original table format */}
-      <div className="mb-8">
-        <div className="mb-4">
-          <span className="text-xl font-bold">
+      <div className="col-xs-12 mb-8">
+        <div className="col-xs-12" style={{ marginBottom: "20px" }}>
+          <span style={{ fontSize: "20px" }}>
             1. Comprehensive Mathematical Thinking Ability Diagnostic Test
           </span>
         </div>
 
-        <table className="table table-bordered w-full">
+        <table
+          className="table table-bordered"
+          style={{ border: "1px solid #000" }}
+        >
           <tbody>
             <tr>
-              <td style={{ verticalAlign: "middle", fontSize: "17px" }}>
+              <td
+                style={{
+                  verticalAlign: "middle",
+                  fontSize: "17px",
+                  border: "1px solid #000",
+                  padding: "15px",
+                }}
+              >
                 <span style={{ whiteSpace: "nowrap" }}>
                   SECTION 1 - COMPUTATIONAL ABILITY
                 </span>
               </td>
-              <td style={{ verticalAlign: "middle", fontSize: "13px" }}>
+              <td
+                style={{
+                  verticalAlign: "middle",
+                  fontSize: "13px",
+                  border: "1px solid #000",
+                  padding: "15px",
+                }}
+              >
                 It assesses the ability to simplify a given equation by applying
                 the basic laws or properties of operations, and the ability to
                 apply basic formulas or calculation methods.
               </td>
             </tr>
             <tr>
-              <td style={{ verticalAlign: "middle", fontSize: "17px" }}>
+              <td
+                style={{
+                  verticalAlign: "middle",
+                  fontSize: "17px",
+                  border: "1px solid #000",
+                  padding: "15px",
+                }}
+              >
                 <span style={{ whiteSpace: "nowrap" }}>
                   SECTION 2 - Conceptual Understanding Ability
                 </span>
               </td>
-              <td style={{ verticalAlign: "middle", fontSize: "13px" }}>
+              <td
+                style={{
+                  verticalAlign: "middle",
+                  fontSize: "13px",
+                  border: "1px solid #000",
+                  padding: "15px",
+                }}
+              >
                 Assess the level of understanding of the meaning and properties
                 of mathematical terms, symbols, formulas, graphs, and tables
                 given in the problem.
               </td>
             </tr>
             <tr>
-              <td style={{ verticalAlign: "middle", fontSize: "17px" }}>
+              <td
+                style={{
+                  verticalAlign: "middle",
+                  fontSize: "17px",
+                  border: "1px solid #000",
+                  padding: "15px",
+                }}
+              >
                 <span style={{ whiteSpace: "nowrap" }}>
                   SECTION 3 - Concept Application Ability
                 </span>
               </td>
-              <td style={{ verticalAlign: "middle", fontSize: "13px" }}>
+              <td
+                style={{
+                  verticalAlign: "middle",
+                  fontSize: "13px",
+                  border: "1px solid #000",
+                  padding: "15px",
+                }}
+              >
                 It assesses the ability to understand and apply mathematical
                 concepts related to a given problem, the ability to express a
                 given problem situation mathematically, and the ability to
@@ -154,12 +240,26 @@ export function ReportCoverPage({
               </td>
             </tr>
             <tr>
-              <td style={{ verticalAlign: "middle", fontSize: "17px" }}>
+              <td
+                style={{
+                  verticalAlign: "middle",
+                  fontSize: "17px",
+                  border: "1px solid #000",
+                  padding: "15px",
+                }}
+              >
                 <span style={{ whiteSpace: "nowrap" }}>
                   SECTION 4 - Reasoning Abilities
                 </span>
               </td>
-              <td style={{ verticalAlign: "middle", fontSize: "13px" }}>
+              <td
+                style={{
+                  verticalAlign: "middle",
+                  fontSize: "13px",
+                  border: "1px solid #000",
+                  padding: "15px",
+                }}
+              >
                 It assesses the ability to discover the core principles of
                 problem solving through listing, counting, and observation; the
                 ability to discover the core principles of problem solving
@@ -172,12 +272,26 @@ export function ReportCoverPage({
               </td>
             </tr>
             <tr>
-              <td style={{ verticalAlign: "middle", fontSize: "17px" }}>
+              <td
+                style={{
+                  verticalAlign: "middle",
+                  fontSize: "17px",
+                  border: "1px solid #000",
+                  padding: "15px",
+                }}
+              >
                 <span style={{ whiteSpace: "nowrap" }}>
                   SECTION 5 - PROBLEM-SOLVING SKILLS
                 </span>
               </td>
-              <td style={{ verticalAlign: "middle", fontSize: "13px" }}>
+              <td
+                style={{
+                  verticalAlign: "middle",
+                  fontSize: "13px",
+                  border: "1px solid #000",
+                  padding: "15px",
+                }}
+              >
                 It assesses the ability to solve problems by understanding and
                 synthesizing the relationship between two or more mathematical
                 concepts, principles, and laws, the ability to solve problems
@@ -191,50 +305,88 @@ export function ReportCoverPage({
       </div>
 
       {/* Overall Evaluation Chart - Match original format */}
-      <div className="mb-8">
-        <div className="mb-4">
-          <span className="text-xl font-bold">2. </span>
-          <span className="text-2xl font-bold">{testCode} </span>
-          <span className="text-xl">Student's diagnostic test results - </span>
-          <span className="text-2xl font-bold text-red-600">[]</span>
+      <div className="mb-8" style={{ marginTop: "30px" }}>
+        <div className="col-xs-12" style={{ marginBottom: "20px" }}>
+          <span style={{ fontSize: "20px" }}>
+            <span>2. </span>
+            <span style={{ fontSize: "25px", fontWeight: "bold" }}>
+              {studentName}&nbsp;
+            </span>
+            <span>Student's Diagnostic Test Results - </span>
+            <span
+              style={{
+                fontSize: "25px",
+                fontWeight: "bold",
+                color: "#cc0000",
+              }}
+            >
+              [{testCode}]&nbsp;
+            </span>
+          </span>
         </div>
-        <div className="text-center mb-4">
-          <span className="text-xl">
+        <div className="col-xs-12 text-center mb-4">
+          <span style={{ fontSize: "20px" }}>
             Able Math Ability Diagnostic Test Results
           </span>
         </div>
 
-        {/* Horizontal Bar Chart */}
+        {/* Legend - Match original design */}
         <div
-          style={{ height: "400px", minHeight: "400px", width: "100%" }}
-          className="print:!h-[300px] print:!min-h-[300px]"
+          className="col-xs-12 text-center mb-2"
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            gap: "15px",
+            flexWrap: "wrap",
+          }}
         >
-          <ResponsiveContainer width="100%" height="100%" minHeight={400}>
+          {chartData.map((entry, index) => (
+            <div
+              key={index}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+              }}
+            >
+              <div
+                style={{
+                  width: "30px",
+                  height: "3px",
+                  backgroundColor: entry.color,
+                }}
+              />
+              <span style={{ fontSize: "12px" }}>{entry.name}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Vertical Bar Chart */}
+        <div
+          className="col-xs-12"
+          style={{ height: "550px", minHeight: "550px", width: "100%" }}
+        >
+          <ResponsiveContainer width="100%" height="100%" minHeight={550}>
             <RechartsBarChart
               data={chartData}
-              layout="vertical"
-              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              margin={{ top: 20, right: 30, left: 0, bottom: 60 }}
+              barCategoryGap="20%"
+              barGap={10}
             >
               <CartesianGrid
                 strokeDasharray="3 3"
-                className="stroke-gray-200"
+                stroke="#e5e7eb"
+                horizontal={true}
+                vertical={false}
               />
               <XAxis
-                type="number"
-                domain={[0, 100]}
-                tick={{ fontSize: 12 }}
-                label={{
-                  value: "Score (%)",
-                  position: "insideBottom",
-                  offset: -5,
-                }}
-              />
-              <YAxis
-                type="category"
                 dataKey="name"
                 tick={{ fontSize: 11 }}
-                width={120}
+                angle={-45}
+                textAnchor="end"
+                height={60}
               />
+              <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} tickCount={6} />
               <Tooltip
                 contentStyle={{
                   backgroundColor: "white",
@@ -243,13 +395,13 @@ export function ReportCoverPage({
                 }}
                 formatter={(value: number) => [`${value.toFixed(1)}%`, "Score"]}
               />
-              <Bar dataKey="value" radius={[0, 8, 8, 0]}>
+              <Bar dataKey="value" radius={[0, 0, 0, 0]} barSize={40}>
                 {chartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
                 <LabelList
                   dataKey="value"
-                  position="right"
+                  position="top"
                   style={{
                     fill: "#000",
                     fontSize: "12px",
@@ -260,6 +412,70 @@ export function ReportCoverPage({
               </Bar>
             </RechartsBarChart>
           </ResponsiveContainer>
+        </div>
+
+        {/* Analysis Header - Match original design */}
+        <div
+          className="col-xs-12 text-center"
+          style={{
+            padding: "20px 0px",
+            borderBottom: "3px solid",
+            marginTop: "10px",
+          }}
+        >
+          <table style={{ width: "40%", margin: "0 auto" }}>
+            <tbody>
+              <tr>
+                <td
+                  style={{
+                    verticalAlign: "middle",
+                    textAlign: "right",
+                    width: "auto",
+                    paddingRight: "10px",
+                  }}
+                >
+                  {/* Logo */}
+                  <img
+                    src="/able_adtm_logo.png"
+                    alt="Able Logo"
+                    style={{ width: "250px" }}
+                    onError={(e) => {
+                      // Fallback to text if image not found
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = "none";
+                      const parent = target.parentElement;
+                      if (parent && !parent.querySelector(".logo-fallback")) {
+                        const fallback = document.createElement("div");
+                        fallback.className =
+                          "logo-fallback text-red-600 text-4xl font-bold";
+                        fallback.textContent = "able";
+                        parent.appendChild(fallback);
+                      }
+                    }}
+                  />
+                </td>
+                <td
+                  style={{
+                    verticalAlign: "middle",
+                    textAlign: "left",
+                    width: "auto",
+                    paddingLeft: "4px",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "50px",
+                      fontFamily: "serif",
+                      fontWeight: "bold",
+                      color: "rgb(103, 106, 108)",
+                    }}
+                  >
+                    Analysis
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

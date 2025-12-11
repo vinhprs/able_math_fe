@@ -78,31 +78,31 @@ api.interceptors.response.use(
 
     // Format error for better handling (for non-401 errors)
     if (error.response?.status !== 401) {
-      if (error.response) {
-        // Server responded with error status
-        const status = error.response.status;
-        const data = error.response.data as { message?: string | string[] };
+    if (error.response) {
+      // Server responded with error status
+      const status = error.response.status;
+      const data = error.response.data as { message?: string | string[] };
 
-        // Create formatted error
-        const formattedError = {
-          ...error,
-          message: data?.message || error.message || "An error occurred",
-          status,
-          data: data,
-        };
+      // Create formatted error
+      const formattedError = {
+        ...error,
+        message: data?.message || error.message || "An error occurred",
+        status,
+        data: data,
+      };
 
-        return Promise.reject(formattedError);
-      } else if (error.request) {
-        // Request was made but no response received (network error)
-        const networkError = {
-          ...error,
-          message: "Network error. Please check your connection and try again.",
-          isNetworkError: true,
-        };
-        return Promise.reject(networkError);
-      }
+      return Promise.reject(formattedError);
+    } else if (error.request) {
+      // Request was made but no response received (network error)
+      const networkError = {
+        ...error,
+        message: "Network error. Please check your connection and try again.",
+        isNetworkError: true,
+      };
+      return Promise.reject(networkError);
+    }
 
-      // Something else happened
+    // Something else happened
       return Promise.reject(error);
     }
 
